@@ -1,0 +1,197 @@
+<!doctype html>
+<!-- O idioma permite ao navegador e aos leitores de tela interpretar este conteúdo em português. -->
+<html lang="pt-BR">
+  <head>
+    <!-- UTF-8 preserva os acentos nos textos e comentários. -->
+    <meta charset="utf-8" />
+    <!-- A largura acompanha a tela para que o layout móvel possa aplicar seus próprios recuos. -->
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- O título identifica a página na aba do navegador. -->
+    <title>PI2 • Tarefa 13 • Conferir os campos e as funções</title>
+    <!-- Reutiliza o estilo compartilhado, sem duplicar regras nesta página. -->
+    <link rel="stylesheet" href="../assets/css/tema.css" />
+    <!-- Carrega o comportamento depois da leitura da estrutura HTML por meio de defer. -->
+    <script src="../assets/js/prototipos.js" defer></script>
+  </head>
+  <body>
+    <!-- Mantém a identificação do projeto e a navegação principal no mesmo lugar. -->
+    <header>
+      <div class="marca">
+        PI2
+        <small>Sistema de atendimento</small>
+      </div>
+      <!-- O caminho acompanha a estrutura por função e mantém a navegação entre páginas. -->
+      <a href="../index.html">Índice do projeto</a>
+    </header>
+    <!-- Delimita o conteúdo principal para facilitar a navegação por tecnologias assistivas. -->
+    <main>
+      <span class="etiqueta">Tarefa 13 • Proposta 01</span>
+      <!-- Identifica o assunto principal da página com um único título de primeiro nível. -->
+      <h1>Conferir os campos e as funções</h1>
+      <p class="subtitulo">
+        Conferência entre os desenhos, os campos recebidos pelo backend e o banco de exemplo, sem
+        documentação técnica extra.
+      </p>
+      <p class="aviso">
+        O material disponível contém o cronograma e os cartões, mas não o texto individual dos
+        requisitos nem o MER do grupo. Os campos abaixo são uma proposta consistente entre estes
+        desenhos e este código; a conferência com os documentos originais continua pendente.
+      </p>
+      <div class="tabela">
+        <!-- Apresenta registros com os mesmos campos para facilitar a comparação. -->
+        <table>
+          <!-- Descreve a finalidade da tabela também para leitores de tela. -->
+          <caption>Mapa de campos da proposta 01</caption>
+          <!-- Separa os títulos das colunas dos registros apresentados. -->
+          <thead>
+            <tr>
+              <th>Tela ou função</th>
+              <th>Campo</th>
+              <th>Formato proposto</th>
+              <th>Obrigatório</th>
+              <th>Onde guardar</th>
+              <th>Conferência</th>
+            </tr>
+          </thead>
+          <!-- Agrupa os registros; no painel, este conteúdo é atualizado com dados devolvidos pelo backend. -->
+          <tbody>
+            <tr>
+              <td>Login</td>
+              <td>login</td>
+              <td>Texto, até 100</td>
+              <td>Sim</td>
+              <td>usuarios.login</td>
+              <td>Usuário fictício: recepcao, enfermagem ou medico.</td>
+            </tr>
+            <tr>
+              <td>Login</td>
+              <td>senha</td>
+              <td>Texto, até 200</td>
+              <td>Sim</td>
+              <td>usuarios.senha_hash</td>
+              <td>O código salva e compara um hash scrypt.</td>
+            </tr>
+            <tr>
+              <td>Paciente</td>
+              <td>nome</td>
+              <td>Texto de 2 a 120</td>
+              <td>Sim</td>
+              <td>pacientes.nome</td>
+              <td>Remover espaços nas pontas. Mostrar como texto nas telas.</td>
+            </tr>
+            <tr>
+              <td>Paciente</td>
+              <td>data_nascimento</td>
+              <td>Data AAAA-MM-DD</td>
+              <td>Sim</td>
+              <td>pacientes.data_nascimento</td>
+              <td>Data existente, de 1900 até o dia atual.</td>
+            </tr>
+            <tr>
+              <td>Paciente</td>
+              <td>documento</td>
+              <td>Texto de 3 a 40</td>
+              <td>Não</td>
+              <td>pacientes.documento</td>
+              <td>Identificador genérico nesta proposta; único quando informado.</td>
+            </tr>
+            <tr>
+              <td>Paciente</td>
+              <td>telefone</td>
+              <td>Texto, até 20</td>
+              <td>Não</td>
+              <td>pacientes.telefone</td>
+              <td>Ao informar: pelo menos 8 dígitos; aceita espaços, +, -, ( e ).</td>
+            </tr>
+            <tr>
+              <td>Cadastro</td>
+              <td>chave_cadastro</td>
+              <td>UUID v4</td>
+              <td>Gerado pelo código</td>
+              <td>pacientes.chave_cadastro</td>
+              <td>Reutilizar ao repetir a mesma tentativa; evita duplicação por repetição.</td>
+            </tr>
+            <tr>
+              <td>Atendimento</td>
+              <td>paciente_id</td>
+              <td>Número inteiro positivo</td>
+              <td>Sim</td>
+              <td>atendimentos.paciente_id</td>
+              <td>Deve apontar para paciente existente.</td>
+            </tr>
+            <tr>
+              <td>Atendimento</td>
+              <td>recepcionista_id</td>
+              <td>Número inteiro</td>
+              <td>Pela sessão</td>
+              <td>atendimentos.recepcionista_id</td>
+              <td>Não confiar em um ID de usuário enviado pelo formulário.</td>
+            </tr>
+            <tr>
+              <td>Atendimento</td>
+              <td>situacao</td>
+              <td>Texto controlado</td>
+              <td>Pelo backend</td>
+              <td>atendimentos.situacao</td>
+              <td>Começa como aguardando_triagem.</td>
+            </tr>
+            <tr>
+              <td>Abertura</td>
+              <td>chave_abertura</td>
+              <td>UUID v4</td>
+              <td>Gerado pelo código</td>
+              <td>atendimentos.chave_abertura</td>
+              <td>Uma mesma tentativa retorna o mesmo atendimento.</td>
+            </tr>
+            <tr>
+              <td>Triagem</td>
+              <td>queixa e sinais vitais</td>
+              <td>Proposta visual</td>
+              <td>A validar</td>
+              <td>Etapa seguinte</td>
+              <td>Queixa, pressão, temperatura, frequência e saturação são campos propostos.</td>
+            </tr>
+            <tr>
+              <td>Triagem</td>
+              <td>classificacao</td>
+              <td>Proposta visual</td>
+              <td>A validar</td>
+              <td>Etapa seguinte</td>
+              <td>
+                Registrar segundo os requisitos aprovados; nenhum algoritmo clínico foi criado.
+              </td>
+            </tr>
+            <tr>
+              <td>Consulta</td>
+              <td>registro_consulta</td>
+              <td>Texto, proposta visual</td>
+              <td>A validar</td>
+              <td>Etapa seguinte</td>
+              <td>Campos definitivos dependem dos requisitos originais.</td>
+            </tr>
+            <tr>
+              <td>Medicações</td>
+              <td>medicacao, dose, via, observacoes</td>
+              <td>Proposta visual</td>
+              <td>A validar</td>
+              <td>Etapa seguinte</td>
+              <td>Confirmar também qual perfil pode usar essa etapa.</td>
+            </tr>
+            <tr>
+              <td>Encerramento</td>
+              <td>resumo e confirmação</td>
+              <td>Proposta visual</td>
+              <td>A validar</td>
+              <td>Etapa seguinte</td>
+              <td>A função real será desenvolvida nas tarefas 38 e 40.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Anuncia o resultado das ações sem exigir que a pessoa procure a mensagem na página. -->
+      <p class="mensagem" role="status" aria-live="polite"></p>
+    </main>
+    <!-- Identifica o contexto acadêmico e o uso de dados de exemplo. -->
+    <footer>Projeto integrador • Dados fictícios • Desenhos para revisão do grupo</footer>
+  </body>
+</html>

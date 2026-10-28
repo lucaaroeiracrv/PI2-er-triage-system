@@ -1,0 +1,178 @@
+<!doctype html>
+<!-- O idioma permite ao navegador e aos leitores de tela interpretar este conteúdo em português. -->
+<html lang="pt-BR">
+  <head>
+    <!-- UTF-8 preserva os acentos nos textos e comentários. -->
+    <meta charset="utf-8" />
+    <!-- A largura acompanha a tela para que o layout móvel possa aplicar seus próprios recuos. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- O título identifica a página na aba do navegador. -->
+    <title>PI2 • Testar o começo do sistema</title>
+    <!-- Reutiliza o estilo compartilhado, sem duplicar regras nesta página. -->
+    <link rel="stylesheet" href="assets/css/painel.css" />
+    <!-- Carrega o comportamento depois da leitura da estrutura HTML por meio de defer. -->
+    <script src="assets/js/painel.js" defer></script>
+  </head>
+  <body>
+    <!-- Mantém a identificação do projeto e a navegação principal no mesmo lugar. -->
+    <header>
+      <div class="marca">
+        PI2
+        <span>Projeto integrador</span>
+      </div>
+      <!-- O caminho acompanha a estrutura por função e mantém a navegação entre páginas. -->
+      <a href="index.html">Ver os desenhos das telas</a>
+    </header>
+    <!-- Delimita o conteúdo principal para facilitar a navegação por tecnologias assistivas. -->
+    <main>
+      <p class="etapa">Tarefas 15 e 21 a 25</p>
+      <!-- Identifica o assunto principal da página com um único título de primeiro nível. -->
+      <h1>Começo do sistema de atendimento</h1>
+      <p>
+        Este painel permite testar o backend com o MySQL. As telas de atendimento definitivas seguem
+        os desenhos das outras pastas.
+      </p>
+      <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
+      <section class="card" id="entrada">
+        <!-- Identifica a seção para facilitar a leitura e a navegação pelos assuntos. -->
+        <h2>Entrar no sistema</h2>
+        <p>
+          Usuários de teste:
+          <strong>recepcao</strong>
+          ,
+          <strong>enfermagem</strong>
+          ou
+          <strong>medico</strong>
+          .
+          <br />
+          Senha inicial dos três:
+          <strong>Pi2@2026!</strong>
+        </p>
+        <!-- O formulário form-login entrega seus campos ao comportamento JavaScript correspondente. -->
+        <form id="form-login">
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label>
+            Usuário
+            <!-- O campo login mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input name="login" autocomplete="username" required maxlength="100" />
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label>
+            Senha
+            <!-- O campo senha mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input
+              name="senha"
+              type="password"
+              autocomplete="current-password"
+              required
+              maxlength="200"
+            />
+          </label>
+          <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+          <button>Entrar</button>
+        </form>
+      </section>
+      <!-- A seção começa oculta e só aparece quando o estado da interface permitir. -->
+      <section class="card" id="sessao" hidden>
+        <div class="linha">
+          <!-- Identifica a seção para facilitar a leitura e a navegação pelos assuntos. -->
+          <h2 id="identidade"></h2>
+          <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+          <button type="button" id="sair" class="secundario">Sair</button>
+        </div>
+        <p id="permissao"></p>
+      </section>
+      <div id="recepcao" hidden>
+        <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
+        <section class="card">
+          <p class="etapa">Tarefa 23</p>
+          <!-- Identifica a seção para facilitar a leitura e a navegação pelos assuntos. -->
+          <h2>Cadastrar paciente fictício</h2>
+          <!-- O formulário form-paciente entrega seus campos ao comportamento JavaScript correspondente. -->
+          <form id="form-paciente" class="grade">
+            <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+            <label>
+              Nome completo
+              <!-- O campo nome mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+              <input name="nome" required minlength="2" maxlength="120" autocomplete="off" />
+            </label>
+            <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+            <label>
+              Data de nascimento
+              <!-- O campo data_nascimento mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+              <input name="data_nascimento" type="date" required min="1900-01-01" />
+            </label>
+            <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+            <label>
+              Documento de teste
+              <span>Opcional, por exemplo TESTE-100</span>
+              <!-- O campo documento mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+              <input name="documento" maxlength="40" autocomplete="off" />
+            </label>
+            <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+            <label>
+              Telefone
+              <span>Opcional</span>
+              <!-- O campo telefone mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+              <input name="telefone" maxlength="20" type="tel" autocomplete="off" />
+            </label>
+            <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+            <button>Salvar paciente</button>
+          </form>
+          <p class="ajuda">
+            Depois de salvar, o paciente aparece abaixo e pode receber um atendimento.
+          </p>
+        </section>
+        <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
+        <section class="card">
+          <p class="etapa">Tarefas 24 e 25</p>
+          <!-- Identifica a seção para facilitar a leitura e a navegação pelos assuntos. -->
+          <h2>Buscar e abrir atendimento</h2>
+          <!-- O formulário form-busca entrega seus campos ao comportamento JavaScript correspondente. -->
+          <form id="form-busca" class="linha">
+            <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+            <label class="crescer">
+              Nome ou documento
+              <!-- O campo busca mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+              <input
+                name="busca"
+                minlength="2"
+                maxlength="100"
+                placeholder="Ex.: Exemplo ou DEMO-002"
+                required
+              />
+            </label>
+            <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+            <button>Buscar</button>
+          </form>
+          <p id="resultado-busca">Use a busca ou cadastre um paciente.</p>
+          <div class="tabela">
+            <!-- Apresenta registros com os mesmos campos para facilitar a comparação. -->
+            <table>
+              <!-- Descreve a finalidade da tabela também para leitores de tela. -->
+              <caption>Pacientes encontrados</caption>
+              <!-- Separa os títulos das colunas dos registros apresentados. -->
+              <thead>
+                <tr>
+                  <th>Paciente</th>
+                  <th>Nascimento</th>
+                  <th>Documento</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <!-- Agrupa os registros; no painel, este conteúdo é atualizado com dados devolvidos pelo backend. -->
+              <tbody id="pacientes"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <!-- Anuncia o resultado das ações sem exigir que a pessoa procure a mensagem na página. -->
+      <p id="mensagem" role="status" aria-live="polite"></p>
+    </main>
+    <!-- Identifica o contexto acadêmico e o uso de dados de exemplo. -->
+    <footer>
+      Dados fictícios para o projeto da faculdade • Login, perfis, pacientes e abertura de
+      atendimento
+    </footer>
+  </body>
+</html>

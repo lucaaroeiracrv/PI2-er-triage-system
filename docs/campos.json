@@ -1,0 +1,130 @@
+[
+  {
+    "tela": "Login",
+    "campo": "login",
+    "formato": "Texto, até 100",
+    "obrigatorio": "Sim",
+    "tabela": "usuarios.login",
+    "observacao": "Usuário fictício: recepcao, enfermagem ou medico."
+  },
+  {
+    "tela": "Login",
+    "campo": "senha",
+    "formato": "Texto, até 200",
+    "obrigatorio": "Sim",
+    "tabela": "usuarios.senha_hash",
+    "observacao": "O código salva e compara um hash scrypt."
+  },
+  {
+    "tela": "Paciente",
+    "campo": "nome",
+    "formato": "Texto de 2 a 120",
+    "obrigatorio": "Sim",
+    "tabela": "pacientes.nome",
+    "observacao": "Remover espaços nas pontas. Mostrar como texto nas telas."
+  },
+  {
+    "tela": "Paciente",
+    "campo": "data_nascimento",
+    "formato": "Data AAAA-MM-DD",
+    "obrigatorio": "Sim",
+    "tabela": "pacientes.data_nascimento",
+    "observacao": "Data existente, de 1900 até o dia atual."
+  },
+  {
+    "tela": "Paciente",
+    "campo": "documento",
+    "formato": "Texto de 3 a 40",
+    "obrigatorio": "Não",
+    "tabela": "pacientes.documento",
+    "observacao": "Identificador genérico nesta proposta; único quando informado."
+  },
+  {
+    "tela": "Paciente",
+    "campo": "telefone",
+    "formato": "Texto, até 20",
+    "obrigatorio": "Não",
+    "tabela": "pacientes.telefone",
+    "observacao": "Ao informar: pelo menos 8 dígitos; aceita espaços, +, -, ( e )."
+  },
+  {
+    "tela": "Cadastro",
+    "campo": "chave_cadastro",
+    "formato": "UUID v4",
+    "obrigatorio": "Gerado pelo código",
+    "tabela": "pacientes.chave_cadastro",
+    "observacao": "Reutilizar ao repetir a mesma tentativa; evita duplicação por repetição."
+  },
+  {
+    "tela": "Atendimento",
+    "campo": "paciente_id",
+    "formato": "Número inteiro positivo",
+    "obrigatorio": "Sim",
+    "tabela": "atendimentos.paciente_id",
+    "observacao": "Deve apontar para paciente existente."
+  },
+  {
+    "tela": "Atendimento",
+    "campo": "recepcionista_id",
+    "formato": "Número inteiro",
+    "obrigatorio": "Pela sessão",
+    "tabela": "atendimentos.recepcionista_id",
+    "observacao": "Não confiar em um ID de usuário enviado pelo formulário."
+  },
+  {
+    "tela": "Atendimento",
+    "campo": "situacao",
+    "formato": "Texto controlado",
+    "obrigatorio": "Pelo backend",
+    "tabela": "atendimentos.situacao",
+    "observacao": "Começa como aguardando_triagem."
+  },
+  {
+    "tela": "Abertura",
+    "campo": "chave_abertura",
+    "formato": "UUID v4",
+    "obrigatorio": "Gerado pelo código",
+    "tabela": "atendimentos.chave_abertura",
+    "observacao": "Uma mesma tentativa retorna o mesmo atendimento."
+  },
+  {
+    "tela": "Triagem",
+    "campo": "queixa e sinais vitais",
+    "formato": "Proposta visual",
+    "obrigatorio": "A validar",
+    "tabela": "Etapa seguinte",
+    "observacao": "Queixa, pressão, temperatura, frequência e saturação são campos propostos."
+  },
+  {
+    "tela": "Triagem",
+    "campo": "classificacao",
+    "formato": "Proposta visual",
+    "obrigatorio": "A validar",
+    "tabela": "Etapa seguinte",
+    "observacao": "Registrar segundo os requisitos aprovados; nenhum algoritmo clínico foi criado."
+  },
+  {
+    "tela": "Consulta",
+    "campo": "registro_consulta",
+    "formato": "Texto, proposta visual",
+    "obrigatorio": "A validar",
+    "tabela": "Etapa seguinte",
+    "observacao": "Campos definitivos dependem dos requisitos originais."
+  },
+  {
+    "tela": "Medicações",
+    "campo": "medicacao, dose, via, observacoes",
+    "formato": "Proposta visual",
+    "obrigatorio": "A validar",
+    "tabela": "Etapa seguinte",
+    "observacao": "Confirmar também qual perfil pode usar essa etapa."
+  },
+  {
+    "tela": "Encerramento",
+    "campo": "resumo e confirmação",
+    "formato": "Proposta visual",
+    "obrigatorio": "A validar",
+    "tabela": "Etapa seguinte",
+    "observacao": "A função real será desenvolvida nas tarefas 38 e 40."
+  }
+]

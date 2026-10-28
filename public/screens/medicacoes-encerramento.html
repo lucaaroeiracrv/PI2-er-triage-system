@@ -1,0 +1,105 @@
+<!doctype html>
+<!-- O idioma permite ao navegador e aos leitores de tela interpretar este conteúdo em português. -->
+<html lang="pt-BR">
+  <head>
+    <!-- UTF-8 preserva os acentos nos textos e comentários. -->
+    <meta charset="utf-8" />
+    <!-- A largura acompanha a tela para que o layout móvel possa aplicar seus próprios recuos. -->
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- O título identifica a página na aba do navegador. -->
+    <title>PI2 • Tarefa 19 • Desenhar medicações e encerramento</title>
+    <!-- Reutiliza o estilo compartilhado, sem duplicar regras nesta página. -->
+    <link rel="stylesheet" href="../assets/css/tema.css" />
+    <!-- Carrega o comportamento depois da leitura da estrutura HTML por meio de defer. -->
+    <script src="../assets/js/prototipos.js" defer></script>
+  </head>
+  <body>
+    <!-- Mantém a identificação do projeto e a navegação principal no mesmo lugar. -->
+    <header>
+      <div class="marca">
+        PI2
+        <small>Sistema de atendimento</small>
+      </div>
+      <!-- O caminho acompanha a estrutura por função e mantém a navegação entre páginas. -->
+      <a href="../index.html">Índice do projeto</a>
+    </header>
+    <!-- Delimita o conteúdo principal para facilitar a navegação por tecnologias assistivas. -->
+    <main>
+      <span class="etiqueta">Proposta de interface</span>
+      <!-- Identifica o assunto principal da página com um único título de primeiro nível. -->
+      <h1>Desenhar medicações e encerramento</h1>
+      <p class="subtitulo">
+        Proposta das telas finais do atendimento. Conferir campos, ações e perfis permitidos com o
+        roteiro completo antes da implementação.
+      </p>
+      <!-- TAREFA 19: duas telas desenhadas; as funções ficam nas tarefas 37 a 40. -->
+      <div class="grade">
+        <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
+        <section class="cartao">
+          <!-- Identifica a seção para facilitar a leitura e a navegação pelos assuntos. -->
+          <h2>Registro de medicações</h2>
+          <p class="meta">Paciente Exemplo Um • Atendimento 001</p>
+          <!-- Este formulário é um desenho; o JavaScript impede que pareça um salvamento real. -->
+          <form data-prototipo>
+            <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+            <label class="campo">
+              Medicação
+              <!-- O campo medicacao mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+              <input name="medicacao" placeholder="Nome informado no registro" />
+            </label>
+            <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+            <label class="campo">
+              Dose
+              <!-- O campo dose mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+              <input name="dose" placeholder="Valor e unidade informados" />
+            </label>
+            <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+            <label class="campo">
+              Via de administração
+              <!-- O campo via mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+              <input name="via" placeholder="Via informada" />
+            </label>
+            <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+            <label class="campo">
+              Observações
+              <!-- O campo observacoes mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+              <textarea name="observacoes"></textarea>
+            </label>
+            <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+            <button>Salvar registro</button>
+          </form>
+        </section>
+        <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
+        <section class="cartao">
+          <!-- Identifica a seção para facilitar a leitura e a navegação pelos assuntos. -->
+          <h2>Encerramento do atendimento</h2>
+          <p>
+            <strong>Paciente Exemplo Um</strong>
+            • Atendimento 001
+          </p>
+          <p>
+            Resumo proposto: identificação, triagem, registro da consulta e medicações do
+            atendimento.
+          </p>
+          <ul>
+            <li>Triagem: exemplo disponível.</li>
+            <li>Consulta: registro de exemplo.</li>
+            <li>Medicações: exibir os registros quando a função for implementada.</li>
+          </ul>
+          <p class="aviso">Conferir as informações antes de confirmar o encerramento.</p>
+          <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+          <button
+            type="button"
+            data-acao="Desenho da confirmação. Nenhum atendimento foi encerrado; a função será ligada na tarefa 40."
+          >
+            Confirmar encerramento
+          </button>
+        </section>
+      </div>
+      <!-- Anuncia o resultado das ações sem exigir que a pessoa procure a mensagem na página. -->
+      <p class="mensagem" role="status" aria-live="polite"></p>
+    </main>
+    <!-- Identifica o contexto acadêmico e o uso de dados de exemplo. -->
+    <footer>Projeto integrador • Dados fictícios • Desenhos para revisão do grupo</footer>
+  </body>
+</html>

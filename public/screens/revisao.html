@@ -1,0 +1,101 @@
+<!doctype html>
+<!-- O idioma permite ao navegador e aos leitores de tela interpretar este conteúdo em português. -->
+<html lang="pt-BR">
+  <head>
+    <!-- UTF-8 preserva os acentos nos textos e comentários. -->
+    <meta charset="utf-8" />
+    <!-- A largura acompanha a tela para que o layout móvel possa aplicar seus próprios recuos. -->
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- O título identifica a página na aba do navegador. -->
+    <title>PI2 • Tarefa 20 • Revisar os desenhos com o grupo</title>
+    <!-- Reutiliza o estilo compartilhado, sem duplicar regras nesta página. -->
+    <link rel="stylesheet" href="../assets/css/tema.css" />
+    <!-- Carrega o comportamento depois da leitura da estrutura HTML por meio de defer. -->
+    <script src="../assets/js/revisao.js" defer></script>
+  </head>
+  <body>
+    <!-- Mantém a identificação do projeto e a navegação principal no mesmo lugar. -->
+    <header>
+      <div class="marca">
+        PI2
+        <small>Sistema de atendimento</small>
+      </div>
+      <!-- O caminho acompanha a estrutura por função e mantém a navegação entre páginas. -->
+      <a href="../index.html">Índice do projeto</a>
+    </header>
+    <!-- Delimita o conteúdo principal para facilitar a navegação por tecnologias assistivas. -->
+    <main>
+      <span class="etiqueta">Tarefa 20 • Proposta 01</span>
+      <!-- Identifica o assunto principal da página com um único título de primeiro nível. -->
+      <h1>Revisar os desenhos com o grupo</h1>
+      <p class="subtitulo">
+        Abra os desenhos das outras pastas, discuta os pontos com o grupo e registre o resultado
+        aqui. A avaliação pode ser baixada para guardar as decisões.
+      </p>
+      <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
+      <section class="cartao">
+        <!-- Identifica a seção para facilitar a leitura e a navegação pelos assuntos. -->
+        <h2>Revisão preparada para o grupo</h2>
+        <p>
+          A conferência técnica não substitui a conversa com os integrantes. Nenhum desenho está
+          marcado como aprovado automaticamente.
+        </p>
+        <!-- O formulário revisao-grupo entrega seus campos ao comportamento JavaScript correspondente. -->
+        <form id="revisao-grupo">
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="check">
+            <!-- O campo fluxo mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input type="checkbox" name="fluxo" />
+            <span>O caminho entre recepção, triagem e médico está compreensível.</span>
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="check">
+            <!-- O campo campos mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input type="checkbox" name="campos" />
+            <span>Os campos foram comparados com os requisitos originais.</span>
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="check">
+            <!-- O campo banco mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input type="checkbox" name="banco" />
+            <span>Os dados foram comparados com o MER do banco do grupo.</span>
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="check">
+            <!-- O campo padrao mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input type="checkbox" name="padrao" />
+            <span>Cores, fontes, botões e mensagens seguem o padrão combinado.</span>
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="check">
+            <!-- O campo perfis mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input type="checkbox" name="perfis" />
+            <span>As funções de cada perfil foram conferidas.</span>
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="campo">
+            Ajustes combinados
+            <!-- O campo ajustes mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <textarea name="ajustes" placeholder="Escrevam aqui o que precisa mudar"></textarea>
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="campo">
+            Decisão do grupo
+            <!-- O campo decisao mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <select name="decisao">
+              <option>Em revisão</option>
+              <option>Ajustes necessários</option>
+              <option>Aprovado pelo grupo</option>
+            </select>
+          </label>
+          <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+          <button>Exportar avaliação em JSON</button>
+        </form>
+      </section>
+      <!-- Anuncia o resultado das ações sem exigir que a pessoa procure a mensagem na página. -->
+      <p class="mensagem" role="status" aria-live="polite"></p>
+    </main>
+    <!-- Identifica o contexto acadêmico e o uso de dados de exemplo. -->
+    <footer>Projeto integrador • Dados fictícios • Desenhos para revisão do grupo</footer>
+  </body>
+</html>

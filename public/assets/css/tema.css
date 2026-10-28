@@ -1,0 +1,517 @@
+/* TAREFA 12: cores, espaçamentos e componentes compartilhados entre os desenhos. */
+:root {
+  --azul: #183b66;
+  --azul-claro: #eaf0f8;
+  --fundo: #f4f6fa;
+  --texto: #17283e;
+  --cinza: #59697d;
+  --borda: #d8e0eb;
+  --sucesso: #236343;
+  --erro: #9d2e2e;
+  --aviso: #6e5300;
+  /* Família compartilhada; a alternativa mantém a leitura quando Arial não estiver instalada. */
+  font-family: Arial, sans-serif;
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: var(--texto);
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: var(--fundo);
+  /* Espaço entre linhas para que o texto continue legível em telas menores. */
+  line-height: 1.55;
+  color-scheme: light;
+}
+* {
+  /* Inclui borda e preenchimento na largura declarada, evitando estouro do layout. */
+  box-sizing: border-box;
+}
+body {
+  /* Separa o elemento dos vizinhos sem alterar seu espaço interno. */
+  margin: 0;
+}
+header {
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: var(--azul);
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: #fff;
+  /* Cria espaço interno para que texto e controles não encostem na borda. */
+  padding: 20px max(24px, calc((100% - 1100px) / 2));
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: flex;
+  /* Mantém distância uniforme entre os itens do mesmo grupo. */
+  gap: 24px;
+  /* Alinha os controles no eixo transversal do grupo. */
+  align-items: center;
+  /* Distribui o espaço entre os controles do grupo. */
+  justify-content: space-between;
+}
+header a {
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: #fff;
+  /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+  font-size: 14px;
+}
+.marca {
+  /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+  font-size: 24px;
+  /* Destaque visual para diferenciar rótulos e ações do texto de apoio. */
+  font-weight: bold;
+}
+.marca small {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: block;
+  /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+  font-size: 12px;
+  /* Destaque visual para diferenciar rótulos e ações do texto de apoio. */
+  font-weight: normal;
+}
+main {
+  /* Limita linhas muito largas e preserva a leitura em computadores. */
+  max-width: 1150px;
+  /* Separa o elemento dos vizinhos sem alterar seu espaço interno. */
+  margin: auto;
+  /* Cria espaço interno para que texto e controles não encostem na borda. */
+  padding: 34px 24px 60px;
+}
+h1 {
+  /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+  font-size: 32px;
+  /* Espaço entre linhas para que o texto continue legível em telas menores. */
+  line-height: 1.2;
+  /* Separa o elemento dos vizinhos sem alterar seu espaço interno. */
+  margin: 8px 0 14px;
+}
+h2 {
+  /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+  font-size: 21px;
+  margin-top: 0;
+}
+h3 {
+  /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+  font-size: 17px;
+}
+.subtitulo {
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: var(--cinza);
+  /* Limita linhas muito largas e preserva a leitura em computadores. */
+  max-width: 760px;
+}
+.etiqueta {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: inline-block;
+  /* Cria espaço interno para que texto e controles não encostem na borda. */
+  padding: 4px 10px;
+  /* Mantém a forma visual dos componentes do mesmo tipo. */
+  border-radius: 4px;
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: var(--azul-claro);
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: var(--azul);
+  /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+  font-size: 12px;
+  /* Destaque visual para diferenciar rótulos e ações do texto de apoio. */
+  font-weight: bold;
+  letter-spacing: 0.04em;
+}
+.cartao {
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: #fff;
+  /* Delimita campos e cartões para facilitar a leitura da interface. */
+  border: 1px solid var(--borda);
+  /* Mantém a forma visual dos componentes do mesmo tipo. */
+  border-radius: 10px;
+  /* Cria espaço interno para que texto e controles não encostem na borda. */
+  padding: 26px;
+  /* Separa o elemento dos vizinhos sem alterar seu espaço interno. */
+  margin: 24px 0;
+}
+.grade {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: grid;
+  /* Distribui os campos ou cartões em colunas; a regra móvel reduz essa quantidade. */
+  grid-template-columns: 1fr 1fr;
+  /* Mantém distância uniforme entre os itens do mesmo grupo. */
+  gap: 20px;
+}
+.grade .cartao {
+  /* Separa o elemento dos vizinhos sem alterar seu espaço interno. */
+  margin: 0;
+}
+.campo {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: block;
+  /* Destaque visual para diferenciar rótulos e ações do texto de apoio. */
+  font-weight: bold;
+  /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+  font-size: 14px;
+}
+.campo small {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: block;
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: var(--cinza);
+  /* Destaque visual para diferenciar rótulos e ações do texto de apoio. */
+  font-weight: normal;
+}
+input:not([type='checkbox']),
+select,
+textarea {
+  font: inherit;
+  /* Controla a largura sem exigir valores específicos para cada página. */
+  width: 100%;
+  /* Cria espaço interno para que texto e controles não encostem na borda. */
+  padding: 12px;
+  /* Delimita campos e cartões para facilitar a leitura da interface. */
+  border: 1px solid #a5b4c8;
+  /* Mantém a forma visual dos componentes do mesmo tipo. */
+  border-radius: 5px;
+  margin-top: 6px;
+  margin-bottom: 18px;
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: #fff;
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: var(--texto);
+  /* Evita que campos ou tabelas sejam comprimidos além de sua apresentação prevista. */
+  min-width: 0;
+}
+textarea {
+  /* Reserva espaço suficiente para o conteúdo e as mensagens. */
+  min-height: 100px;
+  resize: vertical;
+}
+.formulario {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: grid;
+  /* Distribui os campos ou cartões em colunas; a regra móvel reduz essa quantidade. */
+  grid-template-columns: 1fr 1fr;
+  /* Mantém distância uniforme entre os itens do mesmo grupo. */
+  gap: 0 22px;
+}
+.inteira {
+  /* Permite que este campo ocupe toda a linha do formulário. */
+  grid-column: 1/-1;
+}
+.acoes {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: flex;
+  /* Mantém distância uniforme entre os itens do mesmo grupo. */
+  gap: 12px;
+  /* Permite que ações mudem de linha quando o espaço da tela diminuir. */
+  flex-wrap: wrap;
+  /* Alinha os controles no eixo transversal do grupo. */
+  align-items: center;
+  margin-top: 10px;
+}
+button,
+.botao {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: inline-block;
+  font: inherit;
+  /* Informa visualmente se o controle aceita ação ou está aguardando. */
+  cursor: pointer;
+  /* Cria espaço interno para que texto e controles não encostem na borda. */
+  padding: 11px 18px;
+  /* Mantém a forma visual dos componentes do mesmo tipo. */
+  border-radius: 5px;
+  /* Delimita campos e cartões para facilitar a leitura da interface. */
+  border: 1px solid var(--azul);
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: var(--azul);
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: white;
+  text-decoration: none;
+  /* Alinha o texto conforme a leitura esperada de títulos, células ou ações. */
+  text-align: center;
+}
+.secundario {
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: white;
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: var(--azul);
+}
+button:disabled {
+  /* Distingue um controle temporariamente indisponível sem removê-lo da tela. */
+  opacity: 0.5;
+  /* Informa visualmente se o controle aceita ação ou está aguardando. */
+  cursor: not-allowed;
+}
+.linha {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: flex;
+  /* Distribui o espaço entre os controles do grupo. */
+  justify-content: space-between;
+  /* Alinha os controles no eixo transversal do grupo. */
+  align-items: center;
+  /* Mantém distância uniforme entre os itens do mesmo grupo. */
+  gap: 20px;
+  /* Permite que ações mudem de linha quando o espaço da tela diminuir. */
+  flex-wrap: wrap;
+}
+.meta {
+  /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+  font-size: 13px;
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: var(--cinza);
+}
+.aviso {
+  /* Cria espaço interno para que texto e controles não encostem na borda. */
+  padding: 12px 15px;
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: #fff8df;
+  border-left: 3px solid #b98a00;
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: var(--aviso);
+}
+.mensagem {
+  /* Reserva espaço suficiente para o conteúdo e as mensagens. */
+  min-height: 24px;
+  margin-top: 16px;
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: var(--sucesso);
+}
+.erro {
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: var(--erro);
+}
+.tab-nav {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: flex;
+  /* Mantém distância uniforme entre os itens do mesmo grupo. */
+  gap: 10px;
+  /* Permite que ações mudem de linha quando o espaço da tela diminuir. */
+  flex-wrap: wrap;
+  /* Separa o elemento dos vizinhos sem alterar seu espaço interno. */
+  margin: 25px 0;
+}
+.tab-nav button[aria-pressed='true'] {
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: var(--azul);
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: #fff;
+}
+.tab-nav button {
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: #fff;
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: var(--azul);
+}
+.tabela {
+  /* Permite rolar tabelas largas sem fazer a página inteira ultrapassar a tela. */
+  overflow-x: auto;
+}
+table {
+  /* Controla a largura sem exigir valores específicos para cada página. */
+  width: 100%;
+  border-collapse: collapse;
+  /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+  font-size: 14px;
+}
+th,
+td {
+  /* Alinha o texto conforme a leitura esperada de títulos, células ou ações. */
+  text-align: left;
+  /* Cria espaço interno para que texto e controles não encostem na borda. */
+  padding: 12px;
+  /* Delimita campos e cartões para facilitar a leitura da interface. */
+  border: 1px solid var(--borda);
+  vertical-align: top;
+}
+th {
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: var(--azul-claro);
+}
+caption {
+  /* Alinha o texto conforme a leitura esperada de títulos, células ou ações. */
+  text-align: left;
+  /* Destaque visual para diferenciar rótulos e ações do texto de apoio. */
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.risco {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: inline-block;
+  /* Cria espaço interno para que texto e controles não encostem na borda. */
+  padding: 4px 8px;
+  /* Mantém a forma visual dos componentes do mesmo tipo. */
+  border-radius: 4px;
+  /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+  font-size: 13px;
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: #fff0b3;
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: #5f4600;
+}
+.paleta {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: grid;
+  /* Distribui os campos ou cartões em colunas; a regra móvel reduz essa quantidade. */
+  grid-template-columns: repeat(3, 1fr);
+  /* Mantém distância uniforme entre os itens do mesmo grupo. */
+  gap: 15px;
+}
+.cor {
+  /* Delimita campos e cartões para facilitar a leitura da interface. */
+  border: 1px solid var(--borda);
+  /* Mantém a forma visual dos componentes do mesmo tipo. */
+  border-radius: 8px;
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: white;
+  overflow: hidden;
+}
+.amostra {
+  height: 75px;
+}
+.amostra.azul {
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: var(--azul);
+}
+.amostra.fundo {
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: var(--fundo);
+}
+.amostra.texto {
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: var(--texto);
+}
+.amostra.sucesso {
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: var(--sucesso);
+}
+.amostra.erro {
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: var(--erro);
+}
+.amostra.borda {
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: var(--borda);
+}
+.cor p {
+  /* Cria espaço interno para que texto e controles não encostem na borda. */
+  padding: 0 15px;
+}
+.check {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: flex;
+  /* Mantém distância uniforme entre os itens do mesmo grupo. */
+  gap: 10px;
+  /* Alinha os controles no eixo transversal do grupo. */
+  align-items: flex-start;
+  /* Separa o elemento dos vizinhos sem alterar seu espaço interno. */
+  margin: 14px 0;
+}
+.check input {
+  /* Controla a largura sem exigir valores específicos para cada página. */
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+code {
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: var(--azul-claro);
+  /* Cria espaço interno para que texto e controles não encostem na borda. */
+  padding: 2px 5px;
+  /* Mantém a forma visual dos componentes do mesmo tipo. */
+  border-radius: 3px;
+  /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+  font-size: 13px;
+}
+footer {
+  /* Alinha o texto conforme a leitura esperada de títulos, células ou ações. */
+  text-align: center;
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: var(--cinza);
+  /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+  font-size: 13px;
+  /* Cria espaço interno para que texto e controles não encostem na borda. */
+  padding: 22px;
+}
+a {
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: var(--azul);
+}
+:focus-visible {
+  /* Mostra o foco para quem navega pelo teclado. */
+  outline: 3px solid #b98a00;
+  /* Separa o foco da borda para que ele continue visível. */
+  outline-offset: 3px;
+}
+[hidden] {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: none !important;
+}
+/* A tarefa 11 reutiliza a estrutura, mas mostra apenas o rascunho em tons de cinza. */
+.wireframe {
+  --azul: #343434;
+  --azul-claro: #efefef;
+  --fundo: #fafafa;
+  --texto: #242424;
+  --cinza: #606060;
+  --borda: #bcbcbc;
+}
+.wireframe .cartao,
+.wireframe button,
+.wireframe input,
+.wireframe select,
+.wireframe textarea {
+  /* Mantém a forma visual dos componentes do mesmo tipo. */
+  border-radius: 0;
+}
+.wireframe .cartao {
+  border-style: dashed;
+}
+.wireframe .risco {
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: #eee;
+  /* Mantém o texto legível dentro da paleta compartilhada. */
+  color: #333;
+}
+@media (max-width: 700px) {
+  header {
+    /* Alinha os controles no eixo transversal do grupo. */
+    align-items: flex-start;
+  }
+  header a {
+    /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+    font-size: 12px;
+  }
+  main {
+    /* Cria espaço interno para que texto e controles não encostem na borda. */
+    padding: 25px 16px;
+  }
+  h1 {
+    /* Hierarquia de leitura do componente; títulos e campos mantêm tamanhos consistentes. */
+    font-size: 27px;
+  }
+  .cartao {
+    /* Cria espaço interno para que texto e controles não encostem na borda. */
+    padding: 19px;
+  }
+  .grade,
+  .formulario {
+    /* Distribui os campos ou cartões em colunas; a regra móvel reduz essa quantidade. */
+    grid-template-columns: 1fr;
+  }
+  .paleta {
+    /* Distribui os campos ou cartões em colunas; a regra móvel reduz essa quantidade. */
+    grid-template-columns: 1fr 1fr;
+  }
+  .inteira {
+    /* Permite que este campo ocupe toda a linha do formulário. */
+    grid-column: auto;
+  }
+  table {
+    /* Evita que campos ou tabelas sejam comprimidos além de sua apresentação prevista. */
+    min-width: 520px;
+  }
+}
+
+iframe {
+  /* Define como este grupo organiza seus elementos no fluxo da página. */
+  display: block;
+  /* Controla a largura sem exigir valores específicos para cada página. */
+  width: 100%;
+  /* Reserva espaço suficiente para o conteúdo e as mensagens. */
+  min-height: 850px;
+  /* Delimita campos e cartões para facilitar a leitura da interface. */
+  border: 1px dashed var(--borda, #999);
+  /* Define a superfície do componente e o contraste com o texto. */
+  background: white;
+}

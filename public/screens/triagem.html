@@ -1,0 +1,110 @@
+<!doctype html>
+<!-- O idioma permite ao navegador e aos leitores de tela interpretar este conteúdo em português. -->
+<html lang="pt-BR">
+  <head>
+    <!-- UTF-8 preserva os acentos nos textos e comentários. -->
+    <meta charset="utf-8" />
+    <!-- A largura acompanha a tela para que o layout móvel possa aplicar seus próprios recuos. -->
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- O título identifica a página na aba do navegador. -->
+    <title>PI2 • Tarefa 17 • Desenhar a triagem</title>
+    <!-- Reutiliza o estilo compartilhado, sem duplicar regras nesta página. -->
+    <link rel="stylesheet" href="../assets/css/tema.css" />
+    <!-- Carrega o comportamento depois da leitura da estrutura HTML por meio de defer. -->
+    <script src="../assets/js/prototipos.js" defer></script>
+  </head>
+  <body>
+    <!-- Mantém a identificação do projeto e a navegação principal no mesmo lugar. -->
+    <header>
+      <div class="marca">
+        PI2
+        <small>Sistema de atendimento</small>
+      </div>
+      <!-- O caminho acompanha a estrutura por função e mantém a navegação entre páginas. -->
+      <a href="../index.html">Índice do projeto</a>
+    </header>
+    <!-- Delimita o conteúdo principal para facilitar a navegação por tecnologias assistivas. -->
+    <main>
+      <span class="etiqueta">Proposta de interface</span>
+      <!-- Identifica o assunto principal da página com um único título de primeiro nível. -->
+      <h1>Desenhar a triagem</h1>
+      <p class="subtitulo">
+        Proposta de formulário da triagem. Nesta etapa, a classificação é apenas uma seleção de
+        exemplo; não há cálculo nem salvamento.
+      </p>
+      <!-- TAREFA 17: desenho da triagem, sem cálculo clínico ou salvamento nesta etapa. -->
+      <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
+      <section class="cartao">
+        <div class="linha">
+          <!-- Identifica a seção para facilitar a leitura e a navegação pelos assuntos. -->
+          <h2>Triagem</h2>
+          <span class="etiqueta">Enfermagem</span>
+        </div>
+        <p>
+          <strong>Paciente Exemplo Um</strong>
+          • Atendimento 001
+        </p>
+        <!-- Este formulário é um desenho; o JavaScript impede que pareça um salvamento real. -->
+        <form class="formulario" data-prototipo>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="campo inteira">
+            Queixa principal
+            <!-- O campo queixa mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <textarea
+              name="queixa"
+              placeholder="Descrição informada para este atendimento"
+            ></textarea>
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="campo">
+            Pressão arterial
+            <!-- O campo pressao mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input name="pressao" placeholder="Valor informado" />
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="campo">
+            Temperatura em °C
+            <!-- O campo temperatura mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input name="temperatura" type="number" step="0.1" placeholder="Valor informado" />
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="campo">
+            Frequência cardíaca em bpm
+            <!-- O campo frequencia mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input name="frequencia" type="number" placeholder="Valor informado" />
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="campo">
+            Saturação em %
+            <!-- O campo saturacao mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input name="saturacao" type="number" placeholder="Valor informado" />
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="campo inteira">
+            Classificação de risco
+            <small>Seleção demonstrativa; seguir as regras aprovadas para o trabalho.</small>
+            <!-- O campo classificacao mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <select name="classificacao">
+              <option value="">Selecionar classificação</option>
+              <option>Vermelho</option>
+              <option>Laranja</option>
+              <option>Amarelo</option>
+              <option>Verde</option>
+              <option>Azul</option>
+            </select>
+          </label>
+          <div class="acoes inteira">
+            <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+            <button>Salvar triagem</button>
+            <!-- Limpa o formulário sem executar uma operação no banco. -->
+            <button type="reset" class="secundario">Limpar</button>
+          </div>
+        </form>
+      </section>
+      <!-- Anuncia o resultado das ações sem exigir que a pessoa procure a mensagem na página. -->
+      <p class="mensagem" role="status" aria-live="polite"></p>
+    </main>
+    <!-- Identifica o contexto acadêmico e o uso de dados de exemplo. -->
+    <footer>Projeto integrador • Dados fictícios • Desenhos para revisão do grupo</footer>
+  </body>
+</html>

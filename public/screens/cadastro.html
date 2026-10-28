@@ -1,0 +1,95 @@
+<!doctype html>
+<!-- O idioma permite ao navegador e aos leitores de tela interpretar este conteúdo em português. -->
+<html lang="pt-BR">
+  <head>
+    <!-- UTF-8 preserva os acentos nos textos e comentários. -->
+    <meta charset="utf-8" />
+    <!-- A largura acompanha a tela para que o layout móvel possa aplicar seus próprios recuos. -->
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- O título identifica a página na aba do navegador. -->
+    <title>PI2 • Tarefa 16 • Desenhar o cadastro do paciente</title>
+    <!-- Reutiliza o estilo compartilhado, sem duplicar regras nesta página. -->
+    <link rel="stylesheet" href="../assets/css/tema.css" />
+    <!-- Carrega o comportamento depois da leitura da estrutura HTML por meio de defer. -->
+    <script src="../assets/js/prototipos.js" defer></script>
+  </head>
+  <body>
+    <!-- Mantém a identificação do projeto e a navegação principal no mesmo lugar. -->
+    <header>
+      <div class="marca">
+        PI2
+        <small>Sistema de atendimento</small>
+      </div>
+      <!-- O caminho acompanha a estrutura por função e mantém a navegação entre páginas. -->
+      <a href="../index.html">Índice do projeto</a>
+    </header>
+    <!-- Delimita o conteúdo principal para facilitar a navegação por tecnologias assistivas. -->
+    <main>
+      <span class="etiqueta">Proposta de interface</span>
+      <!-- Identifica o assunto principal da página com um único título de primeiro nível. -->
+      <h1>Desenhar o cadastro do paciente</h1>
+      <p class="subtitulo">
+        Desenho do cadastro, preparado para orientar a montagem da tela na tarefa 26. Os campos são
+        uma proposta a conferir com os requisitos originais.
+      </p>
+      <!-- TAREFA 16: disposição dos campos. O envio real será ligado nas tarefas 26 e 28. -->
+      <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
+      <section class="cartao">
+        <div class="linha">
+          <!-- Identifica a seção para facilitar a leitura e a navegação pelos assuntos. -->
+          <h2>Cadastro do paciente</h2>
+          <span class="meta">Recepção</span>
+        </div>
+        <!-- Este formulário é um desenho; o JavaScript impede que pareça um salvamento real. -->
+        <form class="formulario" data-prototipo>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="campo inteira">
+            Nome completo *
+            <!-- O campo nome mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input
+              name="nome"
+              required
+              minlength="2"
+              maxlength="120"
+              placeholder="Nome do paciente"
+            />
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="campo">
+            Data de nascimento *
+            <!-- O campo data_nascimento mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input name="data_nascimento" type="date" min="1900-01-01" required />
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="campo">
+            Documento
+            <small>Opcional nesta proposta</small>
+            <!-- O campo documento mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input name="documento" maxlength="40" placeholder="Ex.: DEMO-004" />
+          </label>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="campo">
+            Telefone
+            <small>Opcional nesta proposta</small>
+            <!-- O campo telefone mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input name="telefone" type="tel" maxlength="20" placeholder="Telefone para contato" />
+          </label>
+          <p class="meta">
+            * Campos obrigatórios. A definição final precisa ser conferida com os requisitos
+            originais.
+          </p>
+          <div class="acoes inteira">
+            <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+            <button>Salvar paciente</button>
+            <!-- Limpa o formulário sem executar uma operação no banco. -->
+            <button type="reset" class="secundario">Limpar</button>
+          </div>
+        </form>
+      </section>
+      <!-- Anuncia o resultado das ações sem exigir que a pessoa procure a mensagem na página. -->
+      <p class="mensagem" role="status" aria-live="polite"></p>
+    </main>
+    <!-- Identifica o contexto acadêmico e o uso de dados de exemplo. -->
+    <footer>Projeto integrador • Dados fictícios • Desenhos para revisão do grupo</footer>
+  </body>
+</html>

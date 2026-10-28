@@ -1,0 +1,107 @@
+<!doctype html>
+<!-- O idioma permite ao navegador e aos leitores de tela interpretar este conteúdo em português. -->
+<html lang="pt-BR">
+  <head>
+    <!-- UTF-8 preserva os acentos nos textos e comentários. -->
+    <meta charset="utf-8" />
+    <!-- A largura acompanha a tela para que o layout móvel possa aplicar seus próprios recuos. -->
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- O título identifica a página na aba do navegador. -->
+    <title>PI2 • Tarefa 18 • Desenhar o painel do médico</title>
+    <!-- Reutiliza o estilo compartilhado, sem duplicar regras nesta página. -->
+    <link rel="stylesheet" href="../assets/css/tema.css" />
+    <!-- Carrega o comportamento depois da leitura da estrutura HTML por meio de defer. -->
+    <script src="../assets/js/prototipos.js" defer></script>
+  </head>
+  <body>
+    <!-- Mantém a identificação do projeto e a navegação principal no mesmo lugar. -->
+    <header>
+      <div class="marca">
+        PI2
+        <small>Sistema de atendimento</small>
+      </div>
+      <!-- O caminho acompanha a estrutura por função e mantém a navegação entre páginas. -->
+      <a href="../index.html">Índice do projeto</a>
+    </header>
+    <!-- Delimita o conteúdo principal para facilitar a navegação por tecnologias assistivas. -->
+    <main>
+      <span class="etiqueta">Proposta de interface</span>
+      <!-- Identifica o assunto principal da página com um único título de primeiro nível. -->
+      <h1>Desenhar o painel do médico</h1>
+      <p class="subtitulo">
+        Proposta da lista de pacientes e do registro de consulta. Os dados são fixos e servem para
+        revisar a disposição dos elementos.
+      </p>
+      <!-- TAREFA 18: lista de exemplo e posição do formulário da consulta. -->
+      <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
+      <section class="cartao">
+        <div class="linha">
+          <!-- Identifica a seção para facilitar a leitura e a navegação pelos assuntos. -->
+          <h2>Pacientes aguardando atendimento</h2>
+          <span class="etiqueta">Médico</span>
+        </div>
+        <div class="tabela">
+          <!-- Apresenta registros com os mesmos campos para facilitar a comparação. -->
+          <table>
+            <!-- Descreve a finalidade da tabela também para leitores de tela. -->
+            <caption>Exemplo de lista após a triagem</caption>
+            <!-- Separa os títulos das colunas dos registros apresentados. -->
+            <thead>
+              <tr>
+                <th>Atendimento</th>
+                <th>Paciente</th>
+                <th>Classificação</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <!-- Agrupa os registros; no painel, este conteúdo é atualizado com dados devolvidos pelo backend. -->
+            <tbody>
+              <tr>
+                <td>001</td>
+                <td>Paciente Exemplo Um</td>
+                <td><span class="risco">Amarelo • exemplo</span></td>
+                <td>
+                  <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+                  <button
+                    type="button"
+                    data-acao="No sistema completo, este botão abrirá os dados do atendimento selecionado."
+                  >
+                    Abrir consulta
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="meta">A ordem e os campos da lista devem seguir os requisitos do projeto.</p>
+      </section>
+      <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
+      <section class="cartao">
+        <!-- Identifica a seção para facilitar a leitura e a navegação pelos assuntos. -->
+        <h2>Registro da consulta</h2>
+        <p>
+          <strong>Paciente Exemplo Um</strong>
+          • Atendimento 001
+        </p>
+        <!-- Este formulário é um desenho; o JavaScript impede que pareça um salvamento real. -->
+        <form data-prototipo>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="campo">
+            Informações da consulta
+            <!-- O campo consulta mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <textarea
+              name="consulta"
+              placeholder="Campo proposto para o primeiro registro da consulta"
+            ></textarea>
+          </label>
+          <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+          <button>Salvar consulta</button>
+        </form>
+      </section>
+      <!-- Anuncia o resultado das ações sem exigir que a pessoa procure a mensagem na página. -->
+      <p class="mensagem" role="status" aria-live="polite"></p>
+    </main>
+    <!-- Identifica o contexto acadêmico e o uso de dados de exemplo. -->
+    <footer>Projeto integrador • Dados fictícios • Desenhos para revisão do grupo</footer>
+  </body>
+</html>

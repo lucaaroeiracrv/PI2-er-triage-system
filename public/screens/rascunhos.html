@@ -1,0 +1,53 @@
+<!doctype html>
+<!-- O idioma permite ao navegador e aos leitores de tela interpretar este conteúdo em português. -->
+<html lang="pt-BR">
+  <head>
+    <!-- UTF-8 preserva os acentos nos textos e comentários. -->
+    <meta charset="utf-8" />
+    <!-- A largura acompanha a tela para que o layout móvel possa aplicar seus próprios recuos. -->
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- O título identifica a página na aba do navegador. -->
+    <title>PI2 • Rascunhos das telas</title>
+    <!-- Reutiliza o estilo compartilhado, sem duplicar regras nesta página. -->
+    <link rel="stylesheet" href="../assets/css/tema.css" />
+    <!-- Carrega o comportamento depois da leitura da estrutura HTML por meio de defer. -->
+    <script src="../assets/js/rascunhos.js" defer></script>
+  </head>
+  <body>
+    <!-- Mantém a identificação do projeto e a navegação principal no mesmo lugar. -->
+    <header>
+      <div class="marca">
+        PI2
+        <small>Sistema de atendimento</small>
+      </div>
+      <!-- O caminho acompanha a estrutura por função e mantém a navegação entre páginas. -->
+      <a href="../index.html">Índice do projeto</a>
+    </header>
+    <!-- Delimita o conteúdo principal para facilitar a navegação por tecnologias assistivas. -->
+    <main>
+      <!-- Identifica o assunto principal da página com um único título de primeiro nível. -->
+      <h1>Rascunhos das telas</h1>
+      <p>
+        Os rascunhos reutilizam as mesmas telas de cadastro, triagem e médico. As alterações feitas
+        nessas telas também aparecem aqui.
+      </p>
+      <!-- Agrupa as ações de navegação; seus rótulos indicam qual tela pode ser consultada. -->
+      <nav class="tab-nav" aria-label="Escolher rascunho">
+        <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+        <button type="button" data-tela="cadastro" aria-pressed="true">1. Recepção</button>
+        <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+        <button type="button" data-tela="triagem" aria-pressed="false">2. Triagem</button>
+        <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+        <button type="button" data-tela="medico" aria-pressed="false">3. Médico</button>
+      </nav>
+      <!-- Reutiliza a tela original no modo rascunho, evitando manter outro formulário igual. -->
+      <iframe
+        id="rascunho"
+        src="cadastro.html?modo=rascunho"
+        title="Visualização do rascunho"
+      ></iframe>
+    </main>
+    <!-- Identifica o contexto acadêmico e o uso de dados de exemplo. -->
+    <footer>Projeto integrador • Dados fictícios</footer>
+  </body>
+</html>

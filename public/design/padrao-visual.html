@@ -1,0 +1,124 @@
+<!doctype html>
+<!-- O idioma permite ao navegador e aos leitores de tela interpretar este conteúdo em português. -->
+<html lang="pt-BR">
+  <head>
+    <!-- UTF-8 preserva os acentos nos textos e comentários. -->
+    <meta charset="utf-8" />
+    <!-- A largura acompanha a tela para que o layout móvel possa aplicar seus próprios recuos. -->
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- O título identifica a página na aba do navegador. -->
+    <title>PI2 • Tarefa 12 • Escolher cores, fontes e botões</title>
+    <!-- Reutiliza o estilo compartilhado, sem duplicar regras nesta página. -->
+    <link rel="stylesheet" href="../assets/css/tema.css" />
+    <!-- Carrega o comportamento depois da leitura da estrutura HTML por meio de defer. -->
+    <script src="../assets/js/prototipos.js" defer></script>
+  </head>
+  <body>
+    <!-- Mantém a identificação do projeto e a navegação principal no mesmo lugar. -->
+    <header>
+      <div class="marca">
+        PI2
+        <small>Sistema de atendimento</small>
+      </div>
+      <!-- O caminho acompanha a estrutura por função e mantém a navegação entre páginas. -->
+      <a href="../index.html">Índice do projeto</a>
+    </header>
+    <!-- Delimita o conteúdo principal para facilitar a navegação por tecnologias assistivas. -->
+    <main>
+      <span class="etiqueta">Tarefa 12 • Proposta 01</span>
+      <!-- Identifica o assunto principal da página com um único título de primeiro nível. -->
+      <h1>Escolher cores, fontes e botões</h1>
+      <p class="subtitulo">
+        Padrão visual simples para manter as telas do grupo consistentes. Os estilos ficam no
+        arquivo compartilhado _comum/tema.css.
+      </p>
+      <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
+      <section class="cartao">
+        <!-- Identifica a seção para facilitar a leitura e a navegação pelos assuntos. -->
+        <h2>Cores</h2>
+        <div class="paleta">
+          <div class="cor">
+            <div class="amostra azul"></div>
+            <p>
+              <strong>Principal</strong>
+              <br />
+              <code>#183B66</code>
+            </p>
+          </div>
+          <div class="cor">
+            <div class="amostra fundo"></div>
+            <p>
+              <strong>Fundo</strong>
+              <br />
+              <code>#F4F6FA</code>
+            </p>
+          </div>
+          <div class="cor">
+            <div class="amostra texto"></div>
+            <p>
+              <strong>Texto</strong>
+              <br />
+              <code>#17283E</code>
+            </p>
+          </div>
+          <div class="cor">
+            <div class="amostra sucesso"></div>
+            <p>
+              <strong>Sucesso</strong>
+              <br />
+              <code>#236343</code>
+            </p>
+          </div>
+          <div class="cor">
+            <div class="amostra erro"></div>
+            <p>
+              <strong>Erro</strong>
+              <br />
+              <code>#9D2E2E</code>
+            </p>
+          </div>
+          <div class="cor">
+            <div class="amostra borda"></div>
+            <p>
+              <strong>Borda</strong>
+              <br />
+              <code>#D8E0EB</code>
+            </p>
+          </div>
+        </div>
+      </section>
+      <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
+      <section class="cartao">
+        <!-- Identifica a seção para facilitar a leitura e a navegação pelos assuntos. -->
+        <h2>Fonte e componentes</h2>
+        <p>
+          Arial, com alternativa sans-serif. Texto de 16 px; títulos maiores e botões com texto
+          claro. A informação também aparece por escrito.
+        </p>
+        <!-- Este formulário é um desenho; o JavaScript impede que pareça um salvamento real. -->
+        <form data-prototipo>
+          <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
+          <label class="campo">
+            Exemplo de campo
+            <!-- O campo exemplo mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
+            <input name="exemplo" placeholder="Texto de exemplo" />
+          </label>
+          <div class="acoes">
+            <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
+            <button>Botão principal</button>
+            <!-- Limpa o formulário sem executar uma operação no banco. -->
+            <button type="reset" class="secundario">Botão secundário</button>
+            <!-- Mostra um controle indisponível; a função só deve ser liberada quando puder ser utilizada. -->
+            <button type="button" disabled>Indisponível</button>
+          </div>
+        </form>
+        <p class="mensagem">Exemplo: operação realizada.</p>
+        <p class="erro">Exemplo: confira o campo obrigatório.</p>
+      </section>
+      <!-- Anuncia o resultado das ações sem exigir que a pessoa procure a mensagem na página. -->
+      <p class="mensagem" role="status" aria-live="polite"></p>
+    </main>
+    <!-- Identifica o contexto acadêmico e o uso de dados de exemplo. -->
+    <footer>Projeto integrador • Dados fictícios • Desenhos para revisão do grupo</footer>
+  </body>
+</html>
