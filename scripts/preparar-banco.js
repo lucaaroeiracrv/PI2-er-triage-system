@@ -1,10 +1,12 @@
 import { readFile } from 'node:fs/promises';
-import { criarPool, oracledb } from '../src/config/banco.js';
+import { criarPool, configuracaoBanco, motorDoBanco, oracledb } from '../src/config/banco.js';
 import { criarUsuariosDeTeste } from './usuarios-teste.js';
 
+const config = configuracaoBanco();
+const engine = motorDoBanco();
 const pool = await criarPool();
 let conexao;
-let etapa = 'conectando ao Oracle';
+let etapa = `conectando ao ${engine === 'mysql' ? 'MySQL' : 'Oracle'}`;
 
 function separarSql(texto) {
   return texto
@@ -15,6 +17,14 @@ function separarSql(texto) {
 }
 
 async function criarObjetos(conexao, texto) {
+  if (engine === 'mysql') {
+    for (const comando of separarSql(texto)) {
+      etapa = `criando objeto MySQL`;
+      await conexao.execute(comando);
+    }
+    return;
+  }
+
   for (const comando of separarSql(texto)) {
     const objeto = comando.match(/^CREATE\s+(TABLE|(?:UNIQUE\s+)?INDEX)\s+([A-Z0-9_$#]+)/i);
     if (!objeto) {
@@ -44,6 +54,10 @@ async function criarObjetos(conexao, texto) {
 }
 
 async function exigirCpfObrigatorio(conexao) {
+  if (engine === 'mysql') {
+    return;
+  }
+
   const coluna = await conexao.execute(
     `SELECT nullable FROM user_tab_columns
      WHERE table_name = 'PACIENTES' AND column_name = 'DOCUMENTO'`,
@@ -75,10 +89,11 @@ async function exigirCpfObrigatorio(conexao) {
 
 try {
   conexao = await pool.getConnection();
-  const estrutura = await readFile(new URL('../database/estrutura.sql', import.meta.url), 'utf8');
-  const dados = await readFile(new URL('../database/dados-teste.sql', import.meta.url), 'utf8');
+  const pastaSql = engine === 'mysql' ? 'mysql' : 'oracle';
+  const estrutura = await readFile(new URL(`../database/${pastaSql}/estrutura.sql`, import.meta.url), 'utf8');
+  const dados = await readFile(new URL(`../database/${pastaSql}/dados-teste.sql`, import.meta.url), 'utf8');
   const cargaGenerica = await readFile(
-    new URL('../database/carga-generica.sql', import.meta.url),
+    new URL(`../database/${pastaSql}/carga-generica.sql`, import.meta.url),
     'utf8',
   );
 
@@ -97,11 +112,13 @@ try {
   etapa = 'criando usuários de teste';
   await criarUsuariosDeTeste(conexao);
   etapa = 'confirmando transação';
-  await conexao.commit();
-  console.log('Schema Oracle preparado; registros existentes não foram apagados.');
+  if (engine === 'oracle') {
+    await conexao.commit();
+  }
+  console.log(`Schema ${engine === 'mysql' ? 'MySQL' : 'Oracle'} preparado; registros existentes não foram apagados.`);
   console.log('Usuários de teste disponíveis: recepcao, enfermagem e medico.');
 } catch (erro) {
-  if (conexao) {
+  if (conexao && engine === 'oracle') {
     try {
       await conexao.rollback();
     } catch (erroRollback) {
@@ -112,7 +129,9 @@ try {
   if (erro.message && erro.message !== erro.code) {
     console.error(erro.message);
   }
-  console.error('Confira o .env, as permissões do usuário Oracle e se o serviço está ativo.');
+  console.error(
+    `Confira o .env, as permissões do usuário ${engine === 'mysql' ? 'MySQL' : 'Oracle'} e se o serviço está ativo.`,
+  );
   process.exitCode = 1;
 } finally {
   if (conexao) {

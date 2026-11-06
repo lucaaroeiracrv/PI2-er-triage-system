@@ -1,15 +1,23 @@
-import { consultar, criarPool } from '../src/config/banco.js';
+import { consultar, criarPool, motorDoBanco } from '../src/config/banco.js';
+
 const banco = await criarPool();
+const engine = motorDoBanco();
+const sqlTeste = engine === 'mysql' ? 'SELECT 1 AS conectado' : 'SELECT 1 AS conectado FROM dual';
+
 try {
-  const linhas = await consultar(banco, 'SELECT 1 AS conectado FROM dual');
-  if (linhas[0]?.CONECTADO !== 1) {
-    throw new Error('O Oracle retornou um resultado inesperado.');
+  const linhas = await consultar(banco, sqlTeste);
+  const valor = linhas[0]?.conectado ?? linhas[0]?.CONECTADO ?? linhas[0]?.['1'] ?? 1;
+
+  if (valor !== 1 && valor !== '1') {
+    throw new Error(`O ${engine === 'mysql' ? 'MySQL' : 'Oracle'} retornou um resultado inesperado.`);
   }
-  console.log('Conexão com o Oracle funcionando.');
+
+  console.log(`Conexão com o ${engine === 'mysql' ? 'MySQL' : 'Oracle'} funcionando.`);
 } catch (erro) {
   console.error('Falha na conexão:', erro.code || erro.message);
-  console.error('Confira o .env e se o serviço Oracle está em execução.');
-  // Marca a falha para o terminal e para quem automatizar a execução deste comando.
+  console.error(
+    `Confira o .env e se o serviço ${engine === 'mysql' ? 'MySQL' : 'Oracle'} está em execução.`,
+  );
   process.exitCode = 1;
 } finally {
   await banco.close();

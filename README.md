@@ -38,7 +38,10 @@ O escopo segue as tarefas 11 a 25 do PI2. O texto individual dos requisitos e o 
 
 ## Executar o backend
 
-Você precisa de Node.js 22 ou superior, npm e uma instância Oracle Database em execução. O padrão local é Oracle Free com o serviço `FREEPDB1`. No terminal da raiz do projeto:
+Você precisa de Node.js 22 ou superior, npm e uma instância Oracle Database ou MySQL em execução. O backend escolhe o motor pela variável `DB_ENGINE`, com valores aceitos `oracle` e `mysql`. No terminal da raiz do projeto:
+
+- Defina `DB_ENGINE=oracle` para usar Oracle Free com o serviço `FREEPDB1` ou `DB_ENGINE=mysql` para usar MySQL local.
+- Ajuste `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` e `DB_NAME`/`DB_DATABASE` conforme a instância local.
 
 Para instruções detalhadas de instalação e inicialização do Oracle Free com Docker no Ubuntu/WSL, configuração do `.env`, preparação do schema e conexão pelo DBeaver, siga o [Guia do banco Oracle no WSL](docs/GUIA_BANCO_ORACLE_WSL.md).
 

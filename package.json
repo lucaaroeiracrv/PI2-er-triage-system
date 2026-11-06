@@ -12,8 +12,14 @@
     "verificar:formatacao": "prettier --check .",
     "configurar": "node scripts/configurar-env.js",
     "criar:usuario": "node --env-file=.env scripts/criar-usuario-oracle.js",
+    "criar:usuario:oracle": "node --env-file=.env scripts/criar-usuario-oracle.js",
+    "criar:usuario:mysql": "DB_ENGINE=mysql node --env-file=.env scripts/criar-usuario-mysql.js",
     "preparar": "node --env-file=.env scripts/preparar-banco.js",
+    "preparar:oracle": "node --env-file=.env scripts/preparar-banco.js",
+    "preparar:mysql": "DB_ENGINE=mysql node --env-file=.env scripts/preparar-banco.js",
     "testar:conexao": "node --env-file=.env scripts/testar-conexao.js",
+    "testar:oracle": "node --env-file=.env scripts/testar-conexao.js",
+    "testar:mysql": "DB_ENGINE=mysql node --env-file=.env scripts/testar-conexao.js",
     "start": "node --env-file=.env src/servidor.js",
     "test": "node --test tests/*.test.js"
   },
@@ -21,6 +27,7 @@
     "prettier": "3.9.10"
   },
   "dependencies": {
+    "mysql2": "^3.12.0",
     "oracledb": "^26.0.0"
   }
 }
