@@ -6,7 +6,7 @@ Mostra a estrutura final do código
 
 - `PI2/`
   - `src/`
-    - `config/banco.js`: configuração e pool MySQL.
+    - `config/banco.js`: configuração e pool Oracle Database.
     - `http/arquivos.js` e `http/respostas.js`: arquivos públicos, respostas, corpo JSON e erros.
     - `auth/`: autenticação, senhas e permissões.
     - `pacientes/`: cadastro e busca.
@@ -19,10 +19,9 @@ Mostra a estrutura final do código
     - `assets/js/`: protótipos, rascunhos, revisão e painel.
     - `design/padrao-visual.html`: cores, fontes e componentes.
     - `screens/`: cadastro, triagem, médico, medicações e encerramento, rascunhos, campos e revisão.
-  - `database/`: estrutura SQL proposta e carga fictícia.
+  - `database/`: schema Oracle proposto e carga fictícia.
   - `scripts/`: configuração local, preparação do banco, usuários fictícios e teste de conexão.
   - `tests/`: testes de arquivos públicos, senhas, permissões e cadastro.
   - `docs/`: materiais numerados, histórico, campos e verificações.
   - `README.md`, `package.json`, `package-lock.json` e configurações de edição.
   - `.git/`: histórico local incluído no ZIP.
-

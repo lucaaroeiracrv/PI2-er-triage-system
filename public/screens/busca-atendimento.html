@@ -1,0 +1,92 @@
+<!doctype html>
+<!-- O idioma permite ao navegador e aos leitores de tela interpretar este conteúdo em português. -->
+<html lang="pt-BR">
+  <head>
+    <!-- UTF-8 preserva os acentos nos textos e comentários. -->
+    <meta charset="utf-8" />
+    <!-- A largura acompanha a tela para que o layout móvel possa aplicar seus próprios recuos. -->
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- O título identifica a página na aba do navegador. -->
+    <title>PI2 • Busca e abertura de atendimento</title>
+    <!-- Reutiliza o estilo compartilhado, sem duplicar regras nesta página. -->
+    <link rel="stylesheet" href="../assets/css/tema.css" />
+    <script src="../assets/js/api.js" defer></script>
+    <!-- Carrega o comportamento depois da leitura da estrutura HTML por meio de defer. -->
+    <script src="../assets/js/busca-atendimento.js" defer></script>
+  </head>
+  <body>
+    <!-- Mantém a identificação do projeto e a navegação principal no mesmo lugar. -->
+    <header>
+      <div class="marca">
+        PI2
+        <small>Sistema de atendimento</small>
+      </div>
+      <a href="../index.html">Índice do projeto</a>
+    </header>
+    <main>
+      <h1>Recepção: buscar paciente</h1>
+      <p class="subtitulo">
+        Procure o paciente pelo nome ou pelo CPF, escolha o resultado correto e abra o atendimento.
+      </p>
+
+      <p class="aviso" id="aviso-teste" hidden>
+        Esta tela precisa ser aberta pelo servidor do projeto. Execute
+        <code>npm start</code>
+        e acesse
+        <a href="http://127.0.0.1:3000/screens/busca-atendimento.html">a tela pelo servidor</a>
+        .
+      </p>
+
+      <section class="cartao">
+        <h2>1. Buscar</h2>
+        <form id="form-busca" novalidate>
+          <label class="campo">
+            Nome ou CPF
+            <small>Digite pelo menos 3 letras do nome ou os 11 números do CPF</small>
+            <input
+              type="search"
+              id="termo"
+              name="termo"
+              autocomplete="off"
+              aria-describedby="erro-termo"
+            />
+            <span class="erro" id="erro-termo"></span>
+          </label>
+          <div class="acoes">
+            <button type="submit" id="botao-buscar">Buscar</button>
+            <a class="botao secundario" href="cadastro.html">Cadastrar novo paciente</a>
+          </div>
+        </form>
+
+        <p class="mensagem" id="mensagem" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="cartao" id="resultados" hidden>
+        <h2>2. Escolher e abrir atendimento</h2>
+        <div class="tabela">
+          <table>
+            <caption>Pacientes encontrados</caption>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Nascimento</th>
+                <th>CPF</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="lista-pacientes"></tbody>
+          </table>
+        </div>
+
+        <p class="meta" id="paciente-escolhido">Nenhum paciente selecionado.</p>
+        <div class="acoes">
+          <button type="button" id="botao-abrir" disabled>Abrir atendimento</button>
+          <a class="botao secundario" id="link-triagem" href="triagem.html" hidden>
+            Ir para a triagem
+          </a>
+        </div>
+      </section>
+    </main>
+    <footer>Projeto integrador • Dados fictícios</footer>
+  </body>
+</html>

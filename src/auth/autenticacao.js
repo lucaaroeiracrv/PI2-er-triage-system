@@ -1,6 +1,7 @@
 // autenticação e sessão em memória, suficiente para a demonstração local.
 // Ao reiniciar o servidor, os usuários precisam entrar novamente.
 import { randomBytes } from 'node:crypto';
+import { consultar } from '../config/banco.js';
 // Reutiliza a derivação de senhas em vez de guardar ou comparar a senha em texto no banco.
 import { gerarHash, conferirSenha } from './senhas.js';
 // Compartilha erros e respostas HTTP para manter o mesmo tratamento entre os módulos.
@@ -84,17 +85,18 @@ export async function criarAutenticacao(banco) {
     if (tentativa.quantidade >= 10) {
       throw new ErroHttp(429, 'Muitas tentativas de entrada. Aguarde alguns minutos.');
     }
-    // Linhas recuperadas no MySQL; o primeiro registro só é usado quando a consulta encontra algo.
-    const [linhas] = await banco.execute(
-      'SELECT id, nome, login, senha_hash, perfil, ativo FROM usuarios WHERE login = ? LIMIT 1',
-      [dados.login.trim()],
+    // O login é único no Oracle, então no máximo uma linha pode ser retornada.
+    const linhas = await consultar(
+      banco,
+      'SELECT id AS "id", nome AS "nome", login AS "login", senha_hash AS "senha_hash", perfil AS "perfil", ativo AS "ativo" FROM usuarios WHERE login = :login',
+      { login: dados.login.trim() },
     );
     // Usuário encontrado na base; somente os campos públicos seguem para o navegador.
     const usuario = linhas[0];
     // Resultado da verificação criptográfica, separado da existência e da ativação do usuário.
     const confere = await conferirSenha(dados.senha, usuario?.senha_hash || hashInexistente);
     // Impede novas verificações durante o limite de tentativas para reduzir adivinhação repetida de senha.
-    if (!usuario || !usuario.ativo || !confere) {
+    if (!usuario || usuario.ativo !== 1 || !confere) {
       tentativa.quantidade += 1;
       // Guarda a associação desta tentativa no estado atual para reconhecer uma repetição posterior.
       tentativas.set(ip, tentativa);

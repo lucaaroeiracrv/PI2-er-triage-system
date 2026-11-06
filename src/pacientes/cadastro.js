@@ -1,5 +1,6 @@
 // validar e salvar um paciente. Todos os valores vão em parâmetros SQL.
 import { ErroHttp } from '../http/respostas.js';
+import { consultar, executar, erroDeUnicidade, oracledb } from '../config/banco.js';
 // Expressão de UUID v4 para identificar uma tentativa sem depender do conteúdo do formulário.
 export const formatoChave =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -32,18 +33,12 @@ export function validarPaciente(dados) {
   ) {
     throw new ErroHttp(400, 'A data de nascimento deve existir e não pode estar no futuro.');
   }
-  // Documento é opcional, mas quando enviado precisa ser texto para aceitar a normalização com segurança.
-  if (dados.documento != null && typeof dados.documento !== 'string') {
-    throw new ErroHttp(400, 'Documento inválido.');
+  if (typeof dados.documento !== 'string') {
+    throw new ErroHttp(400, 'Informe o CPF do paciente.');
   }
-  // Identificador opcional normalizado; vazio vira NULL para não conflitar com outros cadastros sem documento.
-  const documento = dados.documento?.trim().toUpperCase() || null;
-  // Limita o identificador ao formato da proposta e ao tamanho aceito pela coluna do banco.
-  if (documento && !/^[A-Z0-9.\/-]{3,40}$/.test(documento)) {
-    throw new ErroHttp(
-      400,
-      'O documento deve ter de 3 a 40 caracteres: letras, números, ponto, barra ou hífen.',
-    );
+  const documento = dados.documento.replace(/\D/g, '');
+  if (documento.length !== 11) {
+    throw new ErroHttp(400, 'O CPF deve ter 11 números.');
   }
   // Um contato opcional não pode chegar como número ou objeto: o formato textual preserva sinais e zeros.
   if (dados.telefone != null && typeof dados.telefone !== 'string') {
@@ -70,7 +65,7 @@ export function validarPaciente(dados) {
     nome: dados.nome.trim(),
     // Data ISO já conferida no calendário; o banco a armazena em uma coluna DATE.
     data_nascimento: nascimento,
-    // Valor opcional normalizado ou NULL; a unicidade só é aplicada quando há documento.
+    // CPF obrigatório, armazenado somente com os onze dígitos.
     documento,
     // Contato opcional guardado como texto, sem perder sinais e zeros iniciais.
     telefone,
@@ -83,16 +78,16 @@ export async function cadastrarPaciente(banco, dados) {
   // Cadastro validado ou registro da iteração atual; sua identificação liga as próximas operações.
   const paciente = validarPaciente(dados);
   try {
-    // Resultado da operação ou da conferência; o chamador decide a resposta a partir dele.
-    const [resultado] = await banco.execute(
-      'INSERT INTO pacientes (nome, data_nascimento, documento, telefone, chave_cadastro) VALUES (?, ?, ?, ?, ?)',
-      [
-        paciente.nome,
-        paciente.data_nascimento,
-        paciente.documento,
-        paciente.telefone,
-        paciente.chave_cadastro,
-      ],
+    const resultado = await executar(
+      banco,
+      `INSERT INTO pacientes (nome, data_nascimento, documento, telefone, chave_cadastro)
+       VALUES (:nome, TO_DATE(:data_nascimento, 'YYYY-MM-DD'), :documento, :telefone, :chave_cadastro)
+       RETURNING id INTO :id`,
+      {
+        ...paciente,
+        id: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      },
+      { autoCommit: true },
     );
     // Informa a criação nova e devolve o identificador persistido para a próxima ação na interface.
     return {
@@ -101,7 +96,7 @@ export async function cadastrarPaciente(banco, dados) {
       // Registro público do paciente que a tela pode apresentar.
       paciente: {
         // Identificador persistido usado para relacionar registros sem depender de nomes.
-        id: resultado.insertId,
+        id: resultado.outBinds.id[0],
         ...paciente,
         // Identifica a tentativa e não o paciente; uma edição posterior recebe outra chave.
         chave_cadastro: undefined,
@@ -109,14 +104,18 @@ export async function cadastrarPaciente(banco, dados) {
     };
   } catch (erro) {
     // Trata conflito de unicidade como regra de repetição; outras falhas de banco precisam seguir para o tratamento de erro.
-    if (erro.code !== 'ER_DUP_ENTRY') {
+    if (!erroDeUnicidade(erro)) {
       // Mantém a falha original para que o tratamento central registre a causa e encerre a operação.
       throw erro;
     }
     // Uma repetição da mesma tentativa devolve o registro já criado.
-    const [linhas] = await banco.execute(
-      'SELECT id, nome, data_nascimento, documento, telefone FROM pacientes WHERE chave_cadastro = ?',
-      [paciente.chave_cadastro],
+    const linhas = await consultar(
+      banco,
+      `SELECT id AS "id", nome AS "nome",
+              TO_CHAR(data_nascimento, 'YYYY-MM-DD') AS "data_nascimento",
+              documento AS "documento", telefone AS "telefone"
+       FROM pacientes WHERE chave_cadastro = :chave_cadastro`,
+      { chave_cadastro: paciente.chave_cadastro },
     );
     // Só reaproveita um registro depois de conferir que o banco encontrou a tentativa correspondente.
     if (linhas.length) {

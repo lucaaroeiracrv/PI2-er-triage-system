@@ -1,4 +1,4 @@
-// Testes de regras de entrada: executam sem precisar de um MySQL.
+// Testes de regras de entrada: executam sem precisar de um Oracle.
 import test from 'node:test';
 // Compara valores e erros de forma estrita para que uma conversão automática não esconda uma falha.
 import assert from 'node:assert/strict';
@@ -12,8 +12,8 @@ const exemplo = () => ({
   nome: ' Paciente Exemplo ',
   // Data ISO já conferida no calendário; o banco a armazena em uma coluna DATE.
   data_nascimento: '2000-02-29',
-  // Valor opcional normalizado ou NULL; a unicidade só é aplicada quando há documento.
-  documento: ' teste-900 ',
+  // CPF fictício de teste, normalizado para os onze dígitos.
+  documento: ' 123.456.789-01 ',
   // Contato opcional guardado como texto, sem perder sinais e zeros iniciais.
   telefone: '(11) 90000-0000',
   // Identifica a tentativa e não o paciente; uma edição posterior recebe outra chave.
@@ -26,20 +26,15 @@ test('normaliza nome e documento, mantendo os campos válidos', () => {
   // Confere o resultado esperado deste cenário, incluindo seu tipo para não esconder diferenças de valor.
   assert.equal(resultado.nome, 'Paciente Exemplo');
   // Confere o resultado esperado deste cenário, incluindo seu tipo para não esconder diferenças de valor.
-  assert.equal(resultado.documento, 'TESTE-900');
+  assert.equal(resultado.documento, '12345678901');
 });
-// Confere o resultado esperado deste cenário, incluindo seu tipo para não esconder diferenças de valor.
-test('campos opcionais vazios se tornam NULL', () => {
+test('telefone vazio continua opcional', () => {
   // Resultado da operação ou da conferência; o chamador decide a resposta a partir dele.
   const resultado = validarPaciente({
     ...exemplo(),
-    // Valor opcional normalizado ou NULL; a unicidade só é aplicada quando há documento.
-    documento: ' ',
     // Contato opcional guardado como texto, sem perder sinais e zeros iniciais.
     telefone: '',
   });
-  // Confere o resultado esperado deste cenário, incluindo seu tipo para não esconder diferenças de valor.
-  assert.equal(resultado.documento, null);
   // Confere o resultado esperado deste cenário, incluindo seu tipo para não esconder diferenças de valor.
   assert.equal(resultado.telefone, null);
 });
@@ -102,17 +97,33 @@ for (const [nome, ajuste] of [
     },
   ],
   [
-    'documento com marcação',
+    'CPF com marcação',
     {
-      // Valor opcional normalizado ou NULL; a unicidade só é aplicada quando há documento.
-      documento: '<script>',
+      documento: '<script>1234',
     },
   ],
   [
-    'documento com tipo inválido',
+    'CPF com tipo inválido',
     {
-      // Valor opcional normalizado ou NULL; a unicidade só é aplicada quando há documento.
       documento: 123,
+    },
+  ],
+  [
+    'CPF ausente',
+    {
+      documento: undefined,
+    },
+  ],
+  [
+    'CPF vazio',
+    {
+      documento: '',
+    },
+  ],
+  [
+    'CPF incompleto',
+    {
+      documento: '1234567890',
     },
   ],
   [

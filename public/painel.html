@@ -10,6 +10,7 @@
     <title>PI2 • Testar o começo do sistema</title>
     <!-- Reutiliza o estilo compartilhado, sem duplicar regras nesta página. -->
     <link rel="stylesheet" href="assets/css/painel.css" />
+    <script src="assets/js/api.js" defer></script>
     <!-- Carrega o comportamento depois da leitura da estrutura HTML por meio de defer. -->
     <script src="assets/js/painel.js" defer></script>
   </head>
@@ -29,8 +30,8 @@
       <!-- Identifica o assunto principal da página com um único título de primeiro nível. -->
       <h1>Começo do sistema de atendimento</h1>
       <p>
-        Este painel permite testar o backend com o MySQL. As telas de atendimento definitivas seguem
-        os desenhos das outras pastas.
+        Este painel permite testar o backend com o Oracle. As telas de atendimento definitivas
+        seguem os desenhos das outras pastas.
       </p>
       <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
       <section class="card" id="entrada">
@@ -98,16 +99,25 @@
             </label>
             <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
             <label>
-              Data de nascimento
+              Data de nascimento*
               <!-- O campo data_nascimento mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
               <input name="data_nascimento" type="date" required min="1900-01-01" />
             </label>
             <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
             <label>
-              Documento de teste
-              <span>Opcional, por exemplo TESTE-100</span>
+              CPF*
+              <span>Obrigatório: informe 11 números</span>
               <!-- O campo documento mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
-              <input name="documento" maxlength="40" autocomplete="off" />
+              <input
+                name="documento"
+                required
+                inputmode="numeric"
+                minlength="11"
+                maxlength="14"
+                autocomplete="off"
+                placeholder="000.000.000-00"
+                title="Informe um CPF com 11 números."
+              />
             </label>
             <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
             <label>

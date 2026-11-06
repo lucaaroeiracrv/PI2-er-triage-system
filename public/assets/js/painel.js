@@ -7,6 +7,8 @@ let chaveCadastro = crypto.randomUUID();
 $('[name="data_nascimento"]').max = new Date().toISOString().slice(0, 10);
 // Associa cada paciente a uma tentativa de abertura, inclusive após repetir um clique.
 const chavesAbertura = new Map();
+const campoCpf = $('[name="documento"]');
+window.pi2Api.maskCpfInput(campoCpf);
 // Rótulos de apresentação dos perfis que o backend reconhece.
 const nomesPerfis = {
   recepcao: 'Recepção',
@@ -231,12 +233,17 @@ $('#form-paciente').addEventListener('input', () => {
 });
 // Remove os valores do formulário para não reapresentar dados de uma tentativa anterior.
 aoEnviar('#form-paciente', async (dados, form) => {
+  const cpf = String(dados.documento || '').replace(/\D/g, '');
+  if (cpf.length !== 11) {
+    throw new Error('Informe um CPF válido com 11 números.');
+  }
   // Resultado da operação ou da conferência; o chamador decide a resposta a partir dele.
   const resultado = await pedir('/api/pacientes', {
     // Método HTTP que separa leitura e envio de dados.
     method: 'POST',
     dados: {
       ...dados,
+      documento: cpf,
       // Identifica a tentativa e não o paciente; uma edição posterior recebe outra chave.
       chave_cadastro: chaveCadastro,
     },
