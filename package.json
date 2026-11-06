@@ -2,7 +2,7 @@
   "name": "pi2-atendimento",
   "version": "1.0.0",
   "private": true,
-  "description": "Projeto integrador com interface compartilhada e backend Node.js/MySQL.",
+  "description": "Projeto integrador com interface compartilhada e backend Node.js/Oracle.",
   "type": "module",
   "engines": {
     "node": ">=22"
@@ -11,6 +11,7 @@
     "formatar": "prettier --write .",
     "verificar:formatacao": "prettier --check .",
     "configurar": "node scripts/configurar-env.js",
+    "criar:usuario": "node --env-file=.env scripts/criar-usuario-oracle.js",
     "preparar": "node --env-file=.env scripts/preparar-banco.js",
     "testar:conexao": "node --env-file=.env scripts/testar-conexao.js",
     "start": "node --env-file=.env src/servidor.js",
@@ -20,6 +21,6 @@
     "prettier": "3.9.10"
   },
   "dependencies": {
-    "mysql2": "3.24.6"
+    "oracledb": "^26.0.0"
   }
 }

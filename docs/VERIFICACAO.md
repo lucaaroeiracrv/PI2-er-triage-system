@@ -1,5 +1,7 @@
 # Verificação da reorganização
 
+Este relatório registra a verificação da versão anterior, que usava MySQL. A migração atual para Oracle ainda precisa de uma instância Oracle para validar criação do usuário, DDL, dados de teste e integração real.
+
 O projeto reorganizado foi conferido com Node.js 24 e MySQL 8.0.46-0ubuntu0.24.04.3. Os testes utilizaram um banco isolado com contas e pacientes fictícios.
 
 | Conferência                                           | Resultado                               |

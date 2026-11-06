@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 // Resolve caminhos a partir do módulo, mantendo a execução após mover as pastas do projeto.
 import path from 'node:path';
 // Reutiliza a configuração do banco para manter scripts e servidor conectados ao mesmo ambiente.
-import { criarPool } from './config/banco.js';
+import { consultar, criarPool } from './config/banco.js';
 // Compartilha erros e respostas HTTP para manter o mesmo tratamento entre os módulos.
 import { ErroHttp, responder, lerJson, conferirOrigem } from './http/respostas.js';
 // Reutiliza este módulo para manter sua responsabilidade fora do fluxo principal do servidor.
@@ -51,10 +51,10 @@ export async function criarServidor(banco) {
       // Separa esta operação pelas regras de rota e método; somente esse ramo pode produzir sua resposta.
       if (req.method === 'GET' && rota === '/api/saude') {
         // Aguarda a operação do banco; consultas de formulário usam valores separados do texto SQL.
-        await banco.execute('SELECT 1 AS conectado');
+        await consultar(banco, 'SELECT 1 AS conectado FROM dual');
         // Envia a resposta deste ramo e encerra o pedido, sem executar as rotas que aparecem depois.
         return responder(res, 200, {
-          mensagem: 'Backend e MySQL funcionando.',
+          mensagem: 'Backend e Oracle funcionando.',
         });
       }
       // Separa esta operação pelas regras de rota e método; somente esse ramo pode produzir sua resposta.
@@ -152,9 +152,13 @@ export async function criarServidor(banco) {
       const indisponivel = [
         'ECONNREFUSED',
         'ENOTFOUND',
-        'ER_ACCESS_DENIED_ERROR',
-        'ER_BAD_DB_ERROR',
+        'ORA-01017',
+        'ORA-12170',
+        'ORA-12514',
+        'ORA-12541',
+        'NJS-511',
       ].includes(erro.code);
+      console.error('Falha na requisição:', erro.code || erro.message);
       responder(res, indisponivel ? 503 : 500, {
         erro: indisponivel
           ? 'Não foi possível acessar o banco. Confira o terminal e o .env.'
@@ -166,11 +170,11 @@ export async function criarServidor(banco) {
 
 // A comparação permite importar a fábrica nos testes sem iniciar uma porta adicional.
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  // Acesso compartilhado ao MySQL, usado pelas funções que consultam e gravam dados.
-  const banco = criarPool();
+  // Pool compartilhado do Oracle, usado pelas funções que consultam e gravam dados.
+  const banco = await criarPool();
   // Instância HTTP que só começa a receber pedidos depois de listen.
   const servidor = await criarServidor(banco);
-  // Porta HTTP lida do ambiente; não é a mesma porta usada para conectar ao MySQL.
+  // Porta HTTP lida do ambiente; não é a mesma porta usada para conectar ao Oracle.
   const porta = Number(process.env.PORT || 3000);
   // Endereço local onde o servidor escuta; o padrão limita a demonstração ao computador atual.
   const host = process.env.HOST || '127.0.0.1';
@@ -183,7 +187,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     // Informa a causa no terminal para ajudar a corrigir o ambiente sem expor detalhes na tela.
     console.error('Não foi possível iniciar:', erro.code || erro.message);
     // Libera o recurso de conexão para não deixá-lo ocupado após a operação.
-    await banco.end();
+    await banco.close();
     // Marca a falha para o terminal e para quem automatizar a execução deste comando.
     process.exitCode = 1;
   });
@@ -193,7 +197,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     process.once(sinal, () =>
       servidor.close(async () => {
         // Libera o recurso de conexão para não deixá-lo ocupado após a operação.
-        await banco.end();
+        await banco.close();
       }),
     );
   }

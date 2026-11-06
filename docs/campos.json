@@ -33,11 +33,11 @@
   },
   {
     "tela": "Paciente",
-    "campo": "documento",
-    "formato": "Texto de 3 a 40",
-    "obrigatorio": "Não",
+    "campo": "CPF",
+    "formato": "11 dígitos; pode ser digitado com pontuação",
+    "obrigatorio": "Sim",
     "tabela": "pacientes.documento",
-    "observacao": "Identificador genérico nesta proposta; único quando informado."
+    "observacao": "Obrigatório e único; o backend armazena somente os dígitos."
   },
   {
     "tela": "Paciente",

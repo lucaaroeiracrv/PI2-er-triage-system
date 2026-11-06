@@ -1,56 +1,122 @@
-// Cria o banco de exemplo, carrega a tarefa 14 e cria os usuários da tarefa 21.
-// Execute na raiz: npm run preparar. Precisa de um MySQL iniciado e configurado no .env.
-import mysql from 'mysql2/promise';
-// Acessa arquivos com operações assíncronas para não bloquear o servidor durante a leitura.
 import { readFile } from 'node:fs/promises';
-// Reutiliza a configuração do banco para manter scripts e servidor conectados ao mesmo ambiente.
-import { configuracaoBanco } from '../src/config/banco.js';
-// Reutiliza este módulo para manter sua responsabilidade fora do fluxo principal do servidor.
+import { criarPool, oracledb } from '../src/config/banco.js';
 import { criarUsuariosDeTeste } from './usuarios-teste.js';
-// Configuração centralizada para os comandos não repetirem credenciais no código.
-const config = configuracaoBanco();
-// Conexão reservada para esta operação; precisa ser encerrada ou devolvida ao pool.
+
+const pool = await criarPool();
 let conexao;
-try {
-  // multipleStatements só existe neste comando de preparação, que lê SQL local conhecido.
-  // O servidor que recebe formulários mantém essa opção desligada.
-  conexao = await mysql.createConnection({
-    ...config,
-    // Banco isolado escolhido para esta demonstração.
-    database: undefined,
-    multipleStatements: true,
-  });
-  // Aguarda a operação do banco; consultas de formulário usam valores separados do texto SQL.
-  await conexao.query(
-    `CREATE DATABASE IF NOT EXISTS \`${config.database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
-  );
-  await conexao.changeUser({
-    // Banco isolado escolhido para esta demonstração.
-    database: config.database,
-  });
-  // Executa cada arquivo SQL previsto na ordem de dependência das tabelas e dos dados.
-  for (// Conteúdo de um arquivo local ou nome de script SQL previsto para a preparação.
-  const arquivo of ['../database/estrutura.sql', '../database/dados-teste.sql']) {
-    // Aguarda a operação do banco; consultas de formulário usam valores separados do texto SQL.
-    await conexao.query(await readFile(new URL(arquivo, import.meta.url), 'utf8'));
+let etapa = 'conectando ao Oracle';
+
+function separarSql(texto) {
+  return texto
+    .replace(/^\s*--.*$/gm, '')
+    .split(';')
+    .map((comando) => comando.trim())
+    .filter(Boolean);
+}
+
+async function criarObjetos(conexao, texto) {
+  for (const comando of separarSql(texto)) {
+    const objeto = comando.match(/^CREATE\s+(TABLE|(?:UNIQUE\s+)?INDEX)\s+([A-Z0-9_$#]+)/i);
+    if (!objeto) {
+      throw new Error('Comando inesperado no arquivo de estrutura Oracle.');
+    }
+
+    const tipo = objeto[1].toUpperCase().includes('INDEX') ? 'INDEX' : 'TABLE';
+    const nome = objeto[2].toUpperCase();
+    etapa = `verificando ${tipo} ${nome}`;
+    const existentes = await conexao.execute(
+      'SELECT object_type FROM user_objects WHERE object_name = :nome',
+      { nome },
+      { outFormat: oracledb.OUT_FORMAT_OBJECT },
+    );
+
+    if (existentes.rows.length) {
+      if (existentes.rows[0].OBJECT_TYPE !== tipo) {
+        throw new Error(`O objeto Oracle ${nome} existe com tipo inesperado.`);
+      }
+      console.log(`Objeto já existe e foi preservado: ${nome}`);
+      continue;
+    }
+    etapa = `criando ${tipo} ${nome}`;
+    await conexao.execute(comando);
+    console.log(`${tipo} criado: ${nome}`);
   }
+}
+
+async function exigirCpfObrigatorio(conexao) {
+  const coluna = await conexao.execute(
+    `SELECT nullable FROM user_tab_columns
+     WHERE table_name = 'PACIENTES' AND column_name = 'DOCUMENTO'`,
+    {},
+    { outFormat: oracledb.OUT_FORMAT_OBJECT },
+  );
+  if (!coluna.rows.length) {
+    throw new Error('A coluna PACIENTES.DOCUMENTO não foi encontrada.');
+  }
+  if (coluna.rows[0].NULLABLE === 'N') {
+    return;
+  }
+
+  const pendentes = await conexao.execute(
+    'SELECT COUNT(*) AS total FROM pacientes WHERE documento IS NULL',
+    {},
+    { outFormat: oracledb.OUT_FORMAT_OBJECT },
+  );
+  if (pendentes.rows[0].TOTAL > 0) {
+    throw new Error(
+      `${pendentes.rows[0].TOTAL} paciente(s) existente(s) sem CPF. Preencha esses CPFs antes de tornar a coluna obrigatória.`,
+    );
+  }
+
+  etapa = 'tornando pacientes.documento obrigatório';
+  await conexao.execute('ALTER TABLE pacientes MODIFY (documento VARCHAR2(11 CHAR) NOT NULL)');
+  console.log('Coluna ajustada para CPF obrigatório: PACIENTES.DOCUMENTO');
+}
+
+try {
+  conexao = await pool.getConnection();
+  const estrutura = await readFile(new URL('../database/estrutura.sql', import.meta.url), 'utf8');
+  const dados = await readFile(new URL('../database/dados-teste.sql', import.meta.url), 'utf8');
+  const cargaGenerica = await readFile(
+    new URL('../database/carga-generica.sql', import.meta.url),
+    'utf8',
+  );
+
+  await criarObjetos(conexao, estrutura);
+  etapa = 'verificando CPFs dos pacientes existentes';
+  await exigirCpfObrigatorio(conexao);
+  for (const [arquivo, texto] of [
+    ['dados-teste.sql', dados],
+    ['carga-generica.sql', cargaGenerica],
+  ]) {
+    for (const [indice, comando] of separarSql(texto).entries()) {
+      etapa = `executando ${arquivo}, comando ${indice + 1}`;
+      await conexao.execute(comando);
+    }
+  }
+  etapa = 'criando usuários de teste';
   await criarUsuariosDeTeste(conexao);
-  // Informa no terminal o resultado da preparação ou o endereço para testar a etapa.
-  console.log('Banco preparado:', config.database);
-  // Informa no terminal o resultado da preparação ou o endereço para testar a etapa.
-  console.log('Usuários de teste: recepcao, enfermagem e medico. Senha inicial: Pi2@2026!');
-  // Informa no terminal o resultado da preparação ou o endereço para testar a etapa.
-  console.log('Registros existentes não são apagados. A senha acima vale para usuários novos.');
+  etapa = 'confirmando transação';
+  await conexao.commit();
+  console.log('Schema Oracle preparado; registros existentes não foram apagados.');
+  console.log('Usuários de teste disponíveis: recepcao, enfermagem e medico.');
 } catch (erro) {
-  // Informa a causa no terminal para ajudar a corrigir o ambiente sem expor detalhes na tela.
-  console.error('Falha na preparação:', erro.code || erro.message);
-  // Informa a causa no terminal para ajudar a corrigir o ambiente sem expor detalhes na tela.
-  console.error('Confira o .env, se o MySQL está iniciado e se o usuário pode criar o banco.');
-  // Marca a falha para o terminal e para quem automatizar a execução deste comando.
+  if (conexao) {
+    try {
+      await conexao.rollback();
+    } catch (erroRollback) {
+      console.error('Falha ao desfazer a transação:', erroRollback.code || erroRollback.message);
+    }
+  }
+  console.error(`Falha na preparação ao ${etapa}:`, erro.code || erro.message);
+  if (erro.message && erro.message !== erro.code) {
+    console.error(erro.message);
+  }
+  console.error('Confira o .env, as permissões do usuário Oracle e se o serviço está ativo.');
   process.exitCode = 1;
 } finally {
   if (conexao) {
-    // Libera o recurso de conexão para não deixá-lo ocupado após a operação.
-    await conexao.end();
+    await conexao.close();
   }
+  await pool.close();
 }

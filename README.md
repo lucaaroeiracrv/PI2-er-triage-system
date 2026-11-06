@@ -1,10 +1,10 @@
 # PI2 Sistema de atendimento
 
-Projeto integrador com Node.js, MySQL e HTML, CSS e JavaScript. O código é organizado por função e atualizado no mesmo lugar. O histórico identifica as tarefas; não há uma pasta de código por tarefa.
+Projeto integrador com Node.js, Oracle Database e HTML, CSS e JavaScript. O código é organizado por função e atualizado no mesmo lugar. O histórico identifica as tarefas; não há uma pasta de código por tarefa.
 
-## Abrir os desenhos
+## Abrir as telas
 
-Abra `public/index.html` no navegador. Os rascunhos usam as mesmas telas de `public/screens/` com o parâmetro `?modo=rascunho`. O padrão visual compartilhado fica em `public/assets/css/tema.css`.
+Para usar as telas integradas ao backend, inicie o servidor conforme a seção abaixo e abra http://127.0.0.1:3000. Não abra os arquivos HTML diretamente (`file://`): as chamadas `/api/...` precisam ser feitas pela mesma origem HTTP do servidor. Entre como `recepcao` no painel e depois acesse a busca de pacientes. Os rascunhos usam as mesmas telas de `public/screens/` com o parâmetro `?modo=rascunho`. O padrão visual compartilhado fica em `public/assets/css/tema.css`.
 
 ## Estrutura
 
@@ -38,19 +38,21 @@ O escopo segue as tarefas 11 a 25 do PI2. O texto individual dos requisitos e o 
 
 ## Executar o backend
 
-Você precisa de Node.js 22 ou superior, npm e MySQL em execução. No terminal da raiz do projeto:
+Você precisa de Node.js 22 ou superior, npm e uma instância Oracle Database em execução. O padrão local é Oracle Free com o serviço `FREEPDB1`. No terminal da raiz do projeto:
+
+Para instruções detalhadas de instalação e inicialização do Oracle Free com Docker no Ubuntu/WSL, configuração do `.env`, preparação do schema e conexão pelo DBeaver, siga o [Guia do banco Oracle no WSL](docs/GUIA_BANCO_ORACLE_WSL.md).
 
 1. Execute `npm install`.
-2. Execute `npm run configurar` e preencha o `.env` com os dados do seu MySQL.
-3. Execute `npm run preparar` para criar o banco de exemplo, sem apagar registros existentes.
-4. Execute `npm run testar:conexao` para conferir `SELECT 1`.
-5. Execute `npm start` e abra http://127.0.0.1:3000.
+2. Se ainda não houver `.env`, execute `npm run configurar`; o comando gera uma senha aleatória para a aplicação sem sobrescrever arquivos existentes.
+3. Confira host, porta e nome do serviço Oracle. Preencha `DB_ADMIN_PASSWORD` no `.env` com a senha do administrador Oracle e execute `npm run criar:usuario`. O comando cria ou atualiza as permissões e quota do usuário/schema `PI2_APP`, sem alterar a senha de uma conta que já exista.
+4. Execute `npm run preparar` para criar as tabelas e inserir os dados de demonstração e a carga genérica de 100 pacientes e 100 atendimentos. A carga pode ser repetida e não apaga registros existentes.
+5. Execute `npm run testar:conexao` e, em seguida, `npm start`. Abra http://127.0.0.1:3000.
 
-O banco padrão é `pi2_academico`. A estrutura é um apoio à tarefa 10, necessária para testar o backend; não a importe por cima do MER já usado pelo grupo. O script exige permissão para criar o banco. O programa MySQL não está incluído no ZIP. O `.env` não deve ser versionado.
+O schema Oracle padrão é `PI2_APP`. Para conectar pelo DBeaver, selecione Oracle, informe host `127.0.0.1`, porta `1521`, tipo de conexão `Service name`, serviço `FREEPDB1`, usuário `PI2_APP` e a senha em `DB_PASSWORD` no `.env`. Se a instância usar outro host ou service name, ajuste o `.env` e os mesmos campos no DBeaver. O schema é derivado das funções implementadas de usuários, pacientes e atendimentos; triagem, consulta, medicações e encerramento permanecem protótipos, portanto não foram transformados em tabelas clínicas especulativas. Compare a proposta com o MER oficial antes de usá-la no banco do grupo. A instância Oracle precisa ser instalada e iniciada separadamente; o `.env` não deve ser versionado.
 
 ## Login e testes
 
-Os usuários fictícios `recepcao`, `enfermagem` e `medico` são criados com a senha inicial `Pi2@2026!`. A preparação preserva contas existentes. As senhas são guardadas como hash scrypt e a sessão fica em memória; ao reiniciar o servidor, entre novamente.
+Os usuários fictícios `recepcao`, `enfermagem` e `medico` são criados com a senha inicial `Pi2@2026!`. Essa senha de login é independente da senha Oracle usada pelo DBeaver e pelo backend. A preparação preserva contas existentes. As senhas são guardadas como hash scrypt e a sessão fica em memória; ao reiniciar o servidor, entre novamente.
 
 Execute `npm test` para as validações, senhas e permissões presentes nesta etapa. O resultado da verificação final da reorganização fica em `docs/VERIFICACAO.md` quando essa revisão estiver incorporada.
 
