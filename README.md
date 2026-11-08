@@ -1,6 +1,6 @@
 # PI2 Sistema de atendimento
 
-Projeto integrador com Node.js, Oracle Database e HTML, CSS e JavaScript. O código é organizado por função e atualizado no mesmo lugar. O histórico identifica as tarefas; não há uma pasta de código por tarefa.
+Projeto integrador com Node.js, Oracle Database ou MySQL, HTML, CSS e JavaScript. O código é organizado por função e atualizado no mesmo lugar. O histórico identifica as tarefas; não há uma pasta de código por tarefa.
 
 ## Abrir as telas
 
@@ -38,7 +38,7 @@ O escopo segue as tarefas 11 a 25 do PI2. O texto individual dos requisitos e o 
 
 ## Executar o backend
 
-Você precisa de Node.js 22 ou superior, npm e uma instância Oracle Database ou MySQL em execução. O backend escolhe o motor pela variável `DB_ENGINE`, com valores aceitos `oracle` e `mysql`. No terminal da raiz do projeto:
+Você precisa de Node.js 22 ou superior, npm e uma instância Oracle Database ou MySQL em execução. O backend escolhe o motor pela variável `DB_ENGINE`, com valores aceitos `oracle` e `mysql`. O passo a passo de instalação, configuração, testes visuais, consulta no DBeaver, reset seguro e teste MySQL está no [Guia do banco Oracle no WSL](docs/GUIA_BANCO_ORACLE_WSL.md). No terminal da raiz do projeto:
 
 - Defina `DB_ENGINE=oracle` para usar Oracle Free com o serviço `FREEPDB1` ou `DB_ENGINE=mysql` para usar MySQL local.
 - Ajuste `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` e `DB_NAME`/`DB_DATABASE` conforme a instância local.

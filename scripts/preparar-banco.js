@@ -2,8 +2,14 @@ import { readFile } from 'node:fs/promises';
 import { criarPool, configuracaoBanco, motorDoBanco, oracledb } from '../src/config/banco.js';
 import { criarUsuariosDeTeste } from './usuarios-teste.js';
 
+const engineArgumento = process.argv.find((argumento) => argumento.startsWith('--engine='));
+if (engineArgumento) {
+  process.env.DB_ENGINE = engineArgumento.slice('--engine='.length);
+}
+
 const config = configuracaoBanco();
 const engine = motorDoBanco();
+const driverOracle = oracledb?.default ?? oracledb;
 const pool = await criarPool();
 let conexao;
 let etapa = `conectando ao ${engine === 'mysql' ? 'MySQL' : 'Oracle'}`;
@@ -19,7 +25,23 @@ function separarSql(texto) {
 async function criarObjetos(conexao, texto) {
   if (engine === 'mysql') {
     for (const comando of separarSql(texto)) {
-      etapa = `criando objeto MySQL`;
+      const tabela = comando.match(/^CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+([A-Z0-9_$#]+)/i);
+      const indice = comando.match(/^CREATE\s+(?:UNIQUE\s+)?INDEX\s+([A-Z0-9_$#]+)/i);
+      if (indice) {
+        const existentes = await conexao.execute(
+          `SELECT COUNT(*) AS quantidade
+           FROM information_schema.statistics
+           WHERE table_schema = DATABASE() AND index_name = ?`,
+          [indice[1]],
+        );
+        if (existentes.rows[0].quantidade > 0) {
+          console.log(`Índice MySQL já existe e foi preservado: ${indice[1]}`);
+          continue;
+        }
+      } else if (!tabela) {
+        throw new Error('Comando inesperado no arquivo de estrutura MySQL.');
+      }
+      etapa = `criando objeto MySQL${tabela ? ` ${tabela[1]}` : ` ${indice[1]}`}`;
       await conexao.execute(comando);
     }
     return;
@@ -37,7 +59,7 @@ async function criarObjetos(conexao, texto) {
     const existentes = await conexao.execute(
       'SELECT object_type FROM user_objects WHERE object_name = :nome',
       { nome },
-      { outFormat: oracledb.OUT_FORMAT_OBJECT },
+      { outFormat: driverOracle.OUT_FORMAT_OBJECT },
     );
 
     if (existentes.rows.length) {
@@ -62,7 +84,7 @@ async function exigirCpfObrigatorio(conexao) {
     `SELECT nullable FROM user_tab_columns
      WHERE table_name = 'PACIENTES' AND column_name = 'DOCUMENTO'`,
     {},
-    { outFormat: oracledb.OUT_FORMAT_OBJECT },
+    { outFormat: driverOracle.OUT_FORMAT_OBJECT },
   );
   if (!coluna.rows.length) {
     throw new Error('A coluna PACIENTES.DOCUMENTO não foi encontrada.');
@@ -74,7 +96,7 @@ async function exigirCpfObrigatorio(conexao) {
   const pendentes = await conexao.execute(
     'SELECT COUNT(*) AS total FROM pacientes WHERE documento IS NULL',
     {},
-    { outFormat: oracledb.OUT_FORMAT_OBJECT },
+    { outFormat: driverOracle.OUT_FORMAT_OBJECT },
   );
   if (pendentes.rows[0].TOTAL > 0) {
     throw new Error(
@@ -90,8 +112,14 @@ async function exigirCpfObrigatorio(conexao) {
 try {
   conexao = await pool.getConnection();
   const pastaSql = engine === 'mysql' ? 'mysql' : 'oracle';
-  const estrutura = await readFile(new URL(`../database/${pastaSql}/estrutura.sql`, import.meta.url), 'utf8');
-  const dados = await readFile(new URL(`../database/${pastaSql}/dados-teste.sql`, import.meta.url), 'utf8');
+  const estrutura = await readFile(
+    new URL(`../database/${pastaSql}/estrutura.sql`, import.meta.url),
+    'utf8',
+  );
+  const dados = await readFile(
+    new URL(`../database/${pastaSql}/dados-teste.sql`, import.meta.url),
+    'utf8',
+  );
   const cargaGenerica = await readFile(
     new URL(`../database/${pastaSql}/carga-generica.sql`, import.meta.url),
     'utf8',
@@ -115,7 +143,9 @@ try {
   if (engine === 'oracle') {
     await conexao.commit();
   }
-  console.log(`Schema ${engine === 'mysql' ? 'MySQL' : 'Oracle'} preparado; registros existentes não foram apagados.`);
+  console.log(
+    `Schema ${engine === 'mysql' ? 'MySQL' : 'Oracle'} preparado; registros existentes não foram apagados.`,
+  );
   console.log('Usuários de teste disponíveis: recepcao, enfermagem e medico.');
 } catch (erro) {
   if (conexao && engine === 'oracle') {

@@ -1,6 +1,6 @@
-// abrir atendimento ligado ao paciente e ao usuário da recepção.
+// src\atendimentos\abertura.js
 import { ErroHttp } from '../http/respostas.js';
-import { erroDeUnicidade, oracledb } from '../config/banco.js';
+import { erroDeUnicidade, iniciarTransacao, oracledb } from '../config/banco.js';
 // Compartilha a regra de cadastro e seu identificador de tentativa com as operações relacionadas.
 import { formatoChave } from '../pacientes/cadastro.js';
 // Agrupa as conferências e a gravação em uma transação para impedir duas aberturas ativas simultâneas.
@@ -18,6 +18,7 @@ export async function abrirAtendimento(banco, usuario, dados) {
   // A conexão permanece reservada até confirmar ou desfazer a transação Oracle.
   const conexao = await banco.getConnection();
   try {
+    await iniciarTransacao(conexao);
     // O bloqueio do paciente organiza duas aberturas simultâneas para a mesma pessoa.
     const pacientes = await conexao.execute(
       'SELECT id FROM pacientes WHERE id = :paciente_id FOR UPDATE',

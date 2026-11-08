@@ -1,7 +1,9 @@
 import { gerarHash } from '../src/auth/senhas.js';
 
 export async function criarUsuariosDeTeste(conexao) {
-  const engine = String(process.env.DB_ENGINE || 'oracle').trim().toLowerCase();
+  const engine = String(process.env.DB_ENGINE || 'oracle')
+    .trim()
+    .toLowerCase();
 
   for (const [nome, login, perfil] of [
     ['Recepção de teste', 'recepcao', 'recepcao'],

@@ -2,11 +2,14 @@
 const oracledbPromise = import('oracledb').catch(() => null);
 const mysqlPromise = import('mysql2/promise').catch(() => null);
 
-export const oracledb = await oracledbPromise;
+const oracleModule = await oracledbPromise;
+export const oracledb = oracleModule?.default ?? oracleModule;
 export const mysql = await mysqlPromise;
 
 export function motorDoBanco() {
-  const engine = String(process.env.DB_ENGINE || 'oracle').trim().toLowerCase();
+  const engine = String(process.env.DB_ENGINE || 'oracle')
+    .trim()
+    .toLowerCase();
   if (engine !== 'oracle' && engine !== 'mysql') {
     throw new Error('DB_ENGINE inválida.');
   }
@@ -29,9 +32,9 @@ export function configuracaoBanco() {
   const engine = motorDoBanco();
 
   if (engine === 'mysql') {
-    const port = Number(process.env.DB_PORT || 3306);
-    const host = process.env.DB_HOST || '127.0.0.1';
-    const user = process.env.DB_USER || 'PI2_APP';
+    const port = Number(process.env.DB_MYSQL_PORT || 3306);
+    const host = process.env.DB_MYSQL_HOST || process.env.DB_HOST || '127.0.0.1';
+    const user = process.env.DB_MYSQL_USER || process.env.DB_USER || 'PI2_APP';
     const database = process.env.DB_NAME || process.env.DB_DATABASE || 'PI2_APP';
 
     validarPorta(port);
@@ -47,7 +50,7 @@ export function configuracaoBanco() {
       host,
       port,
       user,
-      password: process.env.DB_PASSWORD || '',
+      password: process.env.DB_MYSQL_PASSWORD || process.env.DB_PASSWORD || '',
       database,
       waitForConnections: true,
       connectionLimit: 5,
@@ -101,7 +104,15 @@ export async function criarPool() {
     if (!mysqlDriver) {
       throw new Error('Dependência mysql2 não instalada para o motor MySQL.');
     }
-    return mysqlDriver.createPool(configuracaoBanco());
+    const pool = mysqlDriver.createPool(configuracaoBanco());
+    return {
+      async getConnection() {
+        return adaptarConexaoMysql(await pool.getConnection());
+      },
+      close() {
+        return pool.end();
+      },
+    };
   }
 
   const oracleDriver = oracledb?.default ?? oracledb;
@@ -123,13 +134,84 @@ function extrairBindDeRetorno(sql) {
   return retorno ? retorno[1] : null;
 }
 
+function adaptarSqlMysql(sql, binds) {
+  const bindRetorno = extrairBindDeRetorno(sql);
+  let sqlAdaptado = sqlComAdaptacaoParaMotor(sql, 'mysql')
+    .replace(/TO_DATE\s*\(\s*(:[A-Za-z]\w*)\s*,\s*'YYYY-MM-DD'\s*\)/gi, '$1')
+    .replace(/TO_CHAR\s*\(\s*([\w.]+)\s*,\s*'YYYY-MM-DD'\s*\)/gi, "DATE_FORMAT($1, '%Y-%m-%d')")
+    .replace(/\s+FROM\s+dual\b/gi, '')
+    .replace(/\s+FETCH\s+FIRST\s+(\d+)\s+ROWS\s+ONLY\b/gi, ' LIMIT $1');
+  const valores = [];
+  let parametros = binds;
+
+  if (binds && !Array.isArray(binds) && typeof binds === 'object') {
+    parametros = { ...binds };
+    if (bindRetorno) {
+      delete parametros[bindRetorno];
+    }
+    sqlAdaptado = sqlAdaptado.replace(/(?<!:):([A-Za-z]\w*)/g, (placeholder, nome) => {
+      if (!Object.hasOwn(parametros, nome)) {
+        throw new Error(`Parâmetro SQL ausente: ${nome}.`);
+      }
+      valores.push(parametros[nome]);
+      return '?';
+    });
+  } else if (Array.isArray(binds)) {
+    valores.push(...binds);
+  } else if (binds == null) {
+    parametros = [];
+  } else {
+    throw new Error('Parâmetros MySQL devem ser um objeto ou uma lista.');
+  }
+
+  return { sql: sqlAdaptado, valores, bindRetorno };
+}
+
+function adaptarConexaoMysql(conexao) {
+  return {
+    async execute(sql, binds = {}) {
+      const adaptado = adaptarSqlMysql(sql, binds);
+      const [resultado] = await conexao.execute(adaptado.sql, adaptado.valores);
+
+      if (Array.isArray(resultado)) {
+        return { rows: resultado, outBinds: {} };
+      }
+
+      const idGerado = resultado.insertId ?? resultado.lastInsertId ?? null;
+      return {
+        ...resultado,
+        rows: resultado.rows || [],
+        outBinds: adaptado.bindRetorno ? { [adaptado.bindRetorno]: [idGerado] } : {},
+      };
+    },
+    beginTransaction() {
+      return conexao.beginTransaction();
+    },
+    commit() {
+      return conexao.commit();
+    },
+    rollback() {
+      return conexao.rollback();
+    },
+    close() {
+      return conexao.release();
+    },
+  };
+}
+
+export async function iniciarTransacao(conexao) {
+  if (motorDoBanco() === 'mysql') {
+    await conexao.beginTransaction();
+  }
+}
+
 export async function consultar(banco, sql, binds = {}) {
   const engine = motorDoBanco();
   const conexao = await banco.getConnection();
   try {
     if (engine === 'mysql') {
-      const [resultado] = await conexao.execute(sql, binds);
-      return Array.isArray(resultado) ? resultado : [];
+      const resultado = await conexao.execute(sql, binds);
+      return resultado.rows || [];
     }
 
     const resultado = await conexao.execute(sql, binds, {
@@ -146,24 +228,7 @@ export async function executar(banco, sql, binds = {}, options = {}) {
   const conexao = await banco.getConnection();
   try {
     if (engine === 'mysql') {
-      const bindRetorno = extrairBindDeRetorno(sql);
-      const sqlExecutavel = sqlComAdaptacaoParaMotor(sql, engine);
-      const parametros = { ...binds };
-      if (bindRetorno) {
-        delete parametros[bindRetorno];
-      }
-      const [resultado] = await conexao.execute(sqlExecutavel, parametros, options);
-      if (bindRetorno) {
-        return {
-          outBinds: {
-            [bindRetorno]: [resultado.insertId ?? resultado.lastInsertId ?? null],
-          },
-          insertId: resultado.insertId ?? resultado.lastInsertId ?? null,
-          rows: resultado.rows || [],
-          affectedRows: resultado.affectedRows,
-        };
-      }
-      return resultado;
+      return await conexao.execute(sql, binds, options);
     }
 
     return await conexao.execute(sql, binds, options);

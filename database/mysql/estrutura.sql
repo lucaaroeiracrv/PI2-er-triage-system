@@ -35,11 +35,15 @@ CREATE TABLE IF NOT EXISTS atendimentos (
   recepcionista_id INT DEFAULT NULL,
   situacao VARCHAR(30) NOT NULL DEFAULT 'aguardando_triagem',
   chave_abertura CHAR(36) NOT NULL,
+  paciente_ativo_id INT GENERATED ALWAYS AS (
+    CASE WHEN situacao <> 'finalizado' THEN paciente_id ELSE NULL END
+  ) STORED,
   aberto_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   CONSTRAINT fk_atendimento_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes (id),
   CONSTRAINT fk_atendimento_usuario FOREIGN KEY (recepcionista_id) REFERENCES usuarios (id),
   UNIQUE KEY uq_atendimento_chave (chave_abertura),
+  UNIQUE KEY uq_atendimento_ativo (paciente_ativo_id),
   CHECK (situacao IN ('aguardando_triagem', 'aguardando_medico', 'em_atendimento', 'finalizado'))
 );
 
