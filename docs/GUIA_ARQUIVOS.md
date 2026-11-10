@@ -1,7 +1,5 @@
 # Guia de arquivos do PI2 — recorte até a tarefa 25
 
-> **Nota:** este é um inventário histórico do snapshot até a tarefa 25, não uma lista atualizada de todos os arquivos. Para a configuração atual dos bancos, consulte o [Guia Oracle](GUIA_BANCO_ORACLE_WSL.md) e o [Guia MySQL](GUIA_BANCO_MYSQL.md). A visão geral atual da arquitetura está em [ESTRUTURA.md](ESTRUTURA.md).
-
 ## 1. Escopo deste guia
 
 Este guia descreve os **64 arquivos do projeto que existiam no repositório no commit da tarefa 25**, incluindo código, configurações, documentação, mapas de campos, dados fictícios, protótipos, rascunhos e testes.
