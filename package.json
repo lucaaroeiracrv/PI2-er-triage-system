@@ -2,7 +2,7 @@
   "name": "pi2-atendimento",
   "version": "1.0.0",
   "private": true,
-  "description": "Projeto integrador com interface compartilhada e backend Node.js/Oracle.",
+  "description": "Projeto integrador com interface compartilhada e backend Node.js para Oracle e MySQL.",
   "type": "module",
   "engines": {
     "node": ">=22"
@@ -12,8 +12,17 @@
     "verificar:formatacao": "prettier --check .",
     "configurar": "node scripts/configurar-env.js",
     "criar:usuario": "node --env-file=.env scripts/criar-usuario-oracle.js",
+    "criar:usuario:oracle": "node --env-file=.env scripts/criar-usuario-oracle.js",
+    "criar:usuario:mysql": "node --env-file=.env scripts/criar-usuario-mysql.js",
     "preparar": "node --env-file=.env scripts/preparar-banco.js",
+    "preparar:oracle": "node --env-file=.env scripts/preparar-banco.js",
+    "preparar:mysql": "node --env-file=.env scripts/preparar-banco.js --engine=mysql",
+    "resetar:banco": "node --env-file=.env scripts/resetar-banco.js",
+    "resetar:oracle": "node --env-file=.env scripts/resetar-banco.js --engine=oracle",
+    "resetar:mysql": "node --env-file=.env scripts/resetar-banco.js --engine=mysql",
     "testar:conexao": "node --env-file=.env scripts/testar-conexao.js",
+    "testar:oracle": "node --env-file=.env scripts/testar-conexao.js",
+    "testar:mysql": "node --env-file=.env scripts/testar-conexao.js --engine=mysql",
     "start": "node --env-file=.env src/servidor.js",
     "test": "node --test tests/*.test.js"
   },
@@ -21,6 +30,7 @@
     "prettier": "3.9.10"
   },
   "dependencies": {
+    "mysql2": "^3.12.0",
     "oracledb": "^26.0.0"
   }
 }

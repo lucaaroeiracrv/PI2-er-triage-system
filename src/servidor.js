@@ -1,11 +1,11 @@
-// O servidor liga os módulos por responsabilidade, sem diretórios numerados de tarefa.
+// src\servidor.js
 import { createServer } from 'node:http';
 // Resolve caminhos a partir do módulo, mantendo a execução após mover as pastas do projeto.
 import { fileURLToPath } from 'node:url';
 // Resolve caminhos a partir do módulo, mantendo a execução após mover as pastas do projeto.
 import path from 'node:path';
 // Reutiliza a configuração do banco para manter scripts e servidor conectados ao mesmo ambiente.
-import { consultar, criarPool } from './config/banco.js';
+import { consultar, criarPool, motorDoBanco } from './config/banco.js';
 // Compartilha erros e respostas HTTP para manter o mesmo tratamento entre os módulos.
 import { ErroHttp, responder, lerJson, conferirOrigem } from './http/respostas.js';
 // Reutiliza este módulo para manter sua responsabilidade fora do fluxo principal do servidor.
@@ -54,7 +54,7 @@ export async function criarServidor(banco) {
         await consultar(banco, 'SELECT 1 AS conectado FROM dual');
         // Envia a resposta deste ramo e encerra o pedido, sem executar as rotas que aparecem depois.
         return responder(res, 200, {
-          mensagem: 'Backend e Oracle funcionando.',
+          mensagem: `Backend e ${motorDoBanco() === 'mysql' ? 'MySQL' : 'Oracle'} funcionando.`,
         });
       }
       // Separa esta operação pelas regras de rota e método; somente esse ramo pode produzir sua resposta.
