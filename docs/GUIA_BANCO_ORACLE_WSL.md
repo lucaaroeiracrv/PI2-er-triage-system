@@ -1,6 +1,28 @@
 # Banco Oracle com Docker no Ubuntu WSL
 
-Este guia explica como iniciar o Oracle do projeto em um computador Windows usando Docker no Ubuntu pelo WSL. Siga os passos na ordem. Os comandos Docker deste guia devem ser executados no terminal **Ubuntu (WSL)**; os comandos `npm` devem ser executados na pasta do projeto.
+Este guia oferece duas formas de usar Oracle no Windows: o caminho simples com Docker Compose e, como alternativa, a configuração manual com Docker no Ubuntu/WSL. Na configuração manual, execute os comandos Docker no terminal **Ubuntu (WSL)** e os comandos `npm` na pasta do projeto.
+
+## Caminho mais simples: Docker Compose
+
+Se você só precisa executar o sistema no Windows, instale e inicie o Docker Desktop. Não precisa instalar Node.js, Ubuntu/WSL nem DBeaver para rodar o app. No PowerShell, abra a pasta do projeto e execute:
+
+```powershell
+.\scripts\iniciar-docker.ps1 -Banco oracle
+```
+
+O primeiro início baixa as imagens, gera senhas locais e inicia Oracle e aplicação. O banco é preparado automaticamente; aguarde a inicialização do Oracle e abra `http://127.0.0.1:3000`. Para parar sem apagar os dados:
+
+```powershell
+.\scripts\iniciar-docker.ps1 -Banco oracle -Parar
+```
+
+As credenciais e portas locais estão em `.env.docker`. No DBeaver, use host `127.0.0.1`, porta `1522`, service name `FREEPDB1`, usuário `PI2_APP` e o valor de `ORACLE_APP_PASSWORD`. `ORACLE_ADMIN_PASSWORD` é a senha administrativa `SYS`/`SYSTEM`. Não apague `.env.docker` nem o volume `pi2-compose-oracle-data`; se perder o arquivo de senhas, restaure-o antes de iniciar o volume existente.
+
+O Compose usa um volume próprio `pi2-compose-oracle-data`, independente do container Oracle manual descrito abaixo. Para iniciar o MySQL, use `.\scripts\iniciar-docker.ps1 -Banco mysql`; os dois bancos não iniciam juntos.
+
+## Configuração manual (Node.js local)
+
+As etapas seguintes são uma alternativa para quem prefere instalar Node.js e gerenciar o banco manualmente.
 
 ## O que será instalado
 
@@ -238,61 +260,7 @@ Para selecionar o Oracle explicitamente, use `npm run resetar:oracle`. Para uma 
 
 ## 9. Testar MySQL sem alterar o Oracle
 
-O projeto também tem um caminho de teste MySQL em um container separado. Ele usa a porta externa `3307` e o volume `pi2-mysql-data`; assim, não reutiliza nem apaga o container ou volume Oracle. Execute os comandos Docker no Ubuntu (WSL).
-
-Gere uma senha forte para o administrador MySQL, inicie o container e guarde a senha exibida:
-
-```bash
-MYSQL_ROOT_PASSWORD=$(openssl rand -hex 24)
-docker run -d \
-  --name pi2-mysql \
-  --restart unless-stopped \
-  -p 127.0.0.1:3307:3306 \
-  -e MYSQL_ROOT_PASSWORD="$MYSQL_ROOT_PASSWORD" \
-  -e MYSQL_DATABASE=PI2_APP \
-  -v pi2-mysql-data:/var/lib/mysql \
-  mysql:8.4 &&
-printf 'Guarde esta senha para DB_MYSQL_ADMIN_PASSWORD: %s\n' "$MYSQL_ROOT_PASSWORD"
-unset MYSQL_ROOT_PASSWORD
-```
-
-Se o container `pi2-mysql` já existir, não repita `docker run`; use `docker start pi2-mysql`. Aguarde até o MySQL ficar pronto:
-
-```bash
-docker logs -f pi2-mysql
-```
-
-Quando o log mostrar `ready for connections`, pressione `Ctrl+C` (isso não para o banco). No `.env` do projeto, preencha os campos específicos do MySQL sem alterar as credenciais Oracle:
-
-```dotenv
-DB_MYSQL_HOST=127.0.0.1
-DB_MYSQL_PORT=3307
-DB_MYSQL_USER=PI2_APP
-DB_MYSQL_PASSWORD=<senha_forte_nova_para_o_usuario_PI2_APP>
-DB_MYSQL_ADMIN_USER=root
-DB_MYSQL_ADMIN_PASSWORD=<senha_guardada_na_etapa_do_container_MySQL>
-DB_MYSQL_ACCOUNT_HOST=%
-DB_NAME=PI2_APP
-```
-
-Gere `DB_MYSQL_PASSWORD` separadamente com o comando PowerShell mostrado na etapa 4. `DB_MYSQL_ACCOUNT_HOST=%` permite que o app local se conecte pela porta encaminhada pelo Docker; use somente com o MySQL de desenvolvimento exposto no loopback `127.0.0.1`. No PowerShell, na raiz do projeto, prepare e teste o banco MySQL:
-
-```powershell
-npm run criar:usuario:mysql
-npm run preparar:mysql
-npm run testar:mysql
-```
-
-Esses comandos selecionam MySQL sem mudar `DB_ENGINE=oracle` no `.env`. Para testar a interface web com MySQL, pare o servidor, altere temporariamente `DB_ENGINE=mysql` no `.env`, execute `npm start` e abra `http://127.0.0.1:3000`. Faça login com `recepcao` e `Pi2@2026!`; cadastros feitos nesse modo vão para MySQL. Para voltar ao Oracle, pare o servidor e restaure `DB_ENGINE=oracle`.
-
-No DBeaver, crie uma conexão MySQL com host `127.0.0.1`, porta `3307`, schema `PI2_APP`, usuário `PI2_APP` e a senha em `DB_MYSQL_PASSWORD`. Para verificar os pacientes:
-
-```sql
-SELECT id, nome, data_nascimento, documento, telefone
-FROM pacientes;
-```
-
-O banco MySQL é independente do Oracle. `npm run resetar:mysql` limpa seus atendimentos, pacientes e usuários de teste com a mesma confirmação explícita, mantendo o schema. Guarde o volume `pi2-mysql-data` se quiser conservar esse banco.
+O passo a passo completo para criar e configurar o container MySQL separado, testar o sistema e consultar os dados no DBeaver está no [Guia MySQL](GUIA_BANCO_MYSQL.md). Ele usa porta e volume próprios; não altera o container ou o volume Oracle.
 
 ## Problemas comuns
 

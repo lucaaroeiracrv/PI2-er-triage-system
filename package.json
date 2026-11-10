@@ -2,7 +2,7 @@
   "name": "pi2-atendimento",
   "version": "1.0.0",
   "private": true,
-  "description": "Projeto integrador com interface compartilhada e backend Node.js/Oracle.",
+  "description": "Projeto integrador com interface compartilhada e backend Node.js para Oracle e MySQL.",
   "type": "module",
   "engines": {
     "node": ">=22"

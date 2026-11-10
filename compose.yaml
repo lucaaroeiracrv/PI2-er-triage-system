@@ -1,0 +1,95 @@
+services:
+  # Profiles keep the two database engines separate; start with --profile mysql or --profile oracle.
+  mysql:
+    image: mysql:8.4
+    profiles: [mysql]
+    restart: unless-stopped
+    environment:
+      # The starter script creates local credentials in the ignored .env.docker file.
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Run scripts/iniciar-docker.ps1 first}
+      MYSQL_DATABASE: PI2_APP
+      MYSQL_USER: PI2_APP
+      MYSQL_PASSWORD: ${MYSQL_APP_PASSWORD:?Run scripts/iniciar-docker.ps1 first}
+    ports:
+      # Bind database ports to this computer only; the app reaches MySQL through the service name.
+      - '127.0.0.1:${MYSQL_PORT:-3308}:3306'
+    volumes:
+      # Named volumes keep database files when containers are stopped or recreated.
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping -h 127.0.0.1 -p"$$MYSQL_ROOT_PASSWORD" --silent']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  oracle:
+    image: gvenzl/oracle-free:23-slim
+    profiles: [oracle]
+    restart: unless-stopped
+    environment:
+      # Oracle creates PI2_APP in FREEPDB1 with the app credentials from .env.docker.
+      ORACLE_PASSWORD: ${ORACLE_ADMIN_PASSWORD:?Run scripts/iniciar-docker.ps1 first}
+      APP_USER: PI2_APP
+      APP_USER_PASSWORD: ${ORACLE_APP_PASSWORD:?Run scripts/iniciar-docker.ps1 first}
+    ports:
+      - '127.0.0.1:${ORACLE_PORT:-1522}:1521'
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    healthcheck:
+      test: ['CMD', 'healthcheck.sh']
+      interval: 15s
+      timeout: 10s
+      retries: 30
+      start_period: 2m
+
+  app-mysql:
+    build: .
+    profiles: [mysql]
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        # Do not start the app until MySQL accepts connections.
+        condition: service_healthy
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      COOKIE_SECURE: 'false'
+      DB_ENGINE: mysql
+      DB_NAME: PI2_APP
+      DB_MYSQL_HOST: mysql
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: PI2_APP
+      DB_MYSQL_PASSWORD: ${MYSQL_APP_PASSWORD:?Run scripts/iniciar-docker.ps1 first}
+    ports:
+      - '127.0.0.1:${APP_PORT:-3000}:3000'
+    command: ['sh', '-c', 'npm run preparar:mysql && npm start']
+
+  app-oracle:
+    build: .
+    profiles: [oracle]
+    restart: unless-stopped
+    depends_on:
+      oracle:
+        # Oracle can take longer than MySQL on its first startup.
+        condition: service_healthy
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      COOKIE_SECURE: 'false'
+      DB_ENGINE: oracle
+      DB_HOST: oracle
+      DB_PORT: 1521
+      DB_SERVICE_NAME: FREEPDB1
+      DB_USER: PI2_APP
+      DB_PASSWORD: ${ORACLE_APP_PASSWORD:?Run scripts/iniciar-docker.ps1 first}
+    ports:
+      - '127.0.0.1:${APP_PORT:-3000}:3000'
+    command: ['sh', '-c', 'npm run preparar:oracle && npm start']
+
+# Both volumes are intentionally retained by "docker compose down"; do not add "-v" to down.
+volumes:
+  mysql-data:
+    name: pi2-compose-mysql-data
+  oracle-data:
+    name: pi2-compose-oracle-data
