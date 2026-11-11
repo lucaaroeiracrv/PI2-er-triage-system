@@ -41,9 +41,13 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
 
 # Never replace credentials after database volumes exist: the passwords are stored in the database.
 if (-not (Test-Path $arquivoEnv)) {
+  $volumesExistentes = & docker volume ls --format '{{.Name}}'
+  if ($LASTEXITCODE -ne 0) {
+    throw 'Não foi possível consultar os volumes Docker. Confira se o Docker Engine está em execução.'
+  }
+
   foreach ($volume in @('pi2-compose-mysql-data', 'pi2-compose-oracle-data')) {
-    & docker volume inspect $volume *> $null
-    if ($LASTEXITCODE -eq 0) {
+    if ($volumesExistentes -contains $volume) {
       throw "O volume $volume já existe, mas .env.docker não foi encontrado. Não gere novas senhas para um banco existente; restaure o arquivo .env.docker original."
     }
   }
