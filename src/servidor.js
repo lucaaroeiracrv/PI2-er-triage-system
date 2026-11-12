@@ -21,6 +21,8 @@ import { buscarPacientes } from './pacientes/busca.js';
 // Encaminha a abertura ao módulo que mantém as verificações na mesma transação.
 import { abrirAtendimento } from './atendimentos/abertura.js';
 // Monta o servidor sem ocupar uma porta durante a importação, permitindo testá-lo isoladamente.
+import { cadastrarTriagem } from './triagens/cadastro.js';
+// Encaminha a triagem ao módulo responsável pelo registro.
 export async function criarServidor(banco) {
   // Reúne as regras de sessão desta instância do servidor.
   const autenticacao = await criarAutenticacao(banco);
@@ -132,6 +134,20 @@ export async function criarServidor(banco) {
         const resultado = await abrirAtendimento(banco, sessao.usuario, await lerJson(req));
         // Envia a resposta deste ramo e encerra o pedido, sem executar as rotas que aparecem depois.
         return responder(res, resultado.criado ? 201 : 200, resultado);
+      }
+            // Separa esta operação pelas regras de rota e método; somente esse ramo pode produzir sua resposta.
+      if (req.method === 'POST' && rota === '/api/triagens') {
+        exigirPerfil(sessao, ['enfermagem']);
+
+        // Resultado da operação ou da conferência; o chamador decide a resposta a partir dele.
+        const resultado = await cadastrarTriagem(
+          banco,
+          sessao.usuario,
+          await lerJson(req),
+        );
+
+        // Envia a resposta deste ramo e encerra o pedido.
+        return responder(res, 201, resultado);
       }
       throw new ErroHttp(404, 'Função não encontrada.');
     } catch (erro) {
