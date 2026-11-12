@@ -11,3 +11,7 @@ export {
   erroDeUnicidade,
   motorDoBanco,
 } from '../config/banco.js';
+export {
+  cadastrarTriagem,
+  validarTriagem,
+} from '../triagens/cadastro.js';
