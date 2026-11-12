@@ -1,0 +1,19 @@
+[33m173fd37[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/classificacao-de-risco[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/feature/classificacao-de-risco[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m Merge pull request #6 from lucaaroeiracrv/feat/triagem-atendimento
+[33m56bf63b[m[33m ([m[1;31morigin/feat/triagem-atendimento[m[33m)[m :books: docs: update README for project overview and setup
+[33m515cf85[m feat: implementa cadastro de triagem
+[33m1f336c7[m :bug: fix: fix docker script
+[33m240a1ee[m Merge pull request #5 from lucaaroeiracrv/reapply-mysql-oracle
+[33m3bd29d6[m Reapply MySQL and Oracle database support
+[33m8fa6baf[m Merge pull request #4 from lucaaroeiracrv/revert-3-feat/database-mysql-oracle
+[33md725e8f[m Revert "Add MySQL and Oracle support with simplified Docker setup"
+[33me10a5a1[m Merge pull request #3 from lucaaroeiracrv/feat/database-mysql-oracle
+[33m8d97d8c[m :whale: feat: simplify local setup with Docker Compose
+[33mad92b2a[m :rocket: feat: add MySQL support and enhance database configuration
+[33mdb64b41[m feat(database): adiciona suporte MySQL e Oracle
+[33m4235223[m Merge pull request #2 from lucaaroeiracrv/Feat/CRUDs-port-banco-oracle
+[33maeaaf60[m :sparkles: feat: CRUDs e port banco oracle
+[33m07cda5e[m docs: add a file guide
+[33m09a5ec2[m feat: implement MySQL configuration and connection pooling
+[33mebd00b5[m chore: importar estrutura inicial do projeto PI2
+[33mec49b31[m Add files via upload
+[33made443c[m Initial commit
