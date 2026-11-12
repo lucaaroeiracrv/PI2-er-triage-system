@@ -48,3 +48,22 @@ CREATE TABLE IF NOT EXISTS atendimentos (
 );
 
 CREATE INDEX idx_atendimento_situacao ON atendimentos (situacao);
+
+CREATE TABLE IF NOT EXISTS triagens (
+  id INT NOT NULL AUTO_INCREMENT,
+  atendimento_id INT NOT NULL,
+  enfermeiro_id INT NOT NULL,
+  queixa VARCHAR(500) NOT NULL,
+  pressao VARCHAR(20) NOT NULL,
+  temperatura DECIMAL(4,1) NOT NULL,
+  frequencia INT NOT NULL,
+  saturacao INT NOT NULL,
+  classificacao VARCHAR(20) NOT NULL,
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_triagem_atendimento FOREIGN KEY (atendimento_id) REFERENCES atendimentos (id),
+  CONSTRAINT fk_triagem_enfermeiro FOREIGN KEY (enfermeiro_id) REFERENCES usuarios (id),
+  CHECK (classificacao IN ('Vermelho', 'Laranja', 'Amarelo', 'Verde', 'Azul'))
+);
+
+CREATE UNIQUE INDEX uq_triagem_atendimento ON triagens (atendimento_id);

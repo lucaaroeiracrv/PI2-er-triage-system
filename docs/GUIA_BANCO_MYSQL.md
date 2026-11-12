@@ -114,7 +114,7 @@ npm run testar:mysql
 ```
 
 - `criar:usuario:mysql` cria o banco `PI2_APP`, se necessário, cria a conta `PI2_APP` se ela ainda não existir e concede permissões no banco. Ele usa `DB_MYSQL_ADMIN_USER` e `DB_MYSQL_ADMIN_PASSWORD`.
-- `preparar:mysql` cria as tabelas e índices e insere dados fictícios idempotentemente. A preparação preserva os registros existentes.
+- `preparar:mysql` cria as tabelas e índices e insere dados fictícios idempotentemente. A preparação preserva os registros existentes e renomeia as colunas antigas `triagens.enfermagem_id`/`registrada_em` para `enfermeiro_id`/`criado_em`, quando necessário, sem apagar os dados da triagem.
 - `testar:mysql` confirma que o Node.js consegue conectar ao MySQL.
 
 Se a conta `PI2_APP` já existia com outra senha, o script de criação não troca a senha existente. Use a senha cadastrada em `DB_MYSQL_PASSWORD` ou ajuste a conta de forma administrativa antes de iniciar a aplicação.
