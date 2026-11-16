@@ -26,12 +26,11 @@
     </header>
     <!-- Delimita o conteúdo principal para facilitar a navegação por tecnologias assistivas. -->
     <main>
-      <p class="etapa">Tarefas 15 e 21 a 25</p>
+      <p class="etapa">Tarefas 15, 21 a 25 e 32 a 34</p>
       <!-- Identifica o assunto principal da página com um único título de primeiro nível. -->
       <h1>Começo do sistema de atendimento</h1>
       <p>
-        Este painel integra recepção, registro de triagem pela enfermagem e consulta da fila pelo
-        médico.
+        Este painel integra recepção, triagem pela enfermagem e registro da consulta pelo médico.
       </p>
       <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
       <section class="card" id="entrada">
@@ -249,6 +248,12 @@
             </div>
           </form>
         </section>
+        <section class="card" id="resultado-triagem-card" hidden aria-live="polite">
+          <h2>Resultado da triagem registrada</h2>
+          <p id="resultado-triagem-vinculo"></p>
+          <p id="resultado-triagem-dados"></p>
+          <p class="aviso" id="resultado-triagem-classificacao"></p>
+        </section>
       </div>
       <div id="medico" hidden>
         <section class="card">
@@ -279,11 +284,54 @@
                   <th>Data e hora</th>
                   <th>Profissional responsável</th>
                   <th>Queixa e sinais vitais</th>
+                  <th>Ação</th>
                 </tr>
               </thead>
               <tbody id="fila-medica"></tbody>
             </table>
           </div>
+        </section>
+        <section class="card">
+          <h2>Atendimentos em andamento</h2>
+          <p id="resultado-fila-medica-andamento">
+            Atendimentos com consulta iniciada aparecem aqui para permitir novos registros.
+          </p>
+          <div class="tabela">
+            <table>
+              <caption>Atendimentos em andamento com triagem e consulta registradas</caption>
+              <thead>
+                <tr>
+                  <th>Atendimento</th>
+                  <th>Paciente</th>
+                  <th>Classificação</th>
+                  <th>Data e hora</th>
+                  <th>Profissional responsável</th>
+                  <th>Queixa e sinais vitais</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody id="fila-medica-andamento"></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="card" id="consulta-card" hidden>
+          <h2>Registrar consulta médica</h2>
+          <p id="consulta-contexto"></p>
+          <p class="ajuda">
+            Cada envio cria um registro associado ao atendimento. Salvar a consulta muda a situação
+            para em atendimento; não finaliza o atendimento.
+          </p>
+          <form id="form-consulta">
+            <label>
+              Registro da consulta
+              <textarea name="registro_consulta" required rows="6"></textarea>
+            </label>
+            <div class="linha">
+              <button>Salvar consulta</button>
+              <button type="button" class="secundario" id="cancelar-consulta">Cancelar</button>
+            </div>
+          </form>
+          <p id="resultado-consulta" role="status" aria-live="polite"></p>
         </section>
       </div>
       <!-- Anuncia o resultado das ações sem exigir que a pessoa procure a mensagem na página. -->

@@ -4,6 +4,7 @@ const $ = (seletor) => document.querySelector(seletor);
 let csrf = null;
 let intervaloFilaMedica = null;
 let atendimentoTriagemSelecionado = null;
+let atendimentoConsultaSelecionado = null;
 let carregandoFilaMedica = false;
 // Chave mantida durante a mesma tentativa de envio; uma edição inicia outra tentativa.
 let chaveCadastro = crypto.randomUUID();
@@ -95,9 +96,11 @@ function mostrarSaida() {
   $('#medico').hidden = true;
   //esconde a área do médico.
   $('#formulario-triagem-card').hidden = true;
+  limparConsulta();
   //esconde o formulário de triagem.
   atendimentoTriagemSelecionado = null;
   //limpa a seleção do atendimento, para não reutilizá-la por engano.
+  limparResultadoTriagem();
   if (intervaloFilaMedica) {
     //verifica se existe uma atualização automática da fila médica ativa.
     clearInterval(intervaloFilaMedica);
@@ -157,6 +160,43 @@ function formatarDataHora(valor) {
         timeStyle: 'short',
       }).format(data);
 }
+function limparResultadoTriagem() {
+  $('#resultado-triagem-card').hidden = true;
+  $('#resultado-triagem-vinculo').textContent = '';
+  $('#resultado-triagem-dados').textContent = '';
+  $('#resultado-triagem-classificacao').textContent = '';
+}
+function limparConsulta() {
+  atendimentoConsultaSelecionado = null;
+  $('#consulta-card').hidden = true;
+  $('#consulta-contexto').textContent = '';
+  $('#resultado-consulta').textContent = '';
+  $('#form-consulta').reset();
+}
+function selecionarAtendimentoConsulta(atendimento) {
+  atendimentoConsultaSelecionado = atendimento;
+  $('#form-consulta').reset();
+  $('#resultado-consulta').textContent = '';
+  $('#consulta-contexto').textContent =
+    `Atendimento #${atendimento.atendimento_id} • ${atendimento.paciente_nome} (paciente #${atendimento.paciente_id}) • ${atendimento.classificacao}`;
+  $('#consulta-card').hidden = false;
+  $('#consulta-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function mostrarResultadoTriagem(triagem) {
+  $('#resultado-triagem-vinculo').textContent =
+    `Atendimento #${triagem.atendimento_id} • ${triagem.paciente_nome} (paciente #${triagem.paciente_id})`;
+  $('#resultado-triagem-dados').textContent = [
+    `Queixa: ${triagem.queixa}`,
+    `Pressão: ${triagem.pressao}`,
+    `Temperatura: ${triagem.temperatura} °C`,
+    `Frequência: ${triagem.frequencia} bpm`,
+    `Saturação: ${triagem.saturacao}%`,
+    `Registrada em: ${formatarDataHora(triagem.data_hora)}`,
+  ].join(' • ');
+  $('#resultado-triagem-classificacao').textContent =
+    `Classificação registrada pela enfermagem: ${triagem.classificacao} • ${triagem.profissional_responsavel}`;
+  $('#resultado-triagem-card').hidden = false;
+}
 async function carregarAtendimentosAguardandoTriagem() {
   const resultado = await pedir('/api/triagens/pendentes');
   const corpo = $('#fila-triagem');
@@ -177,6 +217,7 @@ async function carregarAtendimentosAguardandoTriagem() {
     botao.type = 'button';
     botao.textContent = 'Registrar triagem';
     botao.addEventListener('click', () => {
+      limparResultadoTriagem();
       atendimentoTriagemSelecionado = atendimento.atendimento_id;
       $('#atendimento-selecionado').textContent =
         `Atendimento #${atendimento.atendimento_id} • ${atendimento.paciente_nome}`;
@@ -194,34 +235,59 @@ async function carregarFilaMedica() {
   }
   carregandoFilaMedica = true;
   try {
-    const resultado = await pedir('/api/atendimentos/medico');
-    const corpo = $('#fila-medica');
-    corpo.replaceChildren();
-    $('#resultado-fila-medica').textContent = resultado.atendimentos.length
-      ? `${resultado.atendimentos.length} atendimento(s) aguardando atendimento médico. Atualização automática a cada 2 segundos.`
-      : 'Nenhum atendimento aguardando atendimento médico. A fila é atualizada automaticamente a cada 2 segundos.';
-
-    for (const atendimento of resultado.atendimentos) {
-      const linha = document.createElement('tr');
-      const sinaisVitais = [
-        `Queixa: ${atendimento.queixa}`,
-        `Pressão: ${atendimento.pressao}`,
-        `Temperatura: ${atendimento.temperatura} °C`,
-        `Frequência: ${atendimento.frequencia} bpm`,
-        `Saturação: ${atendimento.saturacao}%`,
-      ].join(' • ');
-      linha.append(
-        criarCelula(`#${atendimento.atendimento_id}`),
-        criarCelula(atendimento.paciente_nome),
-        criarCelula(atendimento.classificacao),
-        criarCelula(formatarDataHora(atendimento.data_hora)),
-        criarCelula(atendimento.profissional_responsavel),
-        criarCelula(sinaisVitais),
-      );
-      corpo.append(linha);
-    }
+    const [aguardando, emAndamento] = await Promise.all([
+      pedir('/api/atendimentos/medico'),
+      pedir('/api/atendimentos/medico/em-andamento'),
+    ]);
+    renderizarFilaMedica(
+      aguardando.atendimentos,
+      $('#fila-medica'),
+      $('#resultado-fila-medica'),
+      'Nenhum atendimento aguardando atendimento médico. A fila é atualizada automaticamente a cada 2 segundos.',
+      'Iniciar consulta',
+    );
+    renderizarFilaMedica(
+      emAndamento.atendimentos,
+      $('#fila-medica-andamento'),
+      $('#resultado-fila-medica-andamento'),
+      'Nenhum atendimento em andamento.',
+      'Continuar consulta',
+    );
   } finally {
     carregandoFilaMedica = false;
+  }
+}
+function renderizarFilaMedica(atendimentos, corpo, estado, mensagemVazia, textoAcao) {
+  corpo.replaceChildren();
+  estado.textContent = atendimentos.length
+    ? `${atendimentos.length} atendimento(s). Atualização automática a cada 2 segundos.`
+    : mensagemVazia;
+
+  for (const atendimento of atendimentos) {
+    const linha = document.createElement('tr');
+    const sinaisVitais = [
+      `Queixa: ${atendimento.queixa}`,
+      `Pressão: ${atendimento.pressao}`,
+      `Temperatura: ${atendimento.temperatura} °C`,
+      `Frequência: ${atendimento.frequencia} bpm`,
+      `Saturação: ${atendimento.saturacao}%`,
+    ].join(' • ');
+    linha.append(
+      criarCelula(`#${atendimento.atendimento_id}`),
+      criarCelula(atendimento.paciente_nome),
+      criarCelula(atendimento.classificacao),
+      criarCelula(formatarDataHora(atendimento.data_hora)),
+      criarCelula(atendimento.profissional_responsavel),
+      criarCelula(sinaisVitais),
+    );
+    const acao = document.createElement('td');
+    const botao = document.createElement('button');
+    botao.type = 'button';
+    botao.textContent = textoAcao;
+    botao.addEventListener('click', () => selecionarAtendimentoConsulta(atendimento));
+    acao.append(botao);
+    linha.append(acao);
+    corpo.append(linha);
   }
 }
 // Constrói a lista com elementos DOM e textContent; nomes digitados não são interpretados como HTML.
@@ -397,12 +463,37 @@ aoEnviar('#form-triagem', async (dados, form) => {
   form.reset();
   $('#formulario-triagem-card').hidden = true;
   atendimentoTriagemSelecionado = null;
+  mostrarResultadoTriagem(resultado.triagem);
   const confirmacao = `Triagem do atendimento #${resultado.atendimento_id} registrada. A classificação já está disponível na fila médica.`;
   mensagem(confirmacao);
   try {
     await carregarAtendimentosAguardandoTriagem();
   } catch (erro) {
     mensagem(`${confirmacao} Não foi possível atualizar a lista de triagem: ${erro.message}`, true);
+  }
+});
+aoEnviar('#form-consulta', async (dados, form) => {
+  if (!atendimentoConsultaSelecionado) {
+    throw new Error('Selecione um atendimento disponível para consulta.');
+  }
+  const resultado = await pedir('/api/consultas', {
+    method: 'POST',
+    dados: {
+      atendimento_id: atendimentoConsultaSelecionado.atendimento_id,
+      paciente_id: atendimentoConsultaSelecionado.paciente_id,
+      triagem_id: atendimentoConsultaSelecionado.triagem_id,
+      registro_consulta: dados.registro_consulta,
+    },
+  });
+  form.reset();
+  const confirmacao = `Consulta #${resultado.consulta_id} do atendimento #${resultado.atendimento_id} registrada.`;
+  $('#resultado-consulta').textContent =
+    `${confirmacao} Você pode registrar outra consulta para este atendimento.`;
+  mensagem(resultado.mensagem);
+  try {
+    await carregarFilaMedica();
+  } catch (erro) {
+    mensagem(`${confirmacao} Não foi possível atualizar as filas: ${erro.message}`, true);
   }
 });
 $('#atualizar-triagens').addEventListener('click', () => {
@@ -412,10 +503,12 @@ $('#cancelar-triagem').addEventListener('click', () => {
   $('#form-triagem').reset();
   $('#formulario-triagem-card').hidden = true;
   atendimentoTriagemSelecionado = null;
+  limparResultadoTriagem();
 });
 $('#atualizar-fila-medica').addEventListener('click', () => {
   carregarFilaMedica().catch((erro) => mensagem(erro.message, true));
 });
+$('#cancelar-consulta').addEventListener('click', limparConsulta);
 // Liga a ação do usuário a este controle; o restante da regra só roda quando o evento acontece.
 $('#sair').addEventListener('click', async () => {
   try {

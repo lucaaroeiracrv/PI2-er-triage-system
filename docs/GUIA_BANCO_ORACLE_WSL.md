@@ -248,7 +248,7 @@ Parar o container não apaga os dados. O container também reinicia automaticame
 
 ## 8. Limpar os registros de teste
 
-O comando abaixo pede a confirmação digitando `RESETAR`. Ele apaga todos os registros das tabelas `atendimentos`, `pacientes` e `usuarios`, mas mantém as tabelas, índices, o usuário/schema Oracle `PI2_APP` e o volume Docker. Use-o somente no banco local de testes:
+O comando abaixo pede a confirmação digitando `RESETAR`. Ele apaga todos os registros das tabelas `consultas`, `triagens`, `atendimentos`, `pacientes` e `usuarios`, mas mantém as tabelas, índices, o usuário/schema Oracle `PI2_APP` e o volume Docker. Use-o somente no banco local de testes:
 
 ```text
 npm run resetar:banco

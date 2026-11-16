@@ -22,7 +22,7 @@ async function confirmarReset() {
   const interfaceLeitura = createInterface({ input: stdin, output: stdout });
   try {
     const resposta = await interfaceLeitura.question(
-      `Isso apagará todos os registros de atendimentos, pacientes e usuários de teste no ${nomeMotor}, mantendo o schema. Digite RESETAR para confirmar: `,
+      `Isso apagará todos os registros de consultas, triagens, atendimentos, pacientes e usuários de teste no ${nomeMotor}, mantendo o schema. Digite RESETAR para confirmar: `,
     );
     return resposta === 'RESETAR';
   } finally {
@@ -39,7 +39,7 @@ try {
     await iniciarTransacao(conexao);
 
     const contagens = {};
-    for (const tabela of ['atendimentos', 'pacientes', 'usuarios']) {
+    for (const tabela of ['consultas', 'triagens', 'atendimentos', 'pacientes', 'usuarios']) {
       etapa = `contando registros de ${tabela}`;
       const resultado = await conexao.execute(
         `SELECT COUNT(*) AS total FROM ${tabela}`,
@@ -54,7 +54,7 @@ try {
     etapa = 'confirmando transação';
     await conexao.commit();
     console.log(
-      `Reset concluído no ${nomeMotor}: ${contagens.atendimentos} atendimentos, ${contagens.pacientes} pacientes e ${contagens.usuarios} usuários apagados. As tabelas foram mantidas.`,
+      `Reset concluído no ${nomeMotor}: ${contagens.consultas} consultas, ${contagens.triagens} triagens, ${contagens.atendimentos} atendimentos, ${contagens.pacientes} pacientes e ${contagens.usuarios} usuários apagados. As tabelas foram mantidas.`,
     );
   }
 } catch (erro) {

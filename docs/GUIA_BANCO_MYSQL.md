@@ -152,7 +152,7 @@ Use apenas dados fictícios nos testes. Confirme que o servidor está usando MyS
 
 ## 7. Limpe os dados de teste
 
-O comando a seguir apaga os registros de `atendimentos`, `pacientes` e `usuarios` no MySQL selecionado, mas mantém as tabelas e o volume. Ele pede que você digite `RESETAR`:
+O comando a seguir apaga os registros de `consultas`, `triagens`, `atendimentos`, `pacientes` e `usuarios` no MySQL selecionado, mas mantém as tabelas e o volume. Ele pede que você digite `RESETAR`:
 
 ```powershell
 npm run resetar:mysql

@@ -67,3 +67,16 @@ CREATE TABLE IF NOT EXISTS triagens (
 );
 
 CREATE UNIQUE INDEX uq_triagem_atendimento ON triagens (atendimento_id);
+
+CREATE TABLE IF NOT EXISTS consultas (
+  id INT NOT NULL AUTO_INCREMENT,
+  atendimento_id INT NOT NULL,
+  medico_id INT NOT NULL,
+  registro_consulta TEXT NOT NULL,
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_consulta_atendimento FOREIGN KEY (atendimento_id) REFERENCES atendimentos (id),
+  CONSTRAINT fk_consulta_medico FOREIGN KEY (medico_id) REFERENCES usuarios (id)
+);
+
+CREATE INDEX idx_consultas_atendimento ON consultas (atendimento_id);

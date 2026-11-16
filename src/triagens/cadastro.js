@@ -2,6 +2,23 @@
 import { ErroHttp } from '../http/respostas.js';
 import { consultar, erroDeUnicidade, iniciarTransacao, oracledb } from '../config/banco.js';
 
+const CONSULTA_TRIAGEM_ATENDIMENTO = `SELECT a.id AS "atendimento_id",
+            a.paciente_id AS "paciente_id",
+            p.nome AS "paciente_nome",
+            t.id AS "triagem_id",
+            t.classificacao AS "classificacao",
+            t.criado_em AS "data_hora",
+            u.nome AS "profissional_responsavel",
+            t.queixa AS "queixa",
+            t.pressao AS "pressao",
+            t.temperatura AS "temperatura",
+            t.frequencia AS "frequencia",
+            t.saturacao AS "saturacao"
+       FROM atendimentos a
+       JOIN pacientes p ON p.id = a.paciente_id
+       JOIN triagens t ON t.atendimento_id = a.id
+       JOIN usuarios u ON u.id = t.enfermeiro_id`;
+
 // Confere os campos recebidos da tela antes de permitir qualquer gravação.
 export function validarTriagem(dados) {
   if (!dados || typeof dados !== 'object' || Array.isArray(dados)) {
@@ -134,12 +151,24 @@ export async function cadastrarTriagem(banco, usuario, dados) {
         WHERE id = :id`,
       { id: triagem.atendimento_id },
     );
+    const resultadoTriagem = await conexao.execute(
+      `${CONSULTA_TRIAGEM_ATENDIMENTO}
+        WHERE a.id = :atendimento_id`,
+      { atendimento_id: triagem.atendimento_id },
+      { outFormat: oracledb?.OUT_FORMAT_OBJECT },
+    );
+    const triagemSalva = resultadoTriagem.rows?.[0];
+    if (!triagemSalva) {
+      throw new Error('A triagem registrada não foi encontrada para confirmação.');
+    }
+
     await conexao.commit();
 
     return {
       sucesso: true,
       mensagem: 'Triagem registrada com sucesso.',
       atendimento_id: triagem.atendimento_id,
+      triagem: triagemSalva,
     };
   } catch (erro) {
     await conexao.rollback();
@@ -168,21 +197,20 @@ export async function listarAtendimentosAguardandoTriagem(banco) {
 export async function listarAtendimentosAguardandoMedico(banco) {
   return consultar(
     banco,
-    `SELECT a.id AS "atendimento_id",
-            p.nome AS "paciente_nome",
-            t.classificacao AS "classificacao",
-            t.criado_em AS "data_hora",
-            u.nome AS "profissional_responsavel",
-            t.queixa AS "queixa",
-            t.pressao AS "pressao",
-            t.temperatura AS "temperatura",
-            t.frequencia AS "frequencia",
-            t.saturacao AS "saturacao"
-       FROM atendimentos a
-       JOIN pacientes p ON p.id = a.paciente_id
-       JOIN triagens t ON t.atendimento_id = a.id
-       JOIN usuarios u ON u.id = t.enfermeiro_id
+    `${CONSULTA_TRIAGEM_ATENDIMENTO}
       WHERE a.situacao = 'aguardando_medico'
+      ORDER BY t.criado_em, a.id`,
+  );
+}
+
+export async function listarAtendimentosEmAndamento(banco) {
+  return consultar(
+    banco,
+    `${CONSULTA_TRIAGEM_ATENDIMENTO}
+      WHERE a.situacao = 'em_atendimento'
+        AND EXISTS (
+          SELECT 1 FROM consultas c WHERE c.atendimento_id = a.id
+        )
       ORDER BY t.criado_em, a.id`,
   );
 }
