@@ -75,6 +75,36 @@ async function criarObjetos(conexao, texto) {
   }
 }
 
+async function migrarColunasLegadasDaTriagem(conexao) {
+  const resultado = await conexao.execute(
+    `SELECT column_name AS nome
+       FROM information_schema.columns
+      WHERE table_schema = DATABASE() AND table_name = 'triagens'`,
+  );
+  const colunas = new Set(resultado.rows.map((linha) => linha.nome.toLowerCase()));
+
+  for (const [legada, atual] of [
+    ['enfermagem_id', 'enfermeiro_id'],
+    ['registrada_em', 'criado_em'],
+  ]) {
+    if (colunas.has(legada) && colunas.has(atual)) {
+      throw new Error(
+        `A tabela triagens contém as colunas ${legada} e ${atual}; confira a migração manualmente.`,
+      );
+    }
+    if (!colunas.has(legada) && !colunas.has(atual)) {
+      throw new Error(`A tabela triagens não contém a coluna esperada ${atual}.`);
+    }
+    if (colunas.has(legada)) {
+      etapa = `migrando triagens.${legada} para ${atual}`;
+      await conexao.execute(`ALTER TABLE triagens RENAME COLUMN ${legada} TO ${atual}`);
+      colunas.delete(legada);
+      colunas.add(atual);
+      console.log(`Coluna MySQL migrada: triagens.${legada} para ${atual}`);
+    }
+  }
+}
+
 async function exigirCpfObrigatorio(conexao) {
   if (engine === 'mysql') {
     return;
@@ -126,6 +156,9 @@ try {
   );
 
   await criarObjetos(conexao, estrutura);
+  if (engine === 'mysql') {
+    await migrarColunasLegadasDaTriagem(conexao);
+  }
   etapa = 'verificando CPFs dos pacientes existentes';
   await exigirCpfObrigatorio(conexao);
   for (const [arquivo, texto] of [

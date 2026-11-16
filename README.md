@@ -11,7 +11,6 @@ Projeto acadêmico integrador de desenvolvimento web e banco de dados
 [![Oracle](https://img.shields.io/badge/DB-Oracle-F80000)](https://www.oracle.com/database/)
 [![Status](https://img.shields.io/badge/Status-Em%20desenvolvimento-1F6FEB)](https://github.com/lucaaroeiracrv/PI2-er-triage-system)
 
-
 </div>
 
 ---
@@ -38,21 +37,23 @@ O estado atual do sistema inclui:
 - Cadastro e busca de pacientes.
 - Abertura de atendimento pela recepção.
 - Persistência do atendimento com status inicial de espera pela triagem.
+- Registro da triagem pela enfermagem, com classificação de risco selecionada pelo profissional.
+- Fila médica com classificação, horário, profissional responsável, queixa e sinais vitais da triagem.
 - Configuração do backend para MySQL ou Oracle.
-- Testes automatizados para partes já implementadas.
+- Testes automatizados das regras e do registro transacional da triagem.
 
-> Importante: triagem, consulta médica, medicações e encerramento aparecem como telas ou protótipos, mas ainda não estão implementados como fluxos funcionais completos. Consulte o arquivo [docs/VERIFICACAO.md](docs/VERIFICACAO.md) para detalhes das verificações e limitações.
+> A classificação é informada pela enfermagem conforme o protocolo adotado pelo serviço. O sistema não calcula risco nem substitui a avaliação clínica. Consulta médica, medicações e encerramento permanecem como protótipos. Consulte [docs/VERIFICACAO.md](docs/VERIFICACAO.md) para verificações e limitações.
 
 ## Tecnologias
 
-| Camada | Tecnologias |
-|---|---|
-| Interface | HTML, CSS e JavaScript |
-| Backend | Node.js |
+| Camada          | Tecnologias             |
+| --------------- | ----------------------- |
+| Interface       | HTML, CSS e JavaScript  |
+| Backend         | Node.js                 |
 | Bancos de dados | MySQL e Oracle Database |
-| Execução local | Docker e Docker Compose |
-| Testes | Node.js Test Runner |
-| Formatação | Prettier |
+| Execução local  | Docker e Docker Compose |
+| Testes          | Node.js Test Runner     |
+| Formatação      | Prettier                |
 
 ## Como executar
 
@@ -128,11 +129,11 @@ Os testes automatizados não substituem a validação de conexão com uma instâ
 
 O projeto cria usuários fictícios para os perfis:
 
-| Usuário | Perfil |
-|---|---|
-| `recepcao` | Recepção |
+| Usuário      | Perfil     |
+| ------------ | ---------- |
+| `recepcao`   | Recepção   |
 | `enfermagem` | Enfermagem |
-| `medico` | Médico |
+| `medico`     | Médico     |
 
 **Senha inicial:** `Pi2@2026!`
 

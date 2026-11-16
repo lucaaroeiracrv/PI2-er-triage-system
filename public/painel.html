@@ -30,8 +30,8 @@
       <!-- Identifica o assunto principal da página com um único título de primeiro nível. -->
       <h1>Começo do sistema de atendimento</h1>
       <p>
-        Este painel permite testar o backend com o Oracle. As telas de atendimento definitivas
-        seguem os desenhos das outras pastas.
+        Este painel integra recepção, registro de triagem pela enfermagem e consulta da fila pelo
+        médico.
       </p>
       <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
       <section class="card" id="entrada">
@@ -176,13 +176,123 @@
           </div>
         </section>
       </div>
+      <div id="enfermagem" hidden>
+        <section class="card">
+          <div class="linha">
+            <div>
+              <p class="etapa">Enfermagem</p>
+              <h2>Atendimentos aguardando triagem</h2>
+            </div>
+            <button type="button" class="secundario" id="atualizar-triagens">
+              Atualizar lista
+            </button>
+          </div>
+          <p id="resultado-triagens">Carregando atendimentos...</p>
+          <div class="tabela">
+            <table>
+              <caption>Atendimentos que ainda não têm triagem registrada</caption>
+              <thead>
+                <tr>
+                  <th>Atendimento</th>
+                  <th>Paciente</th>
+                  <th>Abertura</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody id="fila-triagem"></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="card" id="formulario-triagem-card" hidden>
+          <p class="etapa">Registro profissional</p>
+          <h2>Registrar triagem</h2>
+          <p id="atendimento-selecionado"></p>
+          <p class="aviso">
+            A classificação é informada pela enfermagem após avaliação profissional. O sistema
+            apenas registra a opção selecionada; não calcula nem substitui a avaliação clínica.
+          </p>
+          <form id="form-triagem" class="grade">
+            <label>
+              Queixa principal
+              <textarea name="queixa" required minlength="3" maxlength="500"></textarea>
+            </label>
+            <label>
+              Pressão arterial
+              <input name="pressao" required maxlength="20" placeholder="Ex.: 120/80" />
+            </label>
+            <label>
+              Temperatura (°C)
+              <input name="temperatura" type="number" required min="30" max="45" step="0.1" />
+            </label>
+            <label>
+              Frequência cardíaca (bpm)
+              <input name="frequencia" type="number" required min="20" max="300" step="1" />
+            </label>
+            <label>
+              Saturação (%)
+              <input name="saturacao" type="number" required min="0" max="100" step="1" />
+            </label>
+            <label>
+              Classificação de risco (Protocolo de Manchester)
+              <select name="classificacao" required>
+                <option value="">Selecione conforme a avaliação profissional</option>
+                <option value="Vermelho">Vermelho</option>
+                <option value="Laranja">Laranja</option>
+                <option value="Amarelo">Amarelo</option>
+                <option value="Verde">Verde</option>
+                <option value="Azul">Azul</option>
+              </select>
+            </label>
+            <div>
+              <button>Registrar triagem</button>
+              <button type="button" class="secundario" id="cancelar-triagem">Cancelar</button>
+            </div>
+          </form>
+        </section>
+      </div>
+      <div id="medico" hidden>
+        <section class="card">
+          <div class="linha">
+            <div>
+              <p class="etapa">Médico</p>
+              <h2>Atendimentos aguardando atendimento médico</h2>
+            </div>
+            <button type="button" class="secundario" id="atualizar-fila-medica">
+              Atualizar agora
+            </button>
+          </div>
+          <p id="resultado-fila-medica">
+            A fila é atualizada automaticamente enquanto este painel estiver aberto.
+          </p>
+          <p class="aviso">
+            A classificação exibida foi informada pela enfermagem e não substitui a avaliação
+            clínica do profissional responsável pelo atendimento.
+          </p>
+          <div class="tabela">
+            <table>
+              <caption>Classificação e dados da triagem vinculados ao atendimento</caption>
+              <thead>
+                <tr>
+                  <th>Atendimento</th>
+                  <th>Paciente</th>
+                  <th>Classificação</th>
+                  <th>Data e hora</th>
+                  <th>Profissional responsável</th>
+                  <th>Queixa e sinais vitais</th>
+                </tr>
+              </thead>
+              <tbody id="fila-medica"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
       <!-- Anuncia o resultado das ações sem exigir que a pessoa procure a mensagem na página. -->
       <p id="mensagem" role="status" aria-live="polite"></p>
     </main>
     <!-- Identifica o contexto acadêmico e o uso de dados de exemplo. -->
     <footer>
-      Dados fictícios para o projeto da faculdade • Login, perfis, pacientes e abertura de
-      atendimento
+      Projeto acadêmico • Use apenas dados fictícios • A classificação não substitui avaliação
+      clínica
     </footer>
   </body>
 </html>

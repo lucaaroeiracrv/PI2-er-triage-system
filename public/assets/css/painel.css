@@ -115,7 +115,9 @@ label span {
   /* Mantém o texto legível dentro da paleta compartilhada. */
   color: #59697d;
 }
-input {
+input,
+select,
+textarea {
   /* Define como este grupo organiza seus elementos no fluxo da página. */
   display: block;
   /* Controla a largura sem exigir valores específicos para cada página. */
@@ -131,6 +133,15 @@ input {
   font: inherit;
   /* Evita que campos ou tabelas sejam comprimidos além de sua apresentação prevista. */
   min-width: 0;
+}
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+.aviso {
+  padding: 12px 15px;
+  border-left: 3px solid #b98a00;
+  background: #fff8df;
 }
 button {
   /* Define a superfície do componente e o contraste com o texto. */

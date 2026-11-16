@@ -21,9 +21,9 @@ export function informacoesDoPerfil(sessao, perfil) {
     recepcao:
       'Cadastro, busca de paciente e abertura de atendimento disponíveis no painel de teste.',
     enfermagem:
-      'Acesso da enfermagem confirmado. A triagem funcional será desenvolvida nas próximas tarefas.',
+      'Registre a triagem e informe a classificação de risco conforme a avaliação profissional.',
     medico:
-      'Acesso do médico confirmado. O painel e o registro de consulta funcionais serão desenvolvidos nas próximas tarefas.',
+      'Consulte os atendimentos liberados pela triagem; a classificação e os dados ficam vinculados ao atendimento.',
   };
   // Entrega a mensagem somente para o perfil cuja permissão já foi conferida.
   return {

@@ -168,7 +168,7 @@ Protótipo que apresenta as áreas de registro de medicações e encerramento do
 
 ### `public/screens/medico.html`
 
-Protótipo do painel médico, com exemplos de pacientes aguardando atendimento e registro da consulta. Os dados exibidos são ilustrativos; a fila e a consulta ainda não estão integradas ao banco neste recorte.
+Protótipo visual do painel médico e do registro da consulta. O painel funcional da aplicação fica em `public/painel.html` e apresenta a fila de atendimentos triados com classificação, data/hora e profissional responsável.
 
 ### `public/screens/rascunhos.html`
 
@@ -180,7 +180,7 @@ Formulário de revisão para que os integrantes registrem a avaliação dos dese
 
 ### `public/screens/triagem.html`
 
-Protótipo visual da triagem, com campos sugeridos para queixa e sinais vitais. Não implementa cálculo clínico de classificação de risco nem grava uma triagem no banco nesta etapa.
+Protótipo visual da triagem. O fluxo funcional para a enfermagem fica em `public/painel.html`; registra os dados e a classificação selecionada pelo profissional, sem cálculo automático de risco.
 
 ## 8. Scripts de preparação em `scripts/`
 

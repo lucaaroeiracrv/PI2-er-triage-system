@@ -2,6 +2,9 @@
 const $ = (seletor) => document.querySelector(seletor);
 // Token da sessão mantido na memória da página e enviado nas operações que alteram dados.
 let csrf = null;
+let intervaloFilaMedica = null;
+let atendimentoTriagemSelecionado = null;
+let carregandoFilaMedica = false;
 // Chave mantida durante a mesma tentativa de envio; uma edição inicia outra tentativa.
 let chaveCadastro = crypto.randomUUID();
 $('[name="data_nascimento"]').max = new Date().toISOString().slice(0, 10);
@@ -87,6 +90,21 @@ function mostrarSaida() {
   $('#sessao').hidden = true;
   // Ajusta a área visível conforme o estado da sessão; a proteção definitiva continua no backend.
   $('#recepcao').hidden = true;
+  $('#enfermagem').hidden = true;
+  //esconde a área da enfermagem.
+  $('#medico').hidden = true;
+  //esconde a área do médico.
+  $('#formulario-triagem-card').hidden = true;
+  //esconde o formulário de triagem.
+  atendimentoTriagemSelecionado = null;
+  //limpa a seleção do atendimento, para não reutilizá-la por engano.
+  if (intervaloFilaMedica) {
+    //verifica se existe uma atualização automática da fila médica ativa.
+    clearInterval(intervaloFilaMedica);
+    //cancela essa atualização periódica.
+    intervaloFilaMedica = null;
+    //limpa a referência ao intervalo cancelado.
+  }
   // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
   $('#pacientes').replaceChildren();
   // Uma tentativa editada ou concluída recebe outra chave; uma repetição sem edição mantém a anterior.
@@ -109,10 +127,102 @@ async function mostrarSessao(dados) {
   $('#identidade').textContent = `${dados.usuario.nome} • ${nomesPerfis[dados.usuario.perfil]}`;
   // Ajusta a área visível conforme o estado da sessão; a proteção definitiva continua no backend.
   $('#recepcao').hidden = dados.usuario.perfil !== 'recepcao';
+  $('#enfermagem').hidden = dados.usuario.perfil !== 'enfermagem';
+  $('#medico').hidden = dados.usuario.perfil !== 'medico';
   // Resposta da área autorizada pelo backend, usada para orientar o usuário conectado.
   const permissao = await pedir(`/api/perfis/${dados.usuario.perfil}`);
   // Exibe o conteúdo como texto para que dados digitados não se tornem marcação HTML executável.
   $('#permissao').textContent = permissao.mensagem;
+  if (dados.usuario.perfil === 'enfermagem') {
+    await carregarAtendimentosAguardandoTriagem();
+  }
+  if (dados.usuario.perfil === 'medico') {
+    await carregarFilaMedica();
+    intervaloFilaMedica = setInterval(() => {
+      carregarFilaMedica().catch((erro) => mensagem(erro.message, true));
+    }, 2000);
+  }
+}
+function criarCelula(texto) {
+  const celula = document.createElement('td');
+  celula.textContent = texto;
+  return celula;
+}
+function formatarDataHora(valor) {
+  const data = valor instanceof Date ? valor : new Date(valor);
+  return Number.isNaN(data.getTime())
+    ? String(valor || 'Não informado')
+    : new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+      }).format(data);
+}
+async function carregarAtendimentosAguardandoTriagem() {
+  const resultado = await pedir('/api/triagens/pendentes');
+  const corpo = $('#fila-triagem');
+  corpo.replaceChildren();
+  $('#resultado-triagens').textContent = resultado.atendimentos.length
+    ? `${resultado.atendimentos.length} atendimento(s) aguardando triagem.`
+    : 'Nenhum atendimento aguardando triagem.';
+
+  for (const atendimento of resultado.atendimentos) {
+    const linha = document.createElement('tr');
+    linha.append(
+      criarCelula(`#${atendimento.atendimento_id}`),
+      criarCelula(atendimento.paciente_nome),
+      criarCelula(formatarDataHora(atendimento.aberto_em)),
+    );
+    const acao = document.createElement('td');
+    const botao = document.createElement('button');
+    botao.type = 'button';
+    botao.textContent = 'Registrar triagem';
+    botao.addEventListener('click', () => {
+      atendimentoTriagemSelecionado = atendimento.atendimento_id;
+      $('#atendimento-selecionado').textContent =
+        `Atendimento #${atendimento.atendimento_id} • ${atendimento.paciente_nome}`;
+      $('#formulario-triagem-card').hidden = false;
+      $('#formulario-triagem-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    acao.append(botao);
+    linha.append(acao);
+    corpo.append(linha);
+  }
+}
+async function carregarFilaMedica() {
+  if (carregandoFilaMedica) {
+    return;
+  }
+  carregandoFilaMedica = true;
+  try {
+    const resultado = await pedir('/api/atendimentos/medico');
+    const corpo = $('#fila-medica');
+    corpo.replaceChildren();
+    $('#resultado-fila-medica').textContent = resultado.atendimentos.length
+      ? `${resultado.atendimentos.length} atendimento(s) aguardando atendimento médico. Atualização automática a cada 2 segundos.`
+      : 'Nenhum atendimento aguardando atendimento médico. A fila é atualizada automaticamente a cada 2 segundos.';
+
+    for (const atendimento of resultado.atendimentos) {
+      const linha = document.createElement('tr');
+      const sinaisVitais = [
+        `Queixa: ${atendimento.queixa}`,
+        `Pressão: ${atendimento.pressao}`,
+        `Temperatura: ${atendimento.temperatura} °C`,
+        `Frequência: ${atendimento.frequencia} bpm`,
+        `Saturação: ${atendimento.saturacao}%`,
+      ].join(' • ');
+      linha.append(
+        criarCelula(`#${atendimento.atendimento_id}`),
+        criarCelula(atendimento.paciente_nome),
+        criarCelula(atendimento.classificacao),
+        criarCelula(formatarDataHora(atendimento.data_hora)),
+        criarCelula(atendimento.profissional_responsavel),
+        criarCelula(sinaisVitais),
+      );
+      corpo.append(linha);
+    }
+  } finally {
+    carregandoFilaMedica = false;
+  }
 }
 // Constrói a lista com elementos DOM e textContent; nomes digitados não são interpretados como HTML.
 function listar(pacientes) {
@@ -267,6 +377,44 @@ aoEnviar('#form-busca', async (dados) => {
   listar(resultado.pacientes);
   // Apresenta o resultado da ação sem exigir que o usuário consulte o terminal.
   mensagem(resultado.mensagem);
+});
+aoEnviar('#form-triagem', async (dados, form) => {
+  if (!atendimentoTriagemSelecionado) {
+    throw new Error('Selecione um atendimento aguardando triagem.');
+  }
+  const resultado = await pedir('/api/triagens', {
+    method: 'POST',
+    dados: {
+      atendimento_id: atendimentoTriagemSelecionado,
+      queixa: dados.queixa,
+      pressao: dados.pressao,
+      temperatura: Number(dados.temperatura),
+      frequencia: Number(dados.frequencia),
+      saturacao: Number(dados.saturacao),
+      classificacao: dados.classificacao,
+    },
+  });
+  form.reset();
+  $('#formulario-triagem-card').hidden = true;
+  atendimentoTriagemSelecionado = null;
+  const confirmacao = `Triagem do atendimento #${resultado.atendimento_id} registrada. A classificação já está disponível na fila médica.`;
+  mensagem(confirmacao);
+  try {
+    await carregarAtendimentosAguardandoTriagem();
+  } catch (erro) {
+    mensagem(`${confirmacao} Não foi possível atualizar a lista de triagem: ${erro.message}`, true);
+  }
+});
+$('#atualizar-triagens').addEventListener('click', () => {
+  carregarAtendimentosAguardandoTriagem().catch((erro) => mensagem(erro.message, true));
+});
+$('#cancelar-triagem').addEventListener('click', () => {
+  $('#form-triagem').reset();
+  $('#formulario-triagem-card').hidden = true;
+  atendimentoTriagemSelecionado = null;
+});
+$('#atualizar-fila-medica').addEventListener('click', () => {
+  carregarFilaMedica().catch((erro) => mensagem(erro.message, true));
 });
 // Liga a ação do usuário a este controle; o restante da regra só roda quando o evento acontece.
 $('#sair').addEventListener('click', async () => {
