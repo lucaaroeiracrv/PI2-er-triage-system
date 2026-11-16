@@ -26,6 +26,6 @@ Mostra a estrutura final do código
   - `scripts/`: configuração local, preparação/reset dos bancos, usuários fictícios e testes de conexão.
     - `iniciar-docker.ps1`: escolhe o banco e inicia ou para os serviços Compose no Windows.
   - `tests/`: testes de arquivos públicos, configuração de bancos, senhas, permissões, triagem e consulta.
-  - `docs/`: materiais numerados, histórico, campos e verificações.
+  - `docs/`: MER, fluxo esperado, requisitos, guias de banco e verificações.
   - `README.md`, `package.json`, `package-lock.json` e configurações de edição.
   - `.git/`: histórico local incluído no ZIP.

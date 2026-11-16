@@ -158,6 +158,9 @@ Essas contas são apenas para demonstração local. Altere ou substitua as crede
 
 ## Documentação
 
+- [Modelo Entidade-Relacionamento (MER)](docs/MER.md)
+- [Fluxo esperado do atendimento](docs/FLUXO_ESPERADO.md)
+- [Requisitos funcionais e não funcionais](docs/REQUISITOS.md)
 - [Organização do projeto](docs/ESTRUTURA.md)
 - [Guia de arquivos](docs/GUIA_ARQUIVOS.md)
 - [Guia do MySQL](docs/GUIA_BANCO_MYSQL.md)
