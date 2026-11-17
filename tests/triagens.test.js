@@ -228,6 +228,36 @@ test('as filas consultam os dados de vínculo exigidos para enfermagem e médico
   }
 });
 
+test('a fila de espera prioriza a classificação e preserva FIFO entre atendimentos empatados', async () => {
+  const atendimentos = [
+    { atendimento_id: 1, classificacao: 'Amarelo' },
+    { atendimento_id: 2, classificacao: 'Vermelho' },
+    { atendimento_id: 3, classificacao: 'Vermelho' },
+    { atendimento_id: 4, classificacao: 'Verde' },
+    { atendimento_id: 5, classificacao: 'Laranja' },
+    { atendimento_id: 6, classificacao: 'Azul' },
+    { atendimento_id: 7, classificacao: 'Amarelo' },
+    { atendimento_id: 8, classificacao: 'Desconhecido' },
+  ];
+  const banco = {
+    async getConnection() {
+      return {
+        async execute() {
+          return { rows: atendimentos };
+        },
+        async close() {},
+      };
+    },
+  };
+
+  const resultado = await listarAtendimentosAguardandoMedico(banco);
+
+  assert.deepEqual(
+    resultado.map((atendimento) => atendimento.atendimento_id),
+    [2, 3, 5, 1, 7, 4, 6, 8],
+  );
+});
+
 test('a fila médica vazia retorna uma lista vazia e libera a conexão', async () => {
   let fechamentos = 0;
   const banco = {

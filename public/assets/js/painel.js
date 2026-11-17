@@ -19,6 +19,13 @@ const nomesPerfis = {
   enfermagem: 'Enfermagem',
   medico: 'Médico',
 };
+const coresClassificacao = {
+  Vermelho: 'vermelho',
+  Laranja: 'laranja',
+  Amarelo: 'amarelo',
+  Verde: 'verde',
+  Azul: 'azul',
+};
 // Mostra um retorno legível e distingue o erro por texto e aparência.
 function mensagem(texto, erro = false) {
   // Exibe o conteúdo como texto para que dados digitados não se tornem marcação HTML executável.
@@ -151,6 +158,18 @@ function criarCelula(texto) {
   celula.textContent = texto;
   return celula;
 }
+function criarCelulaClassificacao(classificacao) {
+  const celula = document.createElement('td');
+  const etiqueta = document.createElement('span');
+  etiqueta.className = `etiqueta-classificacao ${
+    coresClassificacao[classificacao]
+      ? `classificacao-${coresClassificacao[classificacao]}`
+      : 'classificacao-desconhecida'
+  }`;
+  etiqueta.textContent = classificacao;
+  celula.append(etiqueta);
+  return celula;
+}
 function formatarDataHora(valor) {
   const data = valor instanceof Date ? valor : new Date(valor);
   return Number.isNaN(data.getTime())
@@ -275,7 +294,7 @@ function renderizarFilaMedica(atendimentos, corpo, estado, mensagemVazia, textoA
     linha.append(
       criarCelula(`#${atendimento.atendimento_id}`),
       criarCelula(atendimento.paciente_nome),
-      criarCelula(atendimento.classificacao),
+      criarCelulaClassificacao(atendimento.classificacao),
       criarCelula(formatarDataHora(atendimento.data_hora)),
       criarCelula(atendimento.profissional_responsavel),
       criarCelula(sinaisVitais),
