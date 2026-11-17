@@ -105,11 +105,43 @@
   },
   {
     "tela": "Consulta",
+    "campo": "id",
+    "formato": "Número inteiro positivo",
+    "obrigatorio": "Gerado pelo banco",
+    "tabela": "consultas.id",
+    "observacao": "Chave primária do registro."
+  },
+  {
+    "tela": "Consulta",
+    "campo": "atendimento_id",
+    "formato": "Número inteiro positivo",
+    "obrigatorio": "Sim, selecionado na fila médica",
+    "tabela": "consultas.atendimento_id",
+    "observacao": "Vincula o registro ao atendimento selecionado."
+  },
+  {
+    "tela": "Consulta",
+    "campo": "medico_id",
+    "formato": "Número inteiro positivo",
+    "obrigatorio": "Pela sessão",
+    "tabela": "consultas.medico_id",
+    "observacao": "O backend usa o médico autenticado, sem confiar em um ID enviado pelo formulário."
+  },
+  {
+    "tela": "Consulta",
     "campo": "registro_consulta",
-    "formato": "Texto, proposta visual",
-    "obrigatorio": "A validar",
-    "tabela": "Etapa seguinte",
-    "observacao": "Campos definitivos dependem dos requisitos originais."
+    "formato": "Texto livre",
+    "obrigatorio": "Sim",
+    "tabela": "consultas.registro_consulta",
+    "observacao": "Campo textual acordado para a tarefa 34; vários registros podem pertencer ao mesmo atendimento."
+  },
+  {
+    "tela": "Consulta",
+    "campo": "criado_em",
+    "formato": "Data e hora",
+    "obrigatorio": "Gerado pelo banco",
+    "tabela": "consultas.criado_em",
+    "observacao": "Data/hora da gravação."
   },
   {
     "tela": "Medicações",

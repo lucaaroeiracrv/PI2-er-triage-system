@@ -37,12 +37,14 @@ O estado atual do sistema inclui:
 - Cadastro e busca de pacientes.
 - Abertura de atendimento pela recepção.
 - Persistência do atendimento com status inicial de espera pela triagem.
-- Registro da triagem pela enfermagem, com classificação de risco selecionada pelo profissional.
+- Registro da triagem pela enfermagem, com classificação informada pelo profissional e exibição dos
+  dados recuperados após a confirmação do salvamento.
 - Fila médica com classificação, horário, profissional responsável, queixa e sinais vitais da triagem.
+- Registro de consultas médicas associado ao atendimento, com transação e retomada de atendimentos em andamento.
 - Configuração do backend para MySQL ou Oracle.
-- Testes automatizados das regras e do registro transacional da triagem.
+- Testes automatizados das regras e dos registros transacionais de triagem e consulta.
 
-> A classificação é informada pela enfermagem conforme o protocolo adotado pelo serviço. O sistema não calcula risco nem substitui a avaliação clínica. Consulta médica, medicações e encerramento permanecem como protótipos. Consulte [docs/VERIFICACAO.md](docs/VERIFICACAO.md) para verificações e limitações.
+> A classificação é informada pela enfermagem conforme o protocolo adotado pelo serviço. O sistema não calcula risco nem substitui a avaliação clínica. O registro da consulta usa o campo de texto `registro_consulta`; medicações e encerramento permanecem como protótipos. Consulte [docs/VERIFICACAO.md](docs/VERIFICACAO.md) para verificações e limitações.
 
 ## Tecnologias
 
@@ -156,6 +158,9 @@ Essas contas são apenas para demonstração local. Altere ou substitua as crede
 
 ## Documentação
 
+- [Modelo Entidade-Relacionamento (MER)](docs/MER.md)
+- [Fluxo esperado do atendimento](docs/FLUXO_ESPERADO.md)
+- [Requisitos funcionais e não funcionais](docs/REQUISITOS.md)
 - [Organização do projeto](docs/ESTRUTURA.md)
 - [Guia de arquivos](docs/GUIA_ARQUIVOS.md)
 - [Guia do MySQL](docs/GUIA_BANCO_MYSQL.md)

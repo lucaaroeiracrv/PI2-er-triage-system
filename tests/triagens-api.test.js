@@ -26,6 +26,8 @@ test('enfermagem registra classificação e médico recebe a fila com autoria e 
     },
   ];
   const triagens = [];
+  const consultas = [];
+  let proximoIdConsulta = 101;
   let situacao = 'aguardando_triagem';
   const banco = {
     async getConnection() {
@@ -35,35 +37,51 @@ test('enfermagem registra classificação e médico recebe a fila com autoria e 
             return { rows: usuarios.filter((usuario) => usuario.login === binds.login) };
           }
           if (sql.includes('FOR UPDATE')) {
-            return { rows: [{ id: 44, situacao }] };
+            return { rows: [{ id: 44, paciente_id: 31, situacao }] };
           }
           if (sql.includes('INSERT INTO triagens')) {
             triagens.push({ ...binds, criado_em: new Date('2026-11-12T20:00:00.000Z') });
             return { rows: [] };
           }
+          if (sql.includes('FROM triagens')) {
+            return { rows: [{ triagem_id: 55 }] };
+          }
+          if (sql.includes('INSERT INTO consultas')) {
+            consultas.push({ ...binds, id: proximoIdConsulta });
+            return { outBinds: { id: [proximoIdConsulta++] } };
+          }
           if (sql.includes('UPDATE atendimentos')) {
-            situacao = 'aguardando_medico';
+            situacao = sql.includes("'em_atendimento'") ? 'em_atendimento' : 'aguardando_medico';
             return { rows: [] };
           }
           if (sql.includes('FROM atendimentos a') && sql.includes('JOIN triagens')) {
+            const atendimento = {
+              atendimento_id: 44,
+              paciente_id: 31,
+              paciente_nome: 'Paciente Fictício',
+              triagem_id: 55,
+              classificacao: triagens[0].classificacao,
+              data_hora: triagens[0].criado_em,
+              profissional_responsavel: 'Enfermeira Teste',
+              queixa: triagens[0].queixa,
+              pressao: triagens[0].pressao,
+              temperatura: triagens[0].temperatura,
+              frequencia: triagens[0].frequencia,
+              saturacao: triagens[0].saturacao,
+            };
+            if (sql.includes("a.situacao = 'em_atendimento'")) {
+              return {
+                rows: situacao === 'em_atendimento' && consultas.length ? [atendimento] : [],
+              };
+            }
+            if (sql.includes("a.situacao = 'aguardando_medico'")) {
+              return { rows: situacao === 'aguardando_medico' ? [atendimento] : [] };
+            }
+            if (sql.includes('WHERE a.id = :atendimento_id')) {
+              return { rows: [atendimento] };
+            }
             return {
-              rows:
-                situacao === 'aguardando_medico'
-                  ? [
-                      {
-                        atendimento_id: 44,
-                        paciente_nome: 'Paciente Fictício',
-                        classificacao: triagens[0].classificacao,
-                        data_hora: triagens[0].criado_em,
-                        profissional_responsavel: 'Enfermeira Teste',
-                        queixa: triagens[0].queixa,
-                        pressao: triagens[0].pressao,
-                        temperatura: triagens[0].temperatura,
-                        frequencia: triagens[0].frequencia,
-                        saturacao: triagens[0].saturacao,
-                      },
-                    ]
-                  : [],
+              rows: [],
             };
           }
           if (sql.includes('FROM atendimentos a') && sql.includes('aguardando_triagem')) {
@@ -97,7 +115,9 @@ test('enfermagem registra classificação e médico recebe a fila com autoria e 
     const htmlPainel = await paginaPainel.text();
     assert.equal(paginaPainel.status, 200);
     assert.match(htmlPainel, /form-triagem/);
+    assert.match(htmlPainel, /resultado-triagem-card/);
     assert.match(htmlPainel, /fila-medica/);
+    assert.match(htmlPainel, /form-consulta/);
 
     async function entrar(login) {
       const resposta = await fetch(`${origem}/api/login`, {
@@ -141,8 +161,13 @@ test('enfermagem registra classificação e médico recebe a fila com autoria e 
       }),
     });
     assert.equal(gravacao.status, 201);
+    const resultadoTriagem = await gravacao.json();
     assert.equal(situacao, 'aguardando_medico');
     assert.equal(triagens[0].enfermeiro_id, 12);
+    assert.equal(resultadoTriagem.triagem.atendimento_id, 44);
+    assert.equal(resultadoTriagem.triagem.paciente_id, 31);
+    assert.equal(resultadoTriagem.triagem.classificacao, 'Laranja');
+    assert.equal(resultadoTriagem.triagem.queixa, 'Dor intensa');
 
     const acessoNegado = await fetch(`${origem}/api/atendimentos/medico`, {
       headers: { Cookie: enfermagem.cookie },
@@ -162,6 +187,67 @@ test('enfermagem registra classificação e médico recebe a fila com autoria e 
       new Date(dadosFila.atendimentos[0].data_hora).toISOString(),
       '2026-11-12T20:00:00.000Z',
     );
+    const consultaNegada = await fetch(`${origem}/api/consultas`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Origin: origem,
+        Cookie: enfermagem.cookie,
+        'X-CSRF-Token': enfermagem.csrf,
+      },
+      body: JSON.stringify({
+        atendimento_id: 44,
+        paciente_id: 31,
+        triagem_id: 55,
+        registro_consulta: 'Registro de teste',
+      }),
+    });
+    assert.equal(consultaNegada.status, 403);
+
+    const filaEmAndamentoVazia = await fetch(`${origem}/api/atendimentos/medico/em-andamento`, {
+      headers: { Cookie: medico.cookie },
+    });
+    assert.equal(filaEmAndamentoVazia.status, 200);
+    assert.deepEqual((await filaEmAndamentoVazia.json()).atendimentos, []);
+
+    async function registrarConsulta(registro) {
+      return fetch(`${origem}/api/consultas`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: origem,
+          Cookie: medico.cookie,
+          'X-CSRF-Token': medico.csrf,
+        },
+        body: JSON.stringify({
+          atendimento_id: 44,
+          paciente_id: 31,
+          triagem_id: 55,
+          registro_consulta: registro,
+        }),
+      });
+    }
+
+    const primeiraConsulta = await registrarConsulta('Avaliação médica inicial');
+    const resultadoConsulta = await primeiraConsulta.json();
+    assert.equal(primeiraConsulta.status, 201);
+    assert.equal(resultadoConsulta.consulta_id, 101);
+    assert.equal(resultadoConsulta.atendimento_id, 44);
+    assert.equal(situacao, 'em_atendimento');
+    assert.equal(consultas[0].medico_id, 13);
+    assert.equal(consultas[0].registro_consulta.val, 'Avaliação médica inicial');
+
+    const filaEmAndamento = await fetch(`${origem}/api/atendimentos/medico/em-andamento`, {
+      headers: { Cookie: medico.cookie },
+    });
+    const dadosEmAndamento = await filaEmAndamento.json();
+    assert.equal(filaEmAndamento.status, 200);
+    assert.equal(dadosEmAndamento.atendimentos[0].triagem_id, 55);
+
+    const segundaConsulta = await registrarConsulta('Complemento da consulta');
+    assert.equal(segundaConsulta.status, 201);
+    assert.equal(consultas.length, 2);
+    assert.equal(situacao, 'em_atendimento');
   } finally {
     await new Promise((resolve) => servidor.close(resolve));
     if (engineAnterior === undefined) {

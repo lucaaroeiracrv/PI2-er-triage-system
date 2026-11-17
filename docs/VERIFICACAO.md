@@ -5,7 +5,7 @@ O backend suporta Oracle e MySQL, selecionados individualmente pela variável `D
 ## Verificações registradas
 
 - `npm test`: testes automatizados de configuração dos bancos, validação, senhas, permissões e arquivos públicos.
-- Testes específicos para validação da triagem, gravação transacional, mudança de status e consultas que alimentam as filas de enfermagem e médica.
+- Testes específicos para validação e gravação transacional da triagem e da consulta, vínculo com paciente/atendimento/triagem, mudança de status e filas médicas.
 - `npm run verificar:formatacao`: verificação de formatação com Prettier.
 - `npm run testar:conexao`: teste de conexão Oracle.
 - `npm run testar:mysql`: teste de conexão MySQL.
@@ -20,8 +20,12 @@ Para repetir as verificações disponíveis, execute `npm test` e `npm run verif
 
 Na aplicação, a enfermagem seleciona a classificação após sua avaliação profissional. A triagem fica vinculada ao atendimento, registra data/hora pelo banco e identifica o profissional autenticado. O painel médico consulta os atendimentos liberados e atualiza a fila automaticamente a cada dois segundos. A classificação não é calculada pelo sistema e não substitui a avaliação clínica.
 
-Os testes automatizados usam banco simulado. Nesta execução, o fluxo completo também foi validado contra a instância local MySQL. A conexão Oracle não foi testada nesta execução; consulte os guias de banco para preparar e validar outro ambiente.
+Após registrar a triagem, o backend recupera o registro vinculado ao atendimento dentro da transação; somente confirma após o commit. O painel da enfermagem exibe os dados recuperados e a classificação.
+
+O médico pode registrar vários apontamentos de consulta para o mesmo atendimento. O primeiro registro altera sua situação para `em_atendimento`; o atendimento deixa a fila de espera e fica disponível na lista de atendimentos em andamento. O registro usa `registro_consulta`, é associado ao médico autenticado e ao atendimento, e valida que paciente e triagem selecionados pertencem a esse atendimento. A etapa não finaliza o atendimento.
+
+Os testes automatizados usam banco simulado. Eles cobrem as regras de validação, transação, permissões, vínculos e filas; não substituem a execução de integração. As alterações atuais ainda não foram exercitadas contra instâncias MySQL ou Oracle. Consulte os guias de banco para validar cada ambiente.
 
 ## Limitações
 
-A validação técnica não substitui a comparação do schema com os requisitos completos e o MER oficial do grupo. Consulta médica, medicações e encerramento continuam como protótipos. O projeto é acadêmico, não é uma ferramenta clínica validada e não deve ser usado para atendimento real.
+A validação técnica não substitui a comparação do schema com os requisitos completos e o MER oficial do grupo. O registro da consulta usa os campos acordados no modelo proposto (`id`, `atendimento_id`, `medico_id`, `registro_consulta` e `criado_em`); medicações e encerramento continuam como protótipos. O projeto é acadêmico, não é uma ferramenta clínica validada e não deve ser usado para atendimento real.

@@ -20,9 +20,11 @@ import { cadastrarPaciente } from './pacientes/cadastro.js';
 import { buscarPacientes } from './pacientes/busca.js';
 // Encaminha a abertura ao módulo que mantém as verificações na mesma transação.
 import { abrirAtendimento } from './atendimentos/abertura.js';
+import { registrarConsulta } from './consultas/registro.js';
 // Monta o servidor sem ocupar uma porta durante a importação, permitindo testá-lo isoladamente.
 import {
   cadastrarTriagem,
+  listarAtendimentosEmAndamento,
   listarAtendimentosAguardandoMedico,
   listarAtendimentosAguardandoTriagem,
 } from './triagens/cadastro.js';
@@ -129,6 +131,12 @@ export async function criarServidor(banco) {
           atendimentos: await listarAtendimentosAguardandoMedico(banco),
         });
       }
+      if (req.method === 'GET' && rota === '/api/atendimentos/medico/em-andamento') {
+        exigirPerfil(sessao, ['medico']);
+        return responder(res, 200, {
+          atendimentos: await listarAtendimentosEmAndamento(banco),
+        });
+      }
       // Separa esta operação pelas regras de rota e método; somente esse ramo pode produzir sua resposta.
       if (rota === '/api/pacientes' && req.method === 'POST') {
         exigirPerfil(sessao, ['recepcao']);
@@ -159,6 +167,11 @@ export async function criarServidor(banco) {
         const resultado = await cadastrarTriagem(banco, sessao.usuario, await lerJson(req));
 
         // Envia a resposta deste ramo e encerra o pedido.
+        return responder(res, 201, resultado);
+      }
+      if (req.method === 'POST' && rota === '/api/consultas') {
+        exigirPerfil(sessao, ['medico']);
+        const resultado = await registrarConsulta(banco, sessao.usuario, await lerJson(req));
         return responder(res, 201, resultado);
       }
       throw new ErroHttp(404, 'Função não encontrada.');
