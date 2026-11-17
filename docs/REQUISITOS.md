@@ -64,9 +64,9 @@ relatório do que já está implementado.
 
 - A classificação de risco é informada pela enfermagem após avaliação profissional. O sistema não
   calcula a classificação nem substitui a avaliação clínica.
-- A fila de espera médica prioriza as classificações nesta ordem: Vermelho, Laranja, Amarelo, Verde
-  e Azul. Entre atendimentos da mesma classificação, a ordem é FIFO por `triagens.criado_em` e,
-  em caso de empate, por `atendimentos.id`.
+- A fila médica segue a ordem definida pelo projeto. A regra documentada é FIFO por
+  `triagens.criado_em` e, em caso de empate, por `atendimentos.id`; não há prioridade adicional por
+  cor.
 - A consulta médica contém o registro textual `registro_consulta`, associado ao atendimento e ao
   médico autenticado. Os campos definitivos devem seguir a especificação oficial do grupo.
 - Os registros de medicação incluem os campos previstos nos diagramas fornecidos: `medicacao`,

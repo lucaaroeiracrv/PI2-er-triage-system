@@ -55,9 +55,9 @@ flowchart TD
    sistema.
 4. **Confirmação da triagem:** o backend valida e grava a triagem, muda a situação do atendimento
    para `aguardando_medico` na mesma transação e só confirma o salvamento depois do commit.
-5. **Fila médica:** o médico consulta atendimentos em `aguardando_medico`. A fila prioriza as
-   classificações nesta ordem: Vermelho, Laranja, Amarelo, Verde e Azul. Entre atendimentos da mesma
-   classificação, a ordem é FIFO por `triagens.criado_em` e, em caso de empate, por `atendimentos.id`.
+5. **Fila médica:** o médico consulta atendimentos em `aguardando_medico`. A ordem definida para a
+   fila é FIFO por `triagens.criado_em` e, em caso de empate, por `atendimentos.id`; não há
+   prioridade adicional por cor.
 6. **Consulta médica:** o médico seleciona um atendimento e registra `registro_consulta`. O backend
    associa o médico autenticado e valida que paciente, atendimento e triagem selecionados
    correspondem entre si. A consulta é persistida e o atendimento passa para `em_atendimento`.
@@ -82,9 +82,8 @@ flowchart TD
 
 ## Regras clínicas e decisões pendentes
 
-- O sistema não calcula a classificação de risco nem substitui a avaliação profissional. A fila de
-  espera respeita a classificação informada e ordena, da maior para a menor prioridade: Vermelho,
-  Laranja, Amarelo, Verde e Azul. Dentro de cada classificação, mantém FIFO por data/hora da triagem
-  e ID do atendimento.
+- O sistema não calcula a classificação de risco nem substitui a avaliação profissional.
+- A fila médica segue FIFO; não deve ser introduzida prioridade por classificação sem requisito
+  formal aprovado.
 - O perfil autorizado para registrar medicações e o perfil autorizado para encerrar o atendimento
   devem ser confirmados nos requisitos do grupo antes de implementar o controle de acesso.

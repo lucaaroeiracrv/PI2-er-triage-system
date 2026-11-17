@@ -18,8 +18,6 @@ const CONSULTA_TRIAGEM_ATENDIMENTO = `SELECT a.id AS "atendimento_id",
        JOIN pacientes p ON p.id = a.paciente_id
        JOIN triagens t ON t.atendimento_id = a.id
        JOIN usuarios u ON u.id = t.enfermeiro_id`;
-const ORDEM_CLASSIFICACOES = ['Vermelho', 'Laranja', 'Amarelo', 'Verde', 'Azul'];
-
 // Confere os campos recebidos da tela antes de permitir qualquer gravação.
 export function validarTriagem(dados) {
   if (!dados || typeof dados !== 'object' || Array.isArray(dados)) {
@@ -196,20 +194,12 @@ export async function listarAtendimentosAguardandoTriagem(banco) {
 }
 
 export async function listarAtendimentosAguardandoMedico(banco) {
-  const atendimentos = await consultar(
+  return consultar(
     banco,
     `${CONSULTA_TRIAGEM_ATENDIMENTO}
       WHERE a.situacao = 'aguardando_medico'
       ORDER BY t.criado_em, a.id`,
   );
-  return atendimentos.sort((a, b) => {
-    const prioridadeA = ORDEM_CLASSIFICACOES.indexOf(a.classificacao);
-    const prioridadeB = ORDEM_CLASSIFICACOES.indexOf(b.classificacao);
-    return (
-      (prioridadeA < 0 ? ORDEM_CLASSIFICACOES.length : prioridadeA) -
-      (prioridadeB < 0 ? ORDEM_CLASSIFICACOES.length : prioridadeB)
-    );
-  });
 }
 
 export async function listarAtendimentosEmAndamento(banco) {
