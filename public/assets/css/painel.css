@@ -234,6 +234,39 @@ th {
   /* Mantém o texto legível dentro da paleta compartilhada. */
   color: #526883;
 }
+.etiqueta-classificacao {
+  display: inline-block;
+  padding: 5px 10px;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  font-weight: bold;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.classificacao-vermelho {
+  color: #8c1d18;
+  background: #fde8e7;
+}
+.classificacao-laranja {
+  color: #803500;
+  background: #fff0e3;
+}
+.classificacao-amarelo {
+  color: #594500;
+  background: #fff5bf;
+}
+.classificacao-verde {
+  color: #14532d;
+  background: #e5f5e9;
+}
+.classificacao-azul {
+  color: #164276;
+  background: #e6f0ff;
+}
+.classificacao-desconhecida {
+  color: #334155;
+  background: #eef2f6;
+}
 caption {
   /* Alinha o texto conforme a leitura esperada de títulos, células ou ações. */
   text-align: left;

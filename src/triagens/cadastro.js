@@ -18,7 +18,6 @@ const CONSULTA_TRIAGEM_ATENDIMENTO = `SELECT a.id AS "atendimento_id",
        JOIN pacientes p ON p.id = a.paciente_id
        JOIN triagens t ON t.atendimento_id = a.id
        JOIN usuarios u ON u.id = t.enfermeiro_id`;
-
 // Confere os campos recebidos da tela antes de permitir qualquer gravação.
 export function validarTriagem(dados) {
   if (!dados || typeof dados !== 'object' || Array.isArray(dados)) {
