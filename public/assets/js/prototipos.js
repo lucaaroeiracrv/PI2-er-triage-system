@@ -1,5 +1,9 @@
 // A mesma tela pode ser consultada como desenho colorido ou rascunho em cinza.
 const parametros = new URLSearchParams(window.location.search);
+const campoPressao = document.querySelector('[name="pressao"]');
+if (campoPressao && window.pi2Api) {
+  window.pi2Api.maskPressaoInput(campoPressao);
+}
 // O parâmetro de rascunho aplica o tema em cinza à mesma página, sem copiar seu formulário.
 if (parametros.get('modo') === 'rascunho') {
   // Seleciona o modo de apresentação do desenho sem criar outra cópia da tela.

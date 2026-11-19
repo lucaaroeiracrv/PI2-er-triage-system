@@ -20,6 +20,24 @@ test('máscara de CPF formata até onze dígitos e remove caracteres não numér
   assert.equal(api.formatCpf('1234'), '123.4');
 });
 
+test('máscara de telefone formata números fixos e celulares nacionais', () => {
+  const api = carregarApi(async () => {});
+
+  assert.equal(api.formatTelefone('11987654321'), '(11) 98765-4321');
+  assert.equal(api.formatTelefone('(11) 2345-6789'), '(11) 2345-6789');
+  assert.equal(api.formatTelefone('119876abc54321'), '(11) 98765-4321');
+  assert.equal(api.formatTelefone('+5511987654321'), '+5511987654321');
+});
+
+test('máscara de pressão preserva o separador e limita os valores a seis dígitos', () => {
+  const api = carregarApi(async () => {});
+
+  assert.equal(api.formatPressao('12080'), '120/80');
+  assert.equal(api.formatPressao('90/60'), '90/60');
+  assert.equal(api.formatPressao('120/80'), '120/80');
+  assert.equal(api.formatPressao('120/80abc'), '120/80');
+});
+
 test('requisição POST obtém a sessão e envia seu token CSRF', async () => {
   const chamadas = [];
   const api = carregarApi(async (url, opcoes) => {

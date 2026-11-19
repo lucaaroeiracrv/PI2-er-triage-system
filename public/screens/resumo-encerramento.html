@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Resumo e encerramento • PI2</title>
+    <link rel="stylesheet" href="../assets/css/tema.css" />
+    <script src="../assets/js/resumo-encerramento.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <div class="marca">
+        PI2
+        <small>Sistema de atendimento</small>
+      </div>
+      <nav class="linha" aria-label="Navegação do atendimento">
+        <a href="medico.html">Voltar à fila médica</a>
+        <a href="../index.html">Índice do projeto</a>
+      </nav>
+    </header>
+    <main>
+      <span class="etiqueta">Versão parcial • Tarefa 19</span>
+      <h1>Resumo do atendimento</h1>
+      <p class="subtitulo">Revise as informações antes de confirmar o encerramento.</p>
+
+      <section class="cartao">
+        <div class="linha">
+          <h2>Identificação</h2>
+          <span class="etiqueta" id="situacao-atendimento">Em atendimento • demonstração</span>
+        </div>
+        <dl id="identificacao-atendimento"></dl>
+      </section>
+
+      <section class="cartao">
+        <h2>Triagem</h2>
+        <dl>
+          <dt>Queixa principal</dt>
+          <dd>Demonstração: desconforto informado pelo paciente.</dd>
+          <dt>Classificação</dt>
+          <dd>Amarelo • exemplo informado pela enfermagem</dd>
+          <dt>Sinais vitais</dt>
+          <dd>
+            Pressão: exemplo • Temperatura: exemplo • Frequência: exemplo • Saturação: exemplo
+          </dd>
+        </dl>
+      </section>
+
+      <section class="cartao">
+        <h2>Consulta médica</h2>
+        <p>Registro demonstrativo: avaliação e conduta de exemplo.</p>
+      </section>
+
+      <section class="cartao">
+        <h2>Medicações registradas</h2>
+        <p>Exemplos fictícios, não vinculados a uma prescrição.</p>
+        <ul>
+          <li>Medicação demonstrativa A • dose e via fictícias</li>
+          <li>Medicação demonstrativa B • dose e via fictícias</li>
+        </ul>
+      </section>
+
+      <section class="cartao">
+        <h2>Confirmar encerramento</h2>
+        <p class="aviso">
+          Esta versão é demonstrativa. A confirmação não altera o atendimento nem envia dados ao
+          backend; a função real será ligada na etapa seguinte.
+        </p>
+        <button type="button" id="abrir-confirmacao">Confirmar encerramento</button>
+        <p id="resultado-encerramento" class="mensagem" role="status" aria-live="polite"></p>
+      </section>
+
+      <dialog id="dialogo-confirmacao" aria-labelledby="titulo-confirmacao">
+        <h2 id="titulo-confirmacao">Confirmar encerramento?</h2>
+        <p>Esta ação é apenas uma demonstração e não encerrará o atendimento no sistema.</p>
+        <div class="acoes">
+          <button type="button" id="confirmar-encerramento">Confirmar demonstração</button>
+          <button type="button" class="secundario" id="cancelar-encerramento">Voltar</button>
+        </div>
+      </dialog>
+    </main>
+    <footer>Projeto acadêmico • Dados fictícios • Encerramento real ainda não disponível</footer>
+  </body>
+</html>

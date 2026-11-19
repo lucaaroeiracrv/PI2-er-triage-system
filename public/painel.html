@@ -123,7 +123,13 @@
               Telefone
               <span>Opcional</span>
               <!-- O campo telefone mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
-              <input name="telefone" maxlength="20" type="tel" autocomplete="off" />
+              <input
+                name="telefone"
+                maxlength="20"
+                type="tel"
+                autocomplete="off"
+                placeholder="(00) 00000-0000"
+              />
             </label>
             <!-- A ação é tratada pelo formulário ou pelo evento JavaScript, conforme o tipo do botão. -->
             <button>Salvar paciente</button>
@@ -217,7 +223,14 @@
             </label>
             <label>
               Pressão arterial
-              <input name="pressao" required maxlength="20" placeholder="Ex.: 120/80" />
+              <input
+                name="pressao"
+                type="text"
+                inputmode="numeric"
+                required
+                maxlength="7"
+                placeholder="Ex.: 120/80"
+              />
             </label>
             <label>
               Temperatura (°C)
@@ -262,9 +275,14 @@
               <p class="etapa">Médico</p>
               <h2>Atendimentos aguardando atendimento médico</h2>
             </div>
-            <button type="button" class="secundario" id="atualizar-fila-medica">
-              Atualizar agora
-            </button>
+            <div class="linha">
+              <a class="botao secundario" href="screens/medico.html">
+                Abrir tela completa do médico
+              </a>
+              <button type="button" class="secundario" id="atualizar-fila-medica">
+                Atualizar agora
+              </button>
+            </div>
           </div>
           <p id="resultado-fila-medica">
             A fila é atualizada automaticamente enquanto este painel estiver aberto.

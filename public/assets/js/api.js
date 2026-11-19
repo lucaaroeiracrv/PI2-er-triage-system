@@ -1,5 +1,21 @@
 // Compartilha a sessão atual e envia operações de escrita com o token CSRF da sessão.
 window.pi2Api = {
+  formatTelefone(valor) {
+    if (valor.startsWith('+')) return valor;
+
+    const digitos = valor.replace(/\D/g, '');
+    if (digitos.length > 11) return valor;
+    if (digitos.length <= 2) return digitos ? `(${digitos}` : '';
+
+    const ddd = digitos.slice(0, 2);
+    const numero = digitos.slice(2);
+    if (numero.length <= 4) return `(${ddd}) ${numero}`;
+    if (digitos.length <= 10) {
+      return `(${ddd}) ${numero.slice(0, 4)}-${numero.slice(4)}`;
+    }
+    return `(${ddd}) ${numero.slice(0, 5)}-${numero.slice(5)}`;
+  },
+
   formatCpf(valor) {
     const digitos = valor.replace(/\D/g, '').slice(0, 11);
     return digitos
@@ -8,12 +24,29 @@ window.pi2Api = {
       .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d{1,2})$/, '$1.$2.$3-$4');
   },
 
-  maskCpfInput(campo) {
+  formatPressao(valor) {
+    const entrada = valor.replace(/[^\d/]/g, '');
+    if (entrada.includes('/')) {
+      const [sistolica, ...partesDiastolica] = entrada.split('/');
+      return `${sistolica.slice(0, 3)}/${partesDiastolica.join('').slice(0, 3)}`;
+    }
+
+    const digitos = entrada.slice(0, 6);
+    if (digitos.length <= 3) return digitos;
+    return `${digitos.slice(0, 3)}/${digitos.slice(3)}`;
+  },
+
+  maskInput(campo, formatar) {
     campo.addEventListener('input', () => {
+      const valorAnterior = campo.value;
+      const valorFormatado = formatar(valorAnterior);
+      if (valorFormatado === valorAnterior) return;
+
       const digitosAntesDoCursor = campo.value
         .slice(0, campo.selectionStart)
         .replace(/\D/g, '').length;
-      campo.value = this.formatCpf(campo.value);
+      const separadorAntesDoCursor = campo.value.slice(0, campo.selectionStart).includes('/');
+      campo.value = valorFormatado;
       let posicao = 0;
       let digitosContados = 0;
       while (posicao < campo.value.length && digitosContados < digitosAntesDoCursor) {
@@ -22,8 +55,23 @@ window.pi2Api = {
         }
         posicao += 1;
       }
+      if (separadorAntesDoCursor && campo.value[posicao] === '/') {
+        posicao += 1;
+      }
       campo.setSelectionRange(posicao, posicao);
     });
+  },
+
+  maskCpfInput(campo) {
+    this.maskInput(campo, (valor) => this.formatCpf(valor));
+  },
+
+  maskTelefoneInput(campo) {
+    this.maskInput(campo, (valor) => this.formatTelefone(valor));
+  },
+
+  maskPressaoInput(campo) {
+    this.maskInput(campo, (valor) => this.formatPressao(valor));
   },
 
   async postJson(url, dados) {
