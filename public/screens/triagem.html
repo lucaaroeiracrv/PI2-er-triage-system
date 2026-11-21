@@ -10,6 +10,7 @@
     <title>PI2 • Tarefa 17 • Desenhar a triagem</title>
     <!-- Reutiliza o estilo compartilhado, sem duplicar regras nesta página. -->
     <link rel="stylesheet" href="../assets/css/tema.css" />
+    <script src="../assets/js/api.js" defer></script>
     <!-- Carrega o comportamento depois da leitura da estrutura HTML por meio de defer. -->
     <script src="../assets/js/prototipos.js" defer></script>
   </head>
@@ -59,7 +60,7 @@
           <label class="campo">
             Pressão arterial
             <!-- O campo pressao mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
-            <input name="pressao" placeholder="Valor informado" />
+            <input name="pressao" inputmode="numeric" placeholder="Ex.: 120/80" />
           </label>
           <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
           <label class="campo">

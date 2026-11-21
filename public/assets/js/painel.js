@@ -13,6 +13,8 @@ $('[name="data_nascimento"]').max = new Date().toISOString().slice(0, 10);
 const chavesAbertura = new Map();
 const campoCpf = $('[name="documento"]');
 window.pi2Api.maskCpfInput(campoCpf);
+window.pi2Api.maskTelefoneInput($('[name="telefone"]'));
+window.pi2Api.maskPressaoInput($('[name="pressao"]'));
 // Rótulos de apresentação dos perfis que o backend reconhece.
 const nomesPerfis = {
   recepcao: 'Recepção',

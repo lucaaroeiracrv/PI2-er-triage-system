@@ -8,7 +8,9 @@ const formulario = document.getElementById('form-cadastro');
 const mensagem = document.getElementById('mensagem');
 const linkTriagem = document.getElementById('link-triagem');
 const campoCpf = document.getElementById('cpf');
+const campoTelefone = document.getElementById('telefone');
 window.pi2Api.maskCpfInput(campoCpf);
+window.pi2Api.maskTelefoneInput(campoTelefone);
 
 if (new URLSearchParams(window.location.search).get('modo') === 'rascunho') {
   document.documentElement.classList.add('wireframe');

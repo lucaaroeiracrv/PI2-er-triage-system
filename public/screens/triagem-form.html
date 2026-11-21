@@ -10,6 +10,7 @@
     <title>PI2 • Tarefa 31 • Formulário da triagem</title>
     <!-- Reutiliza o estilo compartilhado, sem duplicar regras nesta página. -->
     <link rel="stylesheet" href="../assets/css/tema.css" />
+    <script src="../assets/js/api.js" defer></script>
     <!-- Carrega o comportamento depois da leitura da estrutura HTML por meio de defer. -->
     <script src="../assets/js/prototipos.js" defer></script>
   </head>
@@ -26,8 +27,8 @@
     <!-- Delimita o conteúdo principal para facilitar a navegação por tecnologias assistivas. -->
     <main>
       <span class="etiqueta">Versão parcial</span>
-<h1>Triagem</h1>
-<p class="subtitulo">Preencha os dados da triagem do atendimento selecionado.</p>
+      <h1>Triagem</h1>
+      <p class="subtitulo">Preencha os dados da triagem do atendimento selecionado.</p>
       <!-- TAREFA 17: desenho da triagem, sem cálculo clínico ou salvamento nesta etapa. -->
       <!-- Agrupa os controles e o conteúdo de uma mesma etapa do fluxo. -->
       <section class="cartao">
@@ -37,9 +38,11 @@
           <span class="etiqueta">Enfermagem</span>
         </div>
         <p>
-  Paciente: <strong id="triagem-paciente">Paciente Exemplo Um</strong>
-  • Atendimento: <strong id="triagem-atendimento">001</strong>
-</p>
+          Paciente:
+          <strong id="triagem-paciente">Paciente Exemplo Um</strong>
+          • Atendimento:
+          <strong id="triagem-atendimento">001</strong>
+        </p>
         <!-- Este formulário é um desenho; o JavaScript impede que pareça um salvamento real. -->
         <form class="formulario" id="form-triagem" data-prototipo>
           <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
@@ -55,7 +58,7 @@
           <label class="campo">
             Pressão arterial
             <!-- O campo pressao mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
-            <input name="pressao" placeholder="Valor informado" />
+            <input name="pressao" inputmode="numeric" placeholder="Ex.: 120/80" />
           </label>
           <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
           <label class="campo">
@@ -78,7 +81,7 @@
           <!-- Associa a descrição ao campo, permitindo compreender a entrada antes de preencher. -->
           <label class="campo inteira">
             Classificação de risco
-            
+
             <!-- O campo classificacao mantém seu nome para que a leitura dos dados continue compatível com a regra da aplicação. -->
             <select name="classificacao">
               <option value="">Selecionar classificação</option>
