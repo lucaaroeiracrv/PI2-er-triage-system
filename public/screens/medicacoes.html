@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Medicações do atendimento • PI2</title>
     <link rel="stylesheet" href="../assets/css/tema.css" />
+    <script src="../assets/js/api.js" defer></script>
     <script src="../assets/js/medicacoes.js" defer></script>
   </head>
   <body>
@@ -20,19 +21,16 @@
       </nav>
     </header>
     <main>
-      <span class="etiqueta">Tarefa 19 • Versão parcial</span>
+      <span class="etiqueta">Tarefa 37 • Medicações</span>
       <h1>Medicações do atendimento</h1>
       <p class="subtitulo">
-        Consulte os registros demonstrativos e preencha o formulário de medicação.
+        Consulte os registros persistidos e preencha o formulário de medicação.
       </p>
 
       <section class="cartao">
         <h2>Atendimento selecionado</h2>
         <p id="contexto-atendimento" aria-live="polite"></p>
-        <p class="aviso">
-          Protótipo com dados fictícios: os registros desta tela são apenas exemplos temporários. O
-          formulário ainda não envia dados ao backend nem salva alterações.
-        </p>
+        <p class="aviso">Os registros são associados ao atendimento e ao médico autenticado.</p>
       </section>
 
       <section class="cartao">
@@ -79,7 +77,7 @@
         </div>
         <div class="tabela">
           <table>
-            <caption>Registros temporários de demonstração deste atendimento</caption>
+            <caption>Registros persistidos deste atendimento</caption>
             <thead>
               <tr>
                 <th>Medicação</th>
@@ -88,26 +86,11 @@
                 <th>Observações</th>
               </tr>
             </thead>
-            <tbody id="lista-medicacoes">
-              <tr>
-                <td>Medicação demonstrativa A</td>
-                <td>Dose fictícia A</td>
-                <td>Via demonstrativa</td>
-                <td>Registro de exemplo; não representa uma prescrição.</td>
-              </tr>
-              <tr>
-                <td>Medicação demonstrativa B</td>
-                <td>Dose fictícia B</td>
-                <td>Via demonstrativa</td>
-                <td>Registro de exemplo; não representa uma prescrição.</td>
-              </tr>
-            </tbody>
+            <tbody id="lista-medicacoes"></tbody>
           </table>
         </div>
       </section>
     </main>
-    <footer>
-      Projeto acadêmico • Dados fictícios • Nenhum dado clínico é salvo nesta versão parcial
-    </footer>
+    <footer>Projeto acadêmico • Use apenas dados fictícios</footer>
   </body>
 </html>

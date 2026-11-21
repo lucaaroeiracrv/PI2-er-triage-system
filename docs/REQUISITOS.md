@@ -71,8 +71,8 @@ relatório do que já está implementado.
   médico autenticado. Os campos definitivos devem seguir a especificação oficial do grupo.
 - Os registros de medicação incluem os campos previstos nos diagramas fornecidos: `medicacao`,
   `dose`, `via` e `observacoes`, além do atendimento, profissional responsável e data/hora.
-- O perfil autorizado para registrar medicações e o perfil autorizado para encerrar atendimentos
-  precisam ser confirmados formalmente antes da implementação dessas permissões.
+- O perfil autorizado para registrar medicações e encerrar atendimentos está provisoriamente
+  definido como `medico` até confirmação formal pelo grupo.
 - O resumo pré-encerramento deve reunir os dados relevantes já registrados no atendimento; não há
   requisito para persistir o resumo como uma entidade separada.
 

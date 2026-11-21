@@ -164,7 +164,15 @@ Página visual da tarefa 13 que organiza e apresenta os campos e as funções pr
 
 ### `public/screens/medicacoes-encerramento.html`
 
-Protótipo que apresenta as áreas de registro de medicações e encerramento do atendimento. Os campos são uma proposta visual e não salvam medicações nem finalizam um atendimento nesta etapa.
+Tela visual consolidada que preserva a apresentação anterior. Ela não substitui as operações reais implementadas em `medicacoes.html` e `resumo-encerramento.html`.
+
+### `public/screens/medicacoes.html`
+
+Integra-se à API de medicações para listar e registrar registros reais do atendimento. Os dados externos são inseridos com `textContent` e o envio evita duplicidade durante uma operação em andamento.
+
+### `public/screens/resumo-encerramento.html`
+
+Carrega o resumo real por atendimento, mostra triagem, consultas e medicações e chama a API idempotente de encerramento. A situação finalizada é aplicada na interface somente após confirmação do backend.
 
 ### `public/screens/medico.html`
 

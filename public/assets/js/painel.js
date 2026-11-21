@@ -434,6 +434,9 @@ aoEnviar('#form-paciente', async (dados, form) => {
   if (cpf.length !== 11) {
     throw new Error('Informe um CPF válido com 11 números.');
   }
+  if (!window.pi2Api.validarCpf(cpf)) {
+    throw new Error('Informe um CPF válido.');
+  }
   // Resultado da operação ou da conferência; o chamador decide a resposta a partir dele.
   const resultado = await pedir('/api/pacientes', {
     // Método HTTP que separa leitura e envio de dados.
