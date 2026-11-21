@@ -14,6 +14,7 @@ O backend suporta Oracle e MySQL, selecionados individualmente pela variável `D
 - Medicações e encerramento possuem testes automatizados unitários/transacionais simulados. Esses testes não substituem execução real em MySQL ou Oracle.
 - MySQL 8.4 validado diretamente em Docker: o script preparou a tabela `medicacoes`, os tipos físicos, a chave primária, o índice de atendimento e as referências estrangeiras.
 - Oracle Database 23 Free validado diretamente em Docker: o script criou `MEDICACOES`, a identidade, o índice `IDX_MEDICACOES_ATENDIMENTO` e as restrições de chave estrangeira.
+- Conversão CLOB validada em Oracle 23 Free usando `TO_CLOB()` e os aliases `registro_consulta`/`observacoes`: `consultar()` retornou strings JavaScript com os valores esperados.
 - Os dois bancos retornaram sucesso nos endpoints `/api/saude` após a preparação e o início da aplicação.
 - CPF possui validação matemática no backend e validação equivalente no frontend.
 - Pressão arterial é validada no backend no formato sistólica/diastólica.
