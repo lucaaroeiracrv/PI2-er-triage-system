@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { configuracaoBanco, erroDeUnicidade, oracledb } from '../src/config/banco.js';
+import { consultar, configuracaoBanco, erroDeUnicidade, oracledb } from '../src/config/banco.js';
 
 const variaveisBanco = [
   'DB_HOST',
@@ -100,4 +100,38 @@ test('expõe as constantes do driver Oracle para os binds e formatos de consulta
   assert.ok(oracledb.NUMBER);
   assert.equal(typeof oracledb.BIND_OUT, 'number');
   assert.equal(typeof oracledb.OUT_FORMAT_OBJECT, 'number');
+});
+
+test('consulta Oracle converte CLOBs de consulta e observações para strings', async () => {
+  const engineAnterior = process.env.DB_ENGINE;
+  process.env.DB_ENGINE = 'oracle';
+  let opcoesExecutadas;
+  const banco = {
+    async getConnection() {
+      return {
+        async execute(sql, binds, opcoes) {
+          opcoesExecutadas = opcoes;
+          return { rows: [{ registro_consulta: 'Consulta', observacoes: 'Observação' }] };
+        },
+        async close() {},
+      };
+    },
+  };
+
+  try {
+    const linhas = await consultar(
+      banco,
+      'SELECT registro_consulta, observacoes FROM atendimentos',
+    );
+    assert.equal(linhas[0].registro_consulta, 'Consulta');
+    assert.equal(linhas[0].observacoes, 'Observação');
+    assert.equal(opcoesExecutadas.fetchInfo.registro_consulta.type, oracledb.STRING);
+    assert.equal(opcoesExecutadas.fetchInfo.observacoes.type, oracledb.STRING);
+  } finally {
+    if (engineAnterior === undefined) {
+      delete process.env.DB_ENGINE;
+    } else {
+      process.env.DB_ENGINE = engineAnterior;
+    }
+  }
 });

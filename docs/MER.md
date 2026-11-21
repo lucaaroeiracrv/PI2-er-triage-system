@@ -147,7 +147,9 @@ Armazena os registros de medicação associados ao atendimento.
 - Um atendimento pode ter nenhum ou vários registros de medicação; cada registro pertence a um
   atendimento e identifica o profissional responsável.
 - O perfil autorizado a registrar medicações deve ser definido na regra de acesso e aplicado no
-  backend. O diagrama fornecido não determina esse perfil.
+  backend. Nesta implementação provisória, o perfil é `medico` e aguarda confirmação do grupo.
+- A tabela física foi adicionada aos schemas MySQL e Oracle com chave estrangeira para
+  `atendimentos` e `usuarios`, campos de texto definidos no MER e `criado_em`.
 
 ## Cardinalidades
 

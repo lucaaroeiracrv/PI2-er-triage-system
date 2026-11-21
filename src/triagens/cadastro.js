@@ -40,8 +40,8 @@ export function validarTriagem(dados) {
     throw new ErroHttp(400, 'Informe a pressão arterial.');
   }
   const pressao = dados.pressao.trim();
-  if (!pressao || pressao.length > 20) {
-    throw new ErroHttp(400, 'Informe uma pressão arterial com até 20 caracteres.');
+  if (!/^\d{2,3}\/\d{2,3}$/.test(pressao) || pressao.length > 20) {
+    throw new ErroHttp(400, 'Informe a pressão no formato sistólica/diastólica, como 120/80.');
   }
 
   const temperatura = Number(dados.temperatura);

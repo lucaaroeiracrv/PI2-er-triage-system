@@ -4,6 +4,22 @@ import { consultar, executar, erroDeUnicidade, oracledb } from '../config/banco.
 // Expressão de UUID v4 para identificar uma tentativa sem depender do conteúdo do formulário.
 export const formatoChave =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+export function validarCpf(valor) {
+  if (typeof valor !== 'string') return false;
+  const digitos = valor.replace(/\D/g, '');
+  if (!/^\d{11}$/.test(digitos) || /^(\d)\1{10}$/.test(digitos)) return false;
+
+  for (const inicio of [9, 10]) {
+    let soma = 0;
+    for (let indice = 0; indice < inicio; indice += 1) {
+      soma += Number(digitos[indice]) * (inicio + 1 - indice);
+    }
+    const resto = (soma * 10) % 11;
+    const digito = resto === 10 ? 0 : resto;
+    if (digito !== Number(digitos[inicio])) return false;
+  }
+  return true;
+}
 // Confere tipos, limites e datas antes de permitir qualquer gravação no banco.
 export function validarPaciente(dados) {
   // O nome precisa ser texto e caber no campo VARCHAR(120); espaços nas pontas não contam como nome.
@@ -39,6 +55,9 @@ export function validarPaciente(dados) {
   const documento = dados.documento.replace(/\D/g, '');
   if (documento.length !== 11) {
     throw new ErroHttp(400, 'O CPF deve ter 11 números.');
+  }
+  if (!validarCpf(documento)) {
+    throw new ErroHttp(400, 'Informe um CPF válido.');
   }
   // Um contato opcional não pode chegar como número ou objeto: o formato textual preserva sinais e zeros.
   if (dados.telefone != null && typeof dados.telefone !== 'string') {

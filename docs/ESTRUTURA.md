@@ -13,6 +13,9 @@ Mostra a estrutura final do código
     - `pacientes/`: cadastro e busca.
     - `atendimentos/abertura.js`: abertura e transação.
     - `consultas/registro.js`: validação, vínculo e persistência transacional das consultas médicas.
+    - `medicacoes/registro.js`: validação, persistência e recuperação das medicações.
+    - `atendimentos/finalizacao.js`: encerramento transacional e idempotente.
+    - `atendimentos/resumo.js`: composição dos dados reais do resumo.
     - `triagens/cadastro.js`: gravação e leitura da triagem e dados das filas de atendimento.
     - `servidor.js`: entrada e encaminhamento das operações.
   - `public/`
@@ -25,7 +28,7 @@ Mostra a estrutura final do código
   - `database/`: schemas Oracle e MySQL, além de dados fictícios.
   - `scripts/`: configuração local, preparação/reset dos bancos, usuários fictícios e testes de conexão.
     - `iniciar-docker.ps1`: escolhe o banco e inicia ou para os serviços Compose no Windows.
-  - `tests/`: testes de arquivos públicos, configuração de bancos, senhas, permissões, triagem e consulta.
+  - `tests/`: testes de arquivos públicos, configuração de bancos, senhas, permissões, triagem, consulta, medicações e encerramento.
   - `docs/`: MER, fluxo esperado, requisitos, guias de banco e verificações.
   - `README.md`, `package.json`, `package-lock.json` e configurações de edição.
   - `.git/`: histórico local incluído no ZIP.

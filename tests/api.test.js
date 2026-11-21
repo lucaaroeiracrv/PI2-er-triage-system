@@ -20,6 +20,14 @@ test('máscara de CPF formata até onze dígitos e remove caracteres não numér
   assert.equal(api.formatCpf('1234'), '123.4');
 });
 
+test('validação de CPF rejeita repetidos e aceita dígitos verificadores válidos', () => {
+  const api = carregarApi(async () => {});
+
+  assert.equal(api.validarCpf('529.982.247-25'), true);
+  assert.equal(api.validarCpf('11111111111'), false);
+  assert.equal(api.validarCpf('52998224724'), false);
+});
+
 test('máscara de telefone formata números fixos e celulares nacionais', () => {
   const api = carregarApi(async () => {});
 

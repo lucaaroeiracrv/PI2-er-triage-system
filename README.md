@@ -41,10 +41,12 @@ O estado atual do sistema inclui:
   dados recuperados após a confirmação do salvamento.
 - Fila médica com classificação, horário, profissional responsável, queixa e sinais vitais da triagem.
 - Registro de consultas médicas associado ao atendimento, com transação e retomada de atendimentos em andamento.
+- Registro e recuperação de medicações vinculadas ao atendimento e ao médico autenticado.
+- Resumo real do atendimento e encerramento idempotente, limitado ao perfil médico provisoriamente.
 - Configuração do backend para MySQL ou Oracle.
-- Testes automatizados das regras e dos registros transacionais de triagem e consulta.
+- Testes automatizados das regras e dos registros transacionais de triagem, consulta, medicação e encerramento.
 
-> A classificação é informada pela enfermagem conforme o protocolo adotado pelo serviço. O sistema não calcula risco nem substitui a avaliação clínica. O registro da consulta usa o campo de texto `registro_consulta`; medicações e encerramento permanecem como protótipos. Consulte [docs/VERIFICACAO.md](docs/VERIFICACAO.md) para verificações e limitações.
+> A classificação é informada pela enfermagem conforme o protocolo adotado pelo serviço. O sistema não calcula risco nem substitui a avaliação clínica. Medicações e encerramento exigem o perfil médico provisoriamente, pois as regras oficiais desses perfis ainda pendem de confirmação do grupo.
 
 ## Tecnologias
 
@@ -127,6 +129,13 @@ npm run formatar
 
 Os testes automatizados não substituem a validação de conexão com uma instância local de MySQL ou Oracle. Consulte o arquivo [docs/VERIFICACAO.md](docs/VERIFICACAO.md) para o registro das verificações e suas limitações.
 
+## APIs das tarefas 37 e 38
+
+- `GET /api/medicacoes?atendimento_id=<id>`: lista as medicações reais de um atendimento. Requer perfil `medico`.
+- `POST /api/medicacoes`: registra `atendimento_id`, `medicacao`, `dose`, `via` e `observacoes`. O profissional é obtido da sessão; requere perfil `medico`.
+- `GET /api/atendimentos/resumo?atendimento_id=<id>`: devolve paciente, situação, triagem, consultas e medicações. Requer perfil `medico`.
+- `POST /api/atendimentos/finalizar`: recebe `atendimento_id` e exige consulta médica registrada. Requer perfil `medico`; repetir após `finalizado` é idempotente.
+
 ## Acesso de demonstração
 
 O projeto cria usuários fictícios para os perfis:
@@ -173,7 +182,7 @@ Este projeto tem finalidade educacional. Os schemas, campos e fluxos devem ser c
 
 - Os registros utilizados para demonstração são fictícios.
 - A aplicação não deve ser usada para atendimento real nem para armazenar dados pessoais ou clínicos reais.
-- Os protótipos de algumas etapas não representam funcionalidades concluídas.
+- Alguns protótipos visuais de desenho ainda podem não representar funcionalidades concluídas; medicações e encerramento foram integrados às telas específicas descritas neste README.
 - A execução local não equivale a uma implantação segura para produção.
 
 ---

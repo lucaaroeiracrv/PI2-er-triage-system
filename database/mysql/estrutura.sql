@@ -80,3 +80,19 @@ CREATE TABLE IF NOT EXISTS consultas (
 );
 
 CREATE INDEX idx_consultas_atendimento ON consultas (atendimento_id);
+
+CREATE TABLE IF NOT EXISTS medicacoes (
+  id INT NOT NULL AUTO_INCREMENT,
+  atendimento_id INT NOT NULL,
+  profissional_id INT NOT NULL,
+  medicacao VARCHAR(120) NOT NULL,
+  dose VARCHAR(80) NOT NULL,
+  via VARCHAR(40) NOT NULL,
+  observacoes VARCHAR(500) NOT NULL DEFAULT '',
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_medicacao_atendimento FOREIGN KEY (atendimento_id) REFERENCES atendimentos (id),
+  CONSTRAINT fk_medicacao_profissional FOREIGN KEY (profissional_id) REFERENCES usuarios (id)
+);
+
+CREATE INDEX idx_medicacoes_atendimento ON medicacoes (atendimento_id);

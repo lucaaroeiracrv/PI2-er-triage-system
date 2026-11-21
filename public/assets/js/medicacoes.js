@@ -4,6 +4,8 @@ const pacienteNome = parametros.get('paciente_nome');
 const formulario = document.getElementById('form-medicacao');
 const listaMedicacoes = document.getElementById('lista-medicacoes');
 const mensagem = document.getElementById('mensagem-medicacao');
+const botaoEnviar = formulario.querySelector('button[type="submit"]');
+let carregando = false;
 
 if (atendimentoId) {
   const parametrosResumo = new URLSearchParams();
@@ -20,7 +22,7 @@ if (atendimentoId) {
 document.getElementById('contexto-atendimento').textContent =
   atendimentoId && pacienteNome
     ? `Paciente: ${pacienteNome} • Atendimento #${atendimentoId}`
-    : 'Paciente Exemplo Um • Atendimento demonstrativo 001';
+    : 'Atendimento não identificado';
 
 function mostrarMensagem(texto, ehErro = false) {
   mensagem.textContent = texto;
@@ -33,21 +35,66 @@ function adicionarCelula(linha, texto) {
   linha.appendChild(celula);
 }
 
-formulario.addEventListener('submit', (evento) => {
+async function carregarMedicacoes() {
+  if (!atendimentoId) {
+    throw new Error('Selecione um atendimento pela tela médica.');
+  }
+  const resposta = await fetch(
+    `/api/medicacoes?atendimento_id=${encodeURIComponent(atendimentoId)}`,
+    {
+      credentials: 'same-origin',
+    },
+  );
+  const dados = await resposta.json();
+  if (!resposta.ok) throw new Error(dados.erro || 'Não foi possível carregar as medicações.');
+  listaMedicacoes.replaceChildren();
+  if (!dados.medicacoes.length) {
+    const linha = document.createElement('tr');
+    const celula = document.createElement('td');
+    celula.colSpan = 4;
+    celula.textContent = 'Nenhuma medicação registrada para este atendimento.';
+    linha.appendChild(celula);
+    listaMedicacoes.appendChild(linha);
+    return;
+  }
+  for (const item of dados.medicacoes) {
+    const linha = document.createElement('tr');
+    adicionarCelula(linha, item.medicacao);
+    adicionarCelula(linha, item.dose);
+    adicionarCelula(linha, item.via);
+    adicionarCelula(linha, item.observacoes);
+    listaMedicacoes.appendChild(linha);
+  }
+}
+
+formulario.addEventListener('submit', async (evento) => {
   evento.preventDefault();
-
+  if (!atendimentoId || carregando) return;
   const dados = new FormData(formulario);
-  const linha = document.createElement('tr');
-  adicionarCelula(linha, dados.get('medicacao').trim());
-  adicionarCelula(linha, dados.get('dose').trim());
-  adicionarCelula(linha, dados.get('via').trim());
-  adicionarCelula(linha, dados.get('observacoes').trim());
-  listaMedicacoes.appendChild(linha);
-
-  formulario.reset();
-  mostrarMensagem('Exemplo adicionado somente nesta tela; não foi salvo no backend.');
+  carregando = true;
+  botaoEnviar.disabled = true;
+  mostrarMensagem('Salvando medicação...');
+  try {
+    const resultado = await window.pi2Api.postJson('/api/medicacoes', {
+      atendimento_id: Number(atendimentoId),
+      medicacao: dados.get('medicacao').trim(),
+      dose: dados.get('dose').trim(),
+      via: dados.get('via').trim(),
+      observacoes: dados.get('observacoes').trim(),
+    });
+    formulario.reset();
+    await carregarMedicacoes();
+    mostrarMensagem(resultado.mensagem || 'Medicação registrada com sucesso.');
+  } catch (erro) {
+    mostrarMensagem(erro.message || 'Não foi possível salvar a medicação.', true);
+  } finally {
+    carregando = false;
+    botaoEnviar.disabled = false;
+  }
 });
 
 formulario.addEventListener('reset', () => {
   mostrarMensagem('');
 });
+
+carregarMedicacoes().catch((erro) => mostrarMensagem(erro.message, true));

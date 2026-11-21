@@ -62,9 +62,9 @@ flowchart TD
    associa o médico autenticado e valida que paciente, atendimento e triagem selecionados
    correspondem entre si. A consulta é persistida e o atendimento passa para `em_atendimento`.
    Consultas adicionais podem ser registradas enquanto o atendimento continuar aberto.
-7. **Medicações:** quando houver medicação a registrar, o profissional autorizado informa
-   medicamento, dose, via e observações. O perfil autorizado deve ser definido formalmente e
-   verificado no backend. Cada registro fica associado ao atendimento e ao profissional responsável.
+7. **Medicações:** quando houver medicação a registrar, o usuário com perfil `medico` informa
+   medicamento, dose, via e observações. Essa autorização é provisória até confirmação formal do
+   grupo. Cada registro fica associado ao atendimento e ao profissional autenticado.
 8. **Resumo e encerramento:** o sistema apresenta os dados do paciente e do atendimento, triagem,
    consultas e medicações registradas. Após revisar e confirmar, o usuário autorizado encerra o
    atendimento; a situação passa para `finalizado` somente se a persistência for confirmada.
@@ -85,5 +85,5 @@ flowchart TD
 - O sistema não calcula a classificação de risco nem substitui a avaliação profissional.
 - A fila médica segue FIFO; não deve ser introduzida prioridade por classificação sem requisito
   formal aprovado.
-- O perfil autorizado para registrar medicações e o perfil autorizado para encerrar o atendimento
-  devem ser confirmados nos requisitos do grupo antes de implementar o controle de acesso.
+- O perfil autorizado para registrar medicações e encerrar atendimentos continua provisoriamente
+  definido como `medico`, aguardando confirmação formal nos requisitos do grupo.
