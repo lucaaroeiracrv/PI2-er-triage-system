@@ -216,6 +216,10 @@ export async function consultar(banco, sql, binds = {}) {
 
     const resultado = await conexao.execute(sql, binds, {
       outFormat: oracledb?.default?.OUT_FORMAT_OBJECT ?? oracledb?.OUT_FORMAT_OBJECT,
+      fetchInfo: {
+        registro_consulta: { type: oracledb?.STRING ?? oracledb?.DB_TYPE_VARCHAR },
+        observacoes: { type: oracledb?.STRING ?? oracledb?.DB_TYPE_VARCHAR },
+      },
     });
     return resultado.rows || [];
   } finally {

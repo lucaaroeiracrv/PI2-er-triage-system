@@ -21,6 +21,9 @@ import { buscarPacientes } from './pacientes/busca.js';
 // Encaminha a abertura ao módulo que mantém as verificações na mesma transação.
 import { abrirAtendimento } from './atendimentos/abertura.js';
 import { registrarConsulta } from './consultas/registro.js';
+import { listarMedicacoes, registrarMedicacao } from './medicacoes/registro.js';
+import { finalizarAtendimento } from './atendimentos/finalizacao.js';
+import { obterResumoAtendimento } from './atendimentos/resumo.js';
 // Monta o servidor sem ocupar uma porta durante a importação, permitindo testá-lo isoladamente.
 import {
   cadastrarTriagem,
@@ -173,6 +176,29 @@ export async function criarServidor(banco) {
         exigirPerfil(sessao, ['medico']);
         const resultado = await registrarConsulta(banco, sessao.usuario, await lerJson(req));
         return responder(res, 201, resultado);
+      }
+      if (rota === '/api/medicacoes' && req.method === 'GET') {
+        exigirPerfil(sessao, ['medico']);
+        const atendimentoId = Number(url.searchParams.get('atendimento_id'));
+        return responder(res, 200, {
+          medicacoes: await listarMedicacoes(banco, atendimentoId),
+        });
+      }
+      if (rota === '/api/medicacoes' && req.method === 'POST') {
+        exigirPerfil(sessao, ['medico']);
+        const resultado = await registrarMedicacao(banco, sessao.usuario, await lerJson(req));
+        return responder(res, 201, resultado);
+      }
+      if (req.method === 'GET' && rota === '/api/atendimentos/resumo') {
+        exigirPerfil(sessao, ['medico']);
+        const atendimentoId = Number(url.searchParams.get('atendimento_id'));
+        return responder(res, 200, await obterResumoAtendimento(banco, atendimentoId));
+      }
+      if (req.method === 'POST' && rota === '/api/atendimentos/finalizar') {
+        exigirPerfil(sessao, ['medico']);
+        const dados = await lerJson(req);
+        const resultado = await finalizarAtendimento(banco, dados);
+        return responder(res, 200, resultado);
       }
       throw new ErroHttp(404, 'Função não encontrada.');
     } catch (erro) {

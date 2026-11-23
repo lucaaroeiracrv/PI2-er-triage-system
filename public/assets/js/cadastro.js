@@ -70,6 +70,8 @@ function validar(dados) {
     registrarErro('cpf', 'Informe o CPF.');
   } else if (dados.documento.length !== 11) {
     registrarErro('cpf', 'O CPF deve ter 11 números.');
+  } else if (!window.pi2Api.validarCpf(dados.documento)) {
+    registrarErro('cpf', 'Informe um CPF válido.');
   }
 
   if (document.getElementById('queixa').value.trim() === '') {

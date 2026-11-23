@@ -24,6 +24,22 @@ window.pi2Api = {
       .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d{1,2})$/, '$1.$2.$3-$4');
   },
 
+  validarCpf(valor) {
+    const digitos = String(valor).replace(/\D/g, '');
+    if (!/^\d{11}$/.test(digitos) || /^(\d)\1{10}$/.test(digitos)) return false;
+
+    for (const inicio of [9, 10]) {
+      let soma = 0;
+      for (let indice = 0; indice < inicio; indice += 1) {
+        soma += Number(digitos[indice]) * (inicio + 1 - indice);
+      }
+      const resto = (soma * 10) % 11;
+      const digito = resto === 10 ? 0 : resto;
+      if (digito !== Number(digitos[inicio])) return false;
+    }
+    return true;
+  },
+
   formatPressao(valor) {
     const entrada = valor.replace(/[^\d/]/g, '');
     if (entrada.includes('/')) {

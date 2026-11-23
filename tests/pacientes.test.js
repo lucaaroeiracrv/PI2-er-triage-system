@@ -13,7 +13,7 @@ const exemplo = () => ({
   // Data ISO já conferida no calendário; o banco a armazena em uma coluna DATE.
   data_nascimento: '2000-02-29',
   // CPF fictício de teste, normalizado para os onze dígitos.
-  documento: ' 123.456.789-01 ',
+  documento: ' 529.982.247-25 ',
   // Contato opcional guardado como texto, sem perder sinais e zeros iniciais.
   telefone: '(11) 90000-0000',
   // Identifica a tentativa e não o paciente; uma edição posterior recebe outra chave.
@@ -26,7 +26,7 @@ test('normaliza nome e documento, mantendo os campos válidos', () => {
   // Confere o resultado esperado deste cenário, incluindo seu tipo para não esconder diferenças de valor.
   assert.equal(resultado.nome, 'Paciente Exemplo');
   // Confere o resultado esperado deste cenário, incluindo seu tipo para não esconder diferenças de valor.
-  assert.equal(resultado.documento, '12345678901');
+  assert.equal(resultado.documento, '52998224725');
 });
 test('telefone vazio continua opcional', () => {
   // Resultado da operação ou da conferência; o chamador decide a resposta a partir dele.
@@ -37,6 +37,20 @@ test('telefone vazio continua opcional', () => {
   });
   // Confere o resultado esperado deste cenário, incluindo seu tipo para não esconder diferenças de valor.
   assert.equal(resultado.telefone, null);
+});
+test('aceita CPF válido com dígitos verificadores', () => {
+  assert.equal(
+    validarPaciente({ ...exemplo(), documento: '52998224725' }).documento,
+    '52998224725',
+  );
+});
+test('rejeita sequência repetida e CPF com dígitos incorretos', () => {
+  for (const documento of ['11111111111', '52998224724']) {
+    assert.throws(
+      () => validarPaciente({ ...exemplo(), documento }),
+      (erro) => erro.status === 400,
+    );
+  }
 });
 // Reutiliza a mesma conferência em diferentes entradas inválidas, identificando cada cenário pelo nome.
 for (const [nome, ajuste] of [
