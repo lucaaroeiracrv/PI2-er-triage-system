@@ -4,12 +4,11 @@
 
 Projeto acadêmico integrador de desenvolvimento web e banco de dados
 
-[![Projeto acadêmico](https://img.shields.io/badge/Status-Acad%C3%AAmico-6B46C1)](https://github.com/lucaaroeiracrv/PI2-er-triage-system)
+[![Projeto acadêmico](https://img.shields.io/badge/Status-Vers%C3%A3o%20acad%C3%AAmica%20final-6B46C1)](https://github.com/lucaaroeiracrv/PI2-er-triage-system)
 [![Node.js](https://img.shields.io/badge/Backend-Node.js-339933)](https://nodejs.org/)
 [![JavaScript](https://img.shields.io/badge/Frontend-JavaScript-F7DF1E)](https://developer.mozilla.org/pt-BR/docs/Web/JavaScript)
 [![MySQL](https://img.shields.io/badge/DB-MySQL-4479A1)](https://www.mysql.com/)
 [![Oracle](https://img.shields.io/badge/DB-Oracle-F80000)](https://www.oracle.com/database/)
-[![Status](https://img.shields.io/badge/Status-Em%20desenvolvimento-1F6FEB)](https://github.com/lucaaroeiracrv/PI2-er-triage-system)
 
 </div>
 
@@ -129,10 +128,10 @@ npm run formatar
 
 Os testes automatizados não substituem a validação de conexão com uma instância local de MySQL ou Oracle. Consulte o arquivo [docs/VERIFICACAO.md](docs/VERIFICACAO.md) para o registro das verificações e suas limitações.
 
-## APIs das tarefas 37 e 38
+## APIs de medicação e encerramento
 
 - `GET /api/medicacoes?atendimento_id=<id>`: lista as medicações reais de um atendimento. Requer perfil `medico`.
-- `POST /api/medicacoes`: registra `atendimento_id`, `medicacao`, `dose`, `via` e `observacoes`. O profissional é obtido da sessão; requere perfil `medico`.
+- `POST /api/medicacoes`: registra `atendimento_id`, `medicacao`, `dose`, `via` e `observacoes`. O profissional é obtido da sessão; requer perfil `medico`.
 - `GET /api/atendimentos/resumo?atendimento_id=<id>`: devolve paciente, situação, triagem, consultas e medicações. Requer perfil `medico`.
 - `POST /api/atendimentos/finalizar`: recebe `atendimento_id` e exige consulta médica registrada. Requer perfil `medico`; repetir após `finalizado` é idempotente.
 
@@ -175,6 +174,8 @@ Essas contas são apenas para demonstração local. Altere ou substitua as crede
 - [Guia do MySQL](docs/GUIA_BANCO_MYSQL.md)
 - [Guia do Oracle no WSL](docs/GUIA_BANCO_ORACLE_WSL.md)
 - [Verificações e limitações](docs/VERIFICACAO.md)
+- [Conclusão final e aprendizados](docs/CONCLUSAO_FINAL.md)
+- [Cronograma executado](docs/CRONOGRAMA.md)
 
 ## Considerações acadêmicas e limitações
 

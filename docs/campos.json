@@ -2,26 +2,26 @@
   {
     "tela": "Login",
     "campo": "login",
-    "formato": "Texto, até 100",
+    "formato": "Texto, até 100 caracteres",
     "obrigatorio": "Sim",
     "tabela": "usuarios.login",
-    "observacao": "Usuário fictício: recepcao, enfermagem ou medico."
+    "observacao": "Contas fictícias: recepcao, enfermagem e medico."
   },
   {
     "tela": "Login",
     "campo": "senha",
-    "formato": "Texto, até 200",
+    "formato": "Texto, até 200 caracteres",
     "obrigatorio": "Sim",
     "tabela": "usuarios.senha_hash",
-    "observacao": "O código salva e compara um hash scrypt."
+    "observacao": "O backend armazena hash scrypt, não a senha em texto puro."
   },
   {
     "tela": "Paciente",
     "campo": "nome",
-    "formato": "Texto de 2 a 120",
+    "formato": "Texto de 2 a 120 caracteres",
     "obrigatorio": "Sim",
     "tabela": "pacientes.nome",
-    "observacao": "Remover espaços nas pontas. Mostrar como texto nas telas."
+    "observacao": "Espaços nas pontas são removidos."
   },
   {
     "tela": "Paciente",
@@ -29,31 +29,31 @@
     "formato": "Data AAAA-MM-DD",
     "obrigatorio": "Sim",
     "tabela": "pacientes.data_nascimento",
-    "observacao": "Data existente, de 1900 até o dia atual."
+    "observacao": "Data válida, entre 1900 e o dia atual."
   },
   {
     "tela": "Paciente",
     "campo": "CPF",
-    "formato": "11 dígitos; pode ser digitado com pontuação",
+    "formato": "11 dígitos; entrada aceita pontuação",
     "obrigatorio": "Sim",
     "tabela": "pacientes.documento",
-    "observacao": "Obrigatório e único; o backend armazena somente os dígitos."
+    "observacao": "Validação dos dígitos verificadores no cliente e backend; único no banco."
   },
   {
     "tela": "Paciente",
     "campo": "telefone",
-    "formato": "Texto, até 20",
+    "formato": "Texto, até 20 caracteres",
     "obrigatorio": "Não",
     "tabela": "pacientes.telefone",
-    "observacao": "Ao informar: pelo menos 8 dígitos; aceita espaços, +, -, ( e )."
+    "observacao": "Quando informado, valida formato e quantidade mínima de dígitos."
   },
   {
     "tela": "Cadastro",
     "campo": "chave_cadastro",
-    "formato": "UUID v4",
-    "obrigatorio": "Gerado pelo código",
+    "formato": "UUID",
+    "obrigatorio": "Gerado pela interface",
     "tabela": "pacientes.chave_cadastro",
-    "observacao": "Reutilizar ao repetir a mesma tentativa; evita duplicação por repetição."
+    "observacao": "Identifica uma tentativa repetida de cadastro."
   },
   {
     "tela": "Atendimento",
@@ -61,102 +61,166 @@
     "formato": "Número inteiro positivo",
     "obrigatorio": "Sim",
     "tabela": "atendimentos.paciente_id",
-    "observacao": "Deve apontar para paciente existente."
+    "observacao": "Deve referenciar paciente existente."
   },
   {
     "tela": "Atendimento",
     "campo": "recepcionista_id",
     "formato": "Número inteiro",
-    "obrigatorio": "Pela sessão",
+    "obrigatorio": "Da sessão",
     "tabela": "atendimentos.recepcionista_id",
-    "observacao": "Não confiar em um ID de usuário enviado pelo formulário."
+    "observacao": "Obtido do usuário autenticado, não do formulário."
   },
   {
     "tela": "Atendimento",
     "campo": "situacao",
-    "formato": "Texto controlado",
-    "obrigatorio": "Pelo backend",
+    "formato": "Estado controlado",
+    "obrigatorio": "Definido pelo backend",
     "tabela": "atendimentos.situacao",
-    "observacao": "Começa como aguardando_triagem."
+    "observacao": "Inicia em aguardando_triagem; progride até finalizado."
   },
   {
     "tela": "Abertura",
     "campo": "chave_abertura",
-    "formato": "UUID v4",
-    "obrigatorio": "Gerado pelo código",
+    "formato": "UUID",
+    "obrigatorio": "Gerado pela interface",
     "tabela": "atendimentos.chave_abertura",
-    "observacao": "Uma mesma tentativa retorna o mesmo atendimento."
+    "observacao": "Permite reconhecer repetição da mesma tentativa."
   },
   {
     "tela": "Triagem",
-    "campo": "queixa e sinais vitais",
-    "formato": "Proposta visual",
-    "obrigatorio": "A validar",
-    "tabela": "Etapa seguinte",
-    "observacao": "Queixa, pressão, temperatura, frequência e saturação são campos propostos."
+    "campo": "queixa",
+    "formato": "Texto de 3 a 500 caracteres",
+    "obrigatorio": "Sim",
+    "tabela": "triagens.queixa",
+    "observacao": "Informada pela enfermagem."
+  },
+  {
+    "tela": "Triagem",
+    "campo": "pressao",
+    "formato": "Sistólica/diastólica",
+    "obrigatorio": "Sim",
+    "tabela": "triagens.pressao",
+    "observacao": "Validada no backend; por exemplo, 120/80."
+  },
+  {
+    "tela": "Triagem",
+    "campo": "temperatura",
+    "formato": "Número de 30 a 45, até uma casa decimal",
+    "obrigatorio": "Sim",
+    "tabela": "triagens.temperatura",
+    "observacao": "Demonstração de validação de entrada, não avaliação clínica."
+  },
+  {
+    "tela": "Triagem",
+    "campo": "frequencia",
+    "formato": "Inteiro de 20 a 300",
+    "obrigatorio": "Sim",
+    "tabela": "triagens.frequencia",
+    "observacao": "Informada pela enfermagem."
+  },
+  {
+    "tela": "Triagem",
+    "campo": "saturacao",
+    "formato": "Inteiro de 0 a 100",
+    "obrigatorio": "Sim",
+    "tabela": "triagens.saturacao",
+    "observacao": "Informada pela enfermagem."
   },
   {
     "tela": "Triagem",
     "campo": "classificacao",
-    "formato": "Proposta visual",
-    "obrigatorio": "A validar",
-    "tabela": "Etapa seguinte",
-    "observacao": "Registrar segundo os requisitos aprovados; nenhum algoritmo clínico foi criado."
+    "formato": "Vermelho, Laranja, Amarelo, Verde ou Azul",
+    "obrigatorio": "Sim",
+    "tabela": "triagens.classificacao",
+    "observacao": "Selecionada pela enfermagem; o sistema não calcula risco."
   },
   {
-    "tela": "Consulta",
-    "campo": "id",
-    "formato": "Número inteiro positivo",
-    "obrigatorio": "Gerado pelo banco",
-    "tabela": "consultas.id",
-    "observacao": "Chave primária do registro."
+    "tela": "Triagem",
+    "campo": "enfermeiro_id",
+    "formato": "Número inteiro",
+    "obrigatorio": "Da sessão",
+    "tabela": "triagens.enfermeiro_id",
+    "observacao": "Associado ao profissional autenticado."
   },
   {
     "tela": "Consulta",
     "campo": "atendimento_id",
     "formato": "Número inteiro positivo",
-    "obrigatorio": "Sim, selecionado na fila médica",
+    "obrigatorio": "Sim",
     "tabela": "consultas.atendimento_id",
-    "observacao": "Vincula o registro ao atendimento selecionado."
+    "observacao": "Selecionado na fila médica."
+  },
+  {
+    "tela": "Consulta",
+    "campo": "paciente_id e triagem_id",
+    "formato": "Números inteiros positivos",
+    "obrigatorio": "Sim",
+    "tabela": "Validados pelo backend",
+    "observacao": "O backend verifica que paciente e triagem pertencem ao atendimento."
   },
   {
     "tela": "Consulta",
     "campo": "medico_id",
-    "formato": "Número inteiro positivo",
-    "obrigatorio": "Pela sessão",
+    "formato": "Número inteiro",
+    "obrigatorio": "Da sessão",
     "tabela": "consultas.medico_id",
-    "observacao": "O backend usa o médico autenticado, sem confiar em um ID enviado pelo formulário."
+    "observacao": "Obtido do médico autenticado."
   },
   {
     "tela": "Consulta",
     "campo": "registro_consulta",
-    "formato": "Texto livre",
+    "formato": "Texto livre não vazio",
     "obrigatorio": "Sim",
     "tabela": "consultas.registro_consulta",
-    "observacao": "Campo textual acordado para a tarefa 34; vários registros podem pertencer ao mesmo atendimento."
-  },
-  {
-    "tela": "Consulta",
-    "campo": "criado_em",
-    "formato": "Data e hora",
-    "obrigatorio": "Gerado pelo banco",
-    "tabela": "consultas.criado_em",
-    "observacao": "Data/hora da gravação."
+    "observacao": "Cada envio cria um registro; o atendimento pode ter várias consultas."
   },
   {
     "tela": "Medicações",
-    "campo": "medicacao, dose, via, observacoes",
-    "formato": "Proposta visual",
-    "obrigatorio": "A validar",
-    "tabela": "Etapa seguinte",
-    "observacao": "Confirmar também qual perfil pode usar essa etapa."
+    "campo": "atendimento_id",
+    "formato": "Número inteiro positivo",
+    "obrigatorio": "Sim",
+    "tabela": "medicacoes.atendimento_id",
+    "observacao": "Somente atendimento em andamento."
+  },
+  {
+    "tela": "Medicações",
+    "campo": "profissional_id",
+    "formato": "Número inteiro",
+    "obrigatorio": "Da sessão",
+    "tabela": "medicacoes.profissional_id",
+    "observacao": "Obtido do profissional autenticado; atualmente o perfil autorizado é medico."
+  },
+  {
+    "tela": "Medicações",
+    "campo": "medicacao, dose, via",
+    "formato": "Textos com limites definidos pelo backend",
+    "obrigatorio": "Sim",
+    "tabela": "medicacoes.medicacao, dose, via",
+    "observacao": "Registro real persistido e recuperável pela API."
+  },
+  {
+    "tela": "Medicações",
+    "campo": "observacoes",
+    "formato": "Texto de até 500 caracteres",
+    "obrigatorio": "Não",
+    "tabela": "medicacoes.observacoes",
+    "observacao": "Omitida, fica vazia ou nula conforme o motor."
   },
   {
     "tela": "Encerramento",
-    "campo": "resumo e confirmação",
-    "formato": "Proposta visual",
-    "obrigatorio": "A validar",
-    "tabela": "Etapa seguinte",
-    "observacao": "A função real será desenvolvida nas tarefas 38 e 40."
+    "campo": "resumo",
+    "formato": "Dados derivados do atendimento",
+    "obrigatorio": "Exibido antes da confirmação",
+    "tabela": "Sem tabela própria",
+    "observacao": "Reúne paciente, situação, triagem, consultas e medicações."
+  },
+  {
+    "tela": "Encerramento",
+    "campo": "atendimento_id",
+    "formato": "Número inteiro positivo",
+    "obrigatorio": "Sim",
+    "tabela": "atendimentos.situacao",
+    "observacao": "Requer consulta registrada e situação em_atendimento; repetição após finalizado é idempotente."
   }
 ]
