@@ -44,15 +44,14 @@ API são protótipos e não devem ser interpretadas como operações funcionais.
 - `assets/css/tema.css`: tema comum das telas de protótipo.
 - `assets/js/api.js`: operações POST da interface, sessão/CSRF e máscaras/validações compartilhadas.
 - `assets/js/painel.js`: interação do painel com as APIs de recepção, enfermagem e médico.
-- `assets/js/medicacoes.js`: listagem e registro de medicações pela API.
-- `assets/js/resumo-encerramento.js`: carregamento do resumo e confirmação de encerramento.
-- `assets/js/medico.js`, `busca-atendimento.js`, `cadastro.js`: interações das telas específicas.
+- `assets/js/busca-atendimento.js`: busca composta por número e CPF e exclusão autorizada de
+  atendimentos ainda sem registros clínicos.
+- `assets/js/cadastro.js`: interação da tela de cadastro específica.
 - `assets/js/prototipos.js`, `rascunhos.js`, `revisao.js`: modo de protótipo, visualização de
   rascunhos e exportação local da revisão.
 - `design/padrao-visual.html`: guia visual.
-- `screens/medicacoes.html`, `screens/resumo-encerramento.html`: telas ligadas às funções reais de
-  medicação e encerramento.
-- `screens/medico.html`: tela médica complementar integrada ao fluxo.
+- `screens/medicacoes.html`, `screens/resumo-encerramento.html`, `screens/medico.html`: rotas
+  legadas redirecionadas ao painel médico unificado.
 - `screens/cadastro.html`, `busca-atendimento.html`, `campos.html`, `triagem.html`,
   `triagem-form.html`, `medicacoes-encerramento.html`, `rascunhos.html`, `revisao.html`: telas de
   desenho, apoio ou revisão; a presença de formulário não implica persistência por si só.

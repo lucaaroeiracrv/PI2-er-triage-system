@@ -161,6 +161,9 @@
             <button>Buscar</button>
           </form>
           <p id="resultado-busca">Use a busca ou cadastre um paciente.</p>
+          <p>
+            <a href="screens/busca-atendimento.html">Localizar ou excluir um atendimento existente</a>
+          </p>
           <div class="tabela">
             <!-- Apresenta registros com os mesmos campos para facilitar a comparação. -->
             <table>
@@ -368,9 +371,6 @@
               <h2>Atendimentos aguardando atendimento médico</h2>
             </div>
             <div class="linha">
-              <a class="botao secundario" href="screens/medico.html">
-                Abrir tela completa do médico
-              </a>
               <button type="button" class="secundario" id="atualizar-fila-medica">
                 Atualizar agora
               </button>
@@ -442,7 +442,65 @@
             </div>
           </form>
           <p id="resultado-consulta" role="status" aria-live="polite"></p>
+          <section aria-labelledby="titulo-detalhes-atendimento">
+            <h2 id="titulo-detalhes-atendimento">Resumo do atendimento selecionado</h2>
+            <dl id="resumo-identificacao-medico"></dl>
+            <h3>Triagem</h3>
+            <dl id="resumo-triagem-medico"></dl>
+            <h3>Consultas registradas</h3>
+            <div id="resumo-consultas-medico"></div>
+          </section>
+          <section aria-labelledby="titulo-medicacoes-medico">
+            <h2 id="titulo-medicacoes-medico">Medicações</h2>
+            <form id="form-medicacao-medico" class="grade">
+              <label>
+                Medicação
+                <input name="medicacao" required maxlength="120" />
+              </label>
+              <label>
+                Dose
+                <input name="dose" required maxlength="80" />
+              </label>
+              <label>
+                Via de administração
+                <input name="via" required maxlength="40" />
+              </label>
+              <label>
+                Observações
+                <textarea name="observacoes" maxlength="500" rows="3"></textarea>
+              </label>
+              <button type="submit">Registrar medicação</button>
+            </form>
+            <p id="resultado-medicacao-medico" role="status" aria-live="polite"></p>
+            <div class="tabela">
+              <table>
+                <caption>Medicações registradas neste atendimento</caption>
+                <thead>
+                  <tr>
+                    <th>Medicação</th>
+                    <th>Dose</th>
+                    <th>Via</th>
+                    <th>Observações</th>
+                  </tr>
+                </thead>
+                <tbody id="lista-medicacoes-medico"></tbody>
+              </table>
+            </div>
+          </section>
+          <div class="linha">
+            <button type="button" id="encerrar-atendimento" disabled>
+              Revisar e encerrar atendimento
+            </button>
+          </div>
         </section>
+        <dialog id="dialogo-encerrar-atendimento" aria-labelledby="titulo-encerrar-atendimento">
+          <h2 id="titulo-encerrar-atendimento">Confirmar encerramento?</h2>
+          <p>Revise o resumo antes de confirmar. O atendimento será encerrado sem apagar seu histórico.</p>
+          <div class="linha">
+            <button type="button" id="confirmar-encerrar-atendimento">Confirmar encerramento</button>
+            <button type="button" class="secundario" id="cancelar-encerrar-atendimento">Voltar</button>
+          </div>
+        </dialog>
       </div>
       <!-- Anuncia o resultado das ações sem exigir que a pessoa procure a mensagem na página. -->
       <p id="mensagem" role="status" aria-live="polite"></p>

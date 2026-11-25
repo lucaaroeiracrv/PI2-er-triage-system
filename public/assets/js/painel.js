@@ -194,15 +194,128 @@ function limparConsulta() {
   $('#consulta-contexto').textContent = '';
   $('#resultado-consulta').textContent = '';
   $('#form-consulta').reset();
+  $('#form-medicacao-medico').reset();
+  $('#resultado-medicacao-medico').textContent = '';
+  $('#resumo-identificacao-medico').replaceChildren();
+  $('#resumo-triagem-medico').replaceChildren();
+  $('#resumo-consultas-medico').replaceChildren();
+  $('#lista-medicacoes-medico').replaceChildren();
+  $('#encerrar-atendimento').disabled = true;
+  $('#form-consulta').querySelector('button[type="submit"]').disabled = false;
+  $('#form-medicacao-medico').querySelector('button[type="submit"]').disabled = true;
 }
 function selecionarAtendimentoConsulta(atendimento) {
   atendimentoConsultaSelecionado = atendimento;
   $('#form-consulta').reset();
   $('#resultado-consulta').textContent = '';
+  $('#resultado-medicacao-medico').textContent = '';
   $('#consulta-contexto').textContent =
     `Atendimento #${atendimento.atendimento_id} • ${atendimento.paciente_nome} (paciente #${atendimento.paciente_id}) • ${atendimento.classificacao}`;
+  $('#resumo-identificacao-medico').replaceChildren();
+  $('#resumo-triagem-medico').replaceChildren();
+  $('#resumo-consultas-medico').replaceChildren();
+  $('#lista-medicacoes-medico').replaceChildren();
+  $('#form-consulta').querySelector('button[type="submit"]').disabled = false;
+  $('#form-medicacao-medico').querySelector('button[type="submit"]').disabled = true;
+  $('#encerrar-atendimento').disabled = true;
   $('#consulta-card').hidden = false;
   $('#consulta-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  carregarResumoMedico(atendimento.atendimento_id).catch((erro) => {
+    mensagem(`Atendimento selecionado, mas não foi possível carregar o resumo: ${erro.message}`, true);
+  });
+}
+function adicionarDefinicao(container, rotulo, valor) {
+  const titulo = document.createElement('dt');
+  titulo.textContent = rotulo;
+  const detalhe = document.createElement('dd');
+  detalhe.textContent = valor ?? 'Não informado';
+  container.append(titulo, detalhe);
+}
+function renderizarResumoMedico(resumo) {
+  const identificacao = $('#resumo-identificacao-medico');
+  identificacao.replaceChildren();
+  adicionarDefinicao(identificacao, 'Paciente', resumo.paciente_nome);
+  adicionarDefinicao(identificacao, 'Atendimento', `#${resumo.atendimento_id}`);
+  adicionarDefinicao(identificacao, 'Situação', resumo.situacao);
+
+  const triagem = $('#resumo-triagem-medico');
+  triagem.replaceChildren();
+  if (resumo.triagem) {
+    adicionarDefinicao(triagem, 'Queixa principal', resumo.triagem.queixa);
+    adicionarDefinicao(triagem, 'Classificação', resumo.triagem.classificacao);
+    adicionarDefinicao(
+      triagem,
+      'Sinais vitais',
+      `Pressão: ${resumo.triagem.pressao} • Temperatura: ${resumo.triagem.temperatura} °C • Frequência: ${resumo.triagem.frequencia} bpm • Saturação: ${resumo.triagem.saturacao}%`,
+    );
+    adicionarDefinicao(
+      triagem,
+      'Profissional da triagem',
+      resumo.triagem.profissional_responsavel,
+    );
+  } else {
+    adicionarDefinicao(triagem, 'Situação', 'Nenhuma triagem registrada.');
+  }
+
+  const consultas = $('#resumo-consultas-medico');
+  consultas.replaceChildren();
+  if (resumo.consultas.length) {
+    for (const consulta of resumo.consultas) {
+      const artigo = document.createElement('article');
+      const titulo = document.createElement('h4');
+      titulo.textContent = `Consulta #${consulta.consulta_id}`;
+      const registro = document.createElement('p');
+      registro.textContent = consulta.registro_consulta;
+      const autoria = document.createElement('p');
+      autoria.textContent = `Responsável: ${consulta.medico_nome || 'Não informado'}`;
+      artigo.append(titulo, registro, autoria);
+      consultas.append(artigo);
+    }
+  } else {
+    const vazio = document.createElement('p');
+    vazio.textContent = 'Nenhuma consulta registrada.';
+    consultas.append(vazio);
+  }
+
+  const medicacoes = $('#lista-medicacoes-medico');
+  medicacoes.replaceChildren();
+  if (resumo.medicacoes.length) {
+    for (const item of resumo.medicacoes) {
+      const linha = document.createElement('tr');
+      linha.append(
+        criarCelula(item.medicacao),
+        criarCelula(item.dose),
+        criarCelula(item.via),
+        criarCelula(item.observacoes),
+      );
+      medicacoes.append(linha);
+    }
+  } else {
+    const linha = document.createElement('tr');
+    const celula = criarCelula('Nenhuma medicação registrada.');
+    celula.colSpan = 4;
+    linha.append(celula);
+    medicacoes.append(linha);
+  }
+
+  const emAtendimento = resumo.situacao === 'em_atendimento';
+  const finalizado = resumo.situacao === 'finalizado';
+  $('#form-medicacao-medico').querySelector('button[type="submit"]').disabled = !emAtendimento;
+  $('#encerrar-atendimento').disabled = !emAtendimento;
+  $('#form-consulta').querySelector('button[type="submit"]').disabled = finalizado;
+  $('#resultado-medicacao-medico').textContent =
+    resumo.situacao === 'aguardando_medico'
+      ? 'Registre uma consulta antes de adicionar medicações.'
+      : finalizado
+        ? 'Este atendimento está finalizado; os registros são somente para consulta.'
+        : '';
+}
+async function carregarResumoMedico(atendimentoId) {
+  const resumo = await pedir(
+    `/api/atendimentos/resumo?atendimento_id=${encodeURIComponent(atendimentoId)}`,
+  );
+  if (atendimentoConsultaSelecionado?.atendimento_id !== atendimentoId) return;
+  renderizarResumoMedico(resumo);
 }
 function mostrarResultadoTriagem(triagem) {
   $('#resultado-triagem-vinculo').textContent =
@@ -565,6 +678,7 @@ $('#form-abertura-atendimento').addEventListener('submit', async (evento) => {
         prioridade_legal: prioridadeLegal,
       },
     });
+    chavesAbertura.delete(pacienteAberturaSelecionado.id);
     mensagem(
       `Atendimento ${resultado.atendimento.id} aberto para ${pacienteAberturaSelecionado.nome}. Situação: aguardando triagem. Prioridade legal registrada.`,
     );
@@ -624,9 +738,56 @@ aoEnviar('#form-consulta', async (dados, form) => {
     `${confirmacao} Você pode registrar outra consulta para este atendimento.`;
   mensagem(resultado.mensagem);
   try {
+    await carregarResumoMedico(atendimentoConsultaSelecionado.atendimento_id);
     await carregarFilaMedica();
   } catch (erro) {
     mensagem(`${confirmacao} Não foi possível atualizar as filas: ${erro.message}`, true);
+  }
+});
+aoEnviar('#form-medicacao-medico', async (dados, form) => {
+  if (!atendimentoConsultaSelecionado) {
+    throw new Error('Selecione um atendimento em andamento antes de registrar medicação.');
+  }
+  const resultado = await pedir('/api/medicacoes', {
+    method: 'POST',
+    dados: {
+      atendimento_id: atendimentoConsultaSelecionado.atendimento_id,
+      medicacao: dados.medicacao,
+      dose: dados.dose,
+      via: dados.via,
+      observacoes: dados.observacoes,
+    },
+  });
+  form.reset();
+  $('#resultado-medicacao-medico').textContent = resultado.mensagem;
+  await carregarResumoMedico(atendimentoConsultaSelecionado.atendimento_id);
+});
+$('#encerrar-atendimento').addEventListener('click', () => {
+  $('#dialogo-encerrar-atendimento').showModal();
+});
+$('#cancelar-encerrar-atendimento').addEventListener('click', () => {
+  $('#dialogo-encerrar-atendimento').close();
+});
+$('#confirmar-encerrar-atendimento').addEventListener('click', async (evento) => {
+  if (!atendimentoConsultaSelecionado) {
+    mensagem('Selecione um atendimento antes de encerrar.', true);
+    return;
+  }
+  const botao = evento.currentTarget;
+  botao.disabled = true;
+  $('#dialogo-encerrar-atendimento').close();
+  try {
+    const resultado = await pedir('/api/atendimentos/finalizar', {
+      method: 'POST',
+      dados: { atendimento_id: atendimentoConsultaSelecionado.atendimento_id },
+    });
+    $('#resultado-consulta').textContent = resultado.mensagem;
+    await carregarResumoMedico(atendimentoConsultaSelecionado.atendimento_id);
+    await carregarFilaMedica();
+  } catch (erro) {
+    mensagem(erro.message, true);
+  } finally {
+    botao.disabled = false;
   }
 });
 $('#atualizar-triagens').addEventListener('click', () => {

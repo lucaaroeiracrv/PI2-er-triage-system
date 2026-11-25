@@ -2,69 +2,11 @@
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0; url=../painel.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Resumo e encerramento • PI2</title>
-    <link rel="stylesheet" href="../assets/css/tema.css" />
-    <script src="../assets/js/api.js" defer></script>
-    <script src="../assets/js/resumo-encerramento.js" defer></script>
   </head>
   <body>
-    <header>
-      <div class="marca">
-        PI2
-        <small>Sistema de atendimento</small>
-      </div>
-      <nav class="linha" aria-label="Navegação do atendimento">
-        <a href="medico.html">Voltar à fila médica</a>
-        <a href="../index.html">Índice do projeto</a>
-      </nav>
-    </header>
-    <main>
-      <span class="etiqueta">Resumo e encerramento</span>
-      <h1>Resumo do atendimento</h1>
-      <p class="subtitulo">Revise as informações antes de confirmar o encerramento.</p>
-
-      <section class="cartao">
-        <div class="linha">
-          <h2>Identificação</h2>
-          <span class="etiqueta" id="situacao-atendimento">Carregando situação</span>
-        </div>
-        <dl id="identificacao-atendimento"></dl>
-      </section>
-
-      <section class="cartao">
-        <h2>Triagem</h2>
-        <dl id="dados-triagem"></dl>
-      </section>
-
-      <section class="cartao">
-        <h2>Consulta médica</h2>
-        <div id="dados-consultas"></div>
-      </section>
-
-      <section class="cartao">
-        <h2>Medicações registradas</h2>
-        <ul id="dados-medicacoes"></ul>
-      </section>
-
-      <section class="cartao">
-        <h2>Confirmar encerramento</h2>
-        <p class="aviso">
-          A medicação é opcional. O encerramento exige uma consulta médica registrada.
-        </p>
-        <button type="button" id="abrir-confirmacao">Confirmar encerramento</button>
-        <p id="resultado-encerramento" class="mensagem" role="status" aria-live="polite"></p>
-      </section>
-
-      <dialog id="dialogo-confirmacao" aria-labelledby="titulo-confirmacao">
-        <h2 id="titulo-confirmacao">Confirmar encerramento?</h2>
-        <p>Confirme somente após revisar o resumo do atendimento.</p>
-        <div class="acoes">
-          <button type="button" id="confirmar-encerramento">Confirmar encerramento</button>
-          <button type="button" class="secundario" id="cancelar-encerramento">Voltar</button>
-        </div>
-      </dialog>
-    </main>
-    <footer>Projeto acadêmico • Use apenas dados fictícios</footer>
+    <p>Resumo e encerramento agora estão no painel médico. <a href="../painel.html">Acessar o painel principal</a>.</p>
   </body>
 </html>

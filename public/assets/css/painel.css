@@ -235,6 +235,16 @@ fieldset {
 legend {
   font-weight: bold;
 }
+dialog {
+  width: min(90vw, 560px);
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 24px;
+  color: var(--texto);
+}
+dialog::backdrop {
+  background: rgb(23 40 62 / 55%);
+}
 .ajuda {
   /* Mantém o texto legível dentro da paleta compartilhada. */
   color: #59697d;

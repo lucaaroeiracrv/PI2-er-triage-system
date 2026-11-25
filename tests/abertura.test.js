@@ -202,3 +202,91 @@ test('desfaz a abertura se a gravação do histórico falhar', async () => {
     }
   }
 });
+
+test('abre novo atendimento com novo número e chave após finalizar o anterior', async () => {
+  const engineAnterior = process.env.DB_ENGINE;
+  process.env.DB_ENGINE = 'oracle';
+  const atendimentos = [];
+  let proximoAtendimento = 40;
+  let proximaPrioridade = 50;
+  const conexao = {
+    async execute(sql, binds = {}) {
+      if (sql.includes('FROM pacientes')) return { rows: [{ id: 8 }] };
+      if (sql.includes('FROM atendimentos WHERE chave_abertura')) {
+        return {
+          rows: atendimentos
+            .filter((atendimento) => atendimento.chave_abertura === binds.chave)
+            .map(({ id, paciente_id, recepcionista_id, situacao }) => ({
+              id,
+              paciente_id,
+              recepcionista_id,
+              situacao,
+            })),
+        };
+      }
+      if (sql.includes("situacao <> 'finalizado'")) {
+        return { rows: atendimentos.filter((atendimento) => atendimento.situacao !== 'finalizado') };
+      }
+      if (sql.includes('INSERT INTO atendimentos')) {
+        const id = ++proximoAtendimento;
+        atendimentos.push({
+          id,
+          paciente_id: binds.paciente_id,
+          recepcionista_id: binds.recepcionista_id,
+          situacao: 'aguardando_triagem',
+          chave_abertura: binds.chave,
+        });
+        return { outBinds: { id: [id] } };
+      }
+      if (sql.includes('INSERT INTO prioridades_legais')) {
+        return { outBinds: { id: [++proximaPrioridade] } };
+      }
+      return { rows: [] };
+    },
+    async commit() {},
+    async rollback() {},
+    async close() {},
+  };
+  const banco = { getConnection: async () => conexao };
+  const usuario = { id: 12 };
+  const dados = (chave_abertura) => ({
+    paciente_id: 8,
+    chave_abertura,
+    prioridade_legal: {
+      declaracao: 'nao',
+      categorias: [],
+      data_doacao_sangue: null,
+    },
+  });
+
+  try {
+    const anterior = await abrirAtendimento(
+      banco,
+      usuario,
+      dados('00000000-0000-4000-8000-000000000003'),
+    );
+    atendimentos[0].situacao = 'finalizado';
+
+    const novo = await abrirAtendimento(
+      banco,
+      usuario,
+      dados('00000000-0000-4000-8000-000000000004'),
+    );
+
+    assert.equal(novo.criado, true);
+    assert.notEqual(novo.atendimento.id, anterior.atendimento.id);
+    assert.equal(novo.atendimento.situacao, 'aguardando_triagem');
+    assert.equal(atendimentos[0].situacao, 'finalizado');
+    assert.notEqual(atendimentos[0].chave_abertura, atendimentos[1].chave_abertura);
+    await assert.rejects(
+      abrirAtendimento(banco, usuario, dados('00000000-0000-4000-8000-000000000005')),
+      (erro) => erro.status === 409,
+    );
+  } finally {
+    if (engineAnterior === undefined) {
+      delete process.env.DB_ENGINE;
+    } else {
+      process.env.DB_ENGINE = engineAnterior;
+    }
+  }
+});
