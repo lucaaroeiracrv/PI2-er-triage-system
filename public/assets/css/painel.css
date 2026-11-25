@@ -170,6 +170,16 @@ button:disabled {
   /* Define a superfície do componente e o contraste com o texto. */
   background: white;
 }
+/* Link com a mesma aparência de um botão secundário, usado para abrir outra tela. */
+a.botao-link {
+  display: inline-block;
+  padding: 12px 18px;
+  border: 1px solid var(--azul);
+  border-radius: 6px;
+  color: var(--azul);
+  background: white;
+  text-decoration: none;
+}
 :focus-visible {
   /* Mostra o foco para quem navega pelo teclado. */
   outline: 3px solid #ca9300;

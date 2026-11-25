@@ -40,6 +40,58 @@ window.pi2Api = {
     return true;
   },
 
+  // Rótulos de apresentação das situações de atendimento reconhecidas pelo backend.
+  situacoesAtendimento: {
+    aguardando_triagem: 'Aguardando triagem',
+    aguardando_medico: 'Aguardando médico',
+    em_atendimento: 'Em atendimento',
+    finalizado: 'Finalizado',
+  },
+
+  rotuloSituacaoAtendimento(situacao) {
+    return Object.hasOwn(this.situacoesAtendimento, situacao)
+      ? this.situacoesAtendimento[situacao]
+      : String(situacao ?? 'Situação desconhecida');
+  },
+
+  // Atendimento finalizado nunca conta como ativo, mesmo que chegue por engano na resposta.
+  atendimentoEstaAtivo(atendimento) {
+    return Boolean(atendimento) && atendimento.situacao !== 'finalizado';
+  },
+
+  // Texto da coluna "Atendimento ativo": "#1025 — Aguardando triagem" ou o aviso de ausência.
+  descreverAtendimentoAtivo(atendimento) {
+    if (!this.atendimentoEstaAtivo(atendimento)) return 'Nenhum atendimento ativo';
+    return `#${atendimento.id} — ${this.rotuloSituacaoAtendimento(atendimento.situacao)}`;
+  },
+
+  // Só um paciente sem atendimento ativo pode receber uma nova abertura.
+  podeAbrirAtendimento(paciente) {
+    return !this.atendimentoEstaAtivo(paciente?.atendimento_ativo);
+  },
+
+  // Endereço da tela de localização/exclusão com o número do atendimento e o CPF já informados.
+  montarLinkLocalizarAtendimento(paciente, destino = 'screens/busca-atendimento.html') {
+    const parametros = new URLSearchParams({ numero: String(paciente.atendimento_ativo.id) });
+    const cpf = String(paciente.documento ?? '').replace(/\D/g, '');
+    // Documentos antigos fora do formato de CPF não são enviados; a recepção os digita na tela.
+    if (cpf.length === 11) parametros.set('cpf', cpf);
+    return `${destino}?${parametros}`;
+  },
+
+  // Lê os parâmetros do endereço e devolve somente valores aceitos pelos campos da tela.
+  lerPreenchimentoBusca(textoBusca) {
+    const parametros = new URLSearchParams(textoBusca);
+    const numero = (parametros.get('numero') ?? '').trim();
+    const cpf = (parametros.get('cpf') ?? '').replace(/\D/g, '');
+    const numeroValido =
+      /^\d+$/.test(numero) && Number.isSafeInteger(Number(numero)) && Number(numero) > 0;
+    return {
+      numero: numeroValido ? numero : '',
+      cpf: cpf.length === 11 ? this.formatCpf(cpf) : '',
+    };
+  },
+
   formatPressao(valor) {
     const entrada = valor.replace(/[^\d/]/g, '');
     if (entrada.includes('/')) {

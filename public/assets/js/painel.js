@@ -7,6 +7,8 @@ let atendimentoTriagemSelecionado = null;
 let atendimentoConsultaSelecionado = null;
 let carregandoFilaMedica = false;
 let pacienteAberturaSelecionado = null;
+// Pacientes exibidos na tabela; permite atualizar a coluna "Atendimento ativo" sem nova busca.
+let pacientesListados = [];
 // Chave mantida durante a mesma tentativa de envio; uma edição inicia outra tentativa.
 let chaveCadastro = crypto.randomUUID();
 $('[name="data_nascimento"]').max = new Date().toISOString().slice(0, 10);
@@ -120,6 +122,7 @@ function mostrarSaida() {
   }
   // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
   $('#pacientes').replaceChildren();
+  pacientesListados = [];
   // Uma tentativa editada ou concluída recebe outra chave; uma repetição sem edição mantém a anterior.
   chaveCadastro = crypto.randomUUID();
   // Exibe o conteúdo como texto para que dados digitados não se tornem marcação HTML executável.
@@ -488,6 +491,14 @@ function atualizarFormularioPrioridade() {
   }
 }
 function selecionarPacienteParaAbertura(paciente) {
+  // Um paciente só tem um atendimento ativo por vez; a abertura de outro fica bloqueada.
+  if (!window.pi2Api.podeAbrirAtendimento(paciente)) {
+    mensagem(
+      `${paciente.nome} já tem o atendimento ${window.pi2Api.descreverAtendimentoAtivo(paciente.atendimento_ativo)}. Localize esse atendimento em vez de abrir outro.`,
+      true,
+    );
+    return;
+  }
   pacienteAberturaSelecionado = paciente;
   $('#form-abertura-atendimento').reset();
   $('#paciente-para-abertura').textContent =
@@ -499,6 +510,7 @@ function selecionarPacienteParaAbertura(paciente) {
 }
 // Constrói a lista com elementos DOM e textContent; nomes digitados não são interpretados como HTML.
 function listar(pacientes) {
+  pacientesListados = pacientes;
   // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
   $('#pacientes').replaceChildren();
   // Exibe o conteúdo como texto para que dados digitados não se tornem marcação HTML executável.
@@ -516,6 +528,7 @@ function listar(pacientes) {
       paciente.nome,
       paciente.data_nascimento.split('-').reverse().join('/'),
       paciente.documento || 'Não informado',
+      window.pi2Api.descreverAtendimentoAtivo(paciente.atendimento_ativo),
     ]) {
       // Célula DOM que mantém o conteúdo do paciente separado da marcação da página.
       const celula = document.createElement('td');
@@ -526,15 +539,28 @@ function listar(pacientes) {
     }
     // Célula DOM que mantém o conteúdo do paciente separado da marcação da página.
     const celula = document.createElement('td');
-    // Controle da ação atual; fica temporariamente desativado para não reenviar durante a espera.
-    const botao = document.createElement('button');
-    botao.type = 'button';
-    // Exibe o conteúdo como texto para que dados digitados não se tornem marcação HTML executável.
-    botao.textContent = 'Selecionar para abertura';
-    // Liga a ação do usuário a este controle; o restante da regra só roda quando o evento acontece.
-    botao.addEventListener('click', () => selecionarPacienteParaAbertura(paciente));
-    // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
-    celula.append(botao);
+    if (window.pi2Api.podeAbrirAtendimento(paciente)) {
+      // Controle da ação atual; fica temporariamente desativado para não reenviar durante a espera.
+      const botao = document.createElement('button');
+      botao.type = 'button';
+      // Exibe o conteúdo como texto para que dados digitados não se tornem marcação HTML executável.
+      botao.textContent = 'Selecionar para abertura';
+      // Liga a ação do usuário a este controle; o restante da regra só roda quando o evento acontece.
+      botao.addEventListener('click', () => selecionarPacienteParaAbertura(paciente));
+      // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
+      celula.append(botao);
+    } else {
+      // Com atendimento ativo não há nova abertura: a ação leva à tela de localização/exclusão.
+      const link = document.createElement('a');
+      link.className = 'botao-link';
+      link.href = window.pi2Api.montarLinkLocalizarAtendimento(paciente);
+      link.textContent = 'Localizar atendimento';
+      link.setAttribute(
+        'aria-label',
+        `Localizar o atendimento #${paciente.atendimento_ativo.id} de ${paciente.nome}`,
+      );
+      celula.append(link);
+    }
     // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
     linha.append(celula);
     // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
@@ -681,6 +707,12 @@ $('#form-abertura-atendimento').addEventListener('submit', async (evento) => {
     mensagem(
       `Atendimento ${resultado.atendimento.id} aberto para ${pacienteAberturaSelecionado.nome}. Situação: aguardando triagem. Prioridade legal registrada.`,
     );
+    // A linha do paciente passa a mostrar o novo atendimento ativo e a ação de localizá-lo.
+    pacienteAberturaSelecionado.atendimento_ativo = {
+      id: resultado.atendimento.id,
+      situacao: resultado.atendimento.situacao,
+    };
+    listar(pacientesListados);
     pacienteAberturaSelecionado = null;
     form.reset();
     $('#abrir-atendimento-card').hidden = true;

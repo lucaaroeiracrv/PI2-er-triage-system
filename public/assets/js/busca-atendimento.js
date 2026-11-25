@@ -10,6 +10,23 @@ let atendimentoEncontrado = null;
 
 window.pi2Api.maskCpfInput(campoCpf);
 
+// A lista de pacientes da recepção envia número e CPF no endereço para evitar digitar de novo.
+function preencherPelaLista() {
+  const preenchimento = window.pi2Api.lerPreenchimentoBusca(window.location.search);
+  if (preenchimento.numero) campoNumero.value = preenchimento.numero;
+  if (preenchimento.cpf) campoCpf.value = preenchimento.cpf;
+  if (window.location.search) {
+    // Remove os dados do endereço para que o CPF não permaneça no histórico do navegador.
+    window.history.replaceState(null, '', window.location.pathname);
+  }
+  if (preenchimento.numero && preenchimento.cpf) {
+    botaoBuscar.focus();
+  } else if (preenchimento.numero) {
+    campoCpf.focus();
+  }
+}
+preencherPelaLista();
+
 function mostrarMensagem(texto, ehErro = false) {
   mensagem.textContent = texto;
   mensagem.classList.toggle('erro', ehErro);
@@ -61,7 +78,7 @@ function mostrarAtendimento(atendimento) {
   dados.replaceChildren();
   adicionarDefinicao('Número', `#${atendimento.atendimento_id}`);
   adicionarDefinicao('Paciente', atendimento.paciente_nome);
-  adicionarDefinicao('Situação', atendimento.situacao);
+  adicionarDefinicao('Situação', window.pi2Api.rotuloSituacaoAtendimento(atendimento.situacao));
   adicionarDefinicao(
     'Aberto em',
     atendimento.aberto_em

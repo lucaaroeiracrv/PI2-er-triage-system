@@ -134,7 +134,8 @@ function extrairBindDeRetorno(sql) {
   return retorno ? retorno[1] : null;
 }
 
-function adaptarSqlMysql(sql, binds) {
+// Exportada para que os testes confiram a tradução do SQL de Oracle para MySQL sem abrir conexão.
+export function adaptarSqlMysql(sql, binds) {
   const bindRetorno = extrairBindDeRetorno(sql);
   let sqlAdaptado = sqlComAdaptacaoParaMotor(sql, 'mysql')
     .replace(/TO_DATE\s*\(\s*(:[A-Za-z]\w*)\s*,\s*'YYYY-MM-DD'\s*\)/gi, '$1')
