@@ -221,7 +221,10 @@ function selecionarAtendimentoConsulta(atendimento) {
   $('#consulta-card').hidden = false;
   $('#consulta-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
   carregarResumoMedico(atendimento.atendimento_id).catch((erro) => {
-    mensagem(`Atendimento selecionado, mas não foi possível carregar o resumo: ${erro.message}`, true);
+    mensagem(
+      `Atendimento selecionado, mas não foi possível carregar o resumo: ${erro.message}`,
+      true,
+    );
   });
 }
 function adicionarDefinicao(container, rotulo, valor) {
@@ -248,11 +251,7 @@ function renderizarResumoMedico(resumo) {
       'Sinais vitais',
       `Pressão: ${resumo.triagem.pressao} • Temperatura: ${resumo.triagem.temperatura} °C • Frequência: ${resumo.triagem.frequencia} bpm • Saturação: ${resumo.triagem.saturacao}%`,
     );
-    adicionarDefinicao(
-      triagem,
-      'Profissional da triagem',
-      resumo.triagem.profissional_responsavel,
-    );
+    adicionarDefinicao(triagem, 'Profissional da triagem', resumo.triagem.profissional_responsavel);
   } else {
     adicionarDefinicao(triagem, 'Situação', 'Nenhuma triagem registrada.');
   }

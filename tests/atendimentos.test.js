@@ -109,17 +109,30 @@ test('recepção pode excluir somente atendimento sem registros, removendo depen
   for (const engine of ['oracle', 'mysql']) {
     process.env.DB_ENGINE = engine;
     const mock = criarBancoExclusao();
-    const resultado = await excluirAtendimento(mock.banco, { perfil: 'recepcao' }, {
-      atendimento_id: 44,
-    });
+    const resultado = await excluirAtendimento(
+      mock.banco,
+      { perfil: 'recepcao' },
+      {
+        atendimento_id: 44,
+      },
+    );
     const sql = mock.comandos.map(({ sql: comando }) => comando);
     const posicao = (fragmento) => sql.findIndex((comando) => comando.includes(fragmento));
 
     assert.equal(resultado.sucesso, true);
-    assert.ok(posicao('DELETE FROM categorias_prioridade_legal') < posicao('DELETE FROM prioridades_legais'));
-    assert.ok(posicao('DELETE FROM historico_prioridades_legais') < posicao('DELETE FROM prioridades_legais'));
+    assert.ok(
+      posicao('DELETE FROM categorias_prioridade_legal') <
+        posicao('DELETE FROM prioridades_legais'),
+    );
+    assert.ok(
+      posicao('DELETE FROM historico_prioridades_legais') <
+        posicao('DELETE FROM prioridades_legais'),
+    );
     assert.ok(posicao('DELETE FROM prioridades_legais') < posicao('DELETE FROM atendimentos'));
-    assert.equal(sql.some((comando) => comando.includes('DELETE FROM pacientes')), false);
+    assert.equal(
+      sql.some((comando) => comando.includes('DELETE FROM pacientes')),
+      false,
+    );
     assert.deepEqual(mock.contadores(), {
       commits: 1,
       rollbacks: 0,

@@ -225,7 +225,9 @@ test('abre novo atendimento com novo número e chave após finalizar o anterior'
         };
       }
       if (sql.includes("situacao <> 'finalizado'")) {
-        return { rows: atendimentos.filter((atendimento) => atendimento.situacao !== 'finalizado') };
+        return {
+          rows: atendimentos.filter((atendimento) => atendimento.situacao !== 'finalizado'),
+        };
       }
       if (sql.includes('INSERT INTO atendimentos')) {
         const id = ++proximoAtendimento;

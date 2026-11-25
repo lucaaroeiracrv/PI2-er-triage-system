@@ -42,8 +42,7 @@ function validarCampos() {
   let valido = true;
 
   if (!/^\d+$/.test(numero) || !Number.isSafeInteger(Number(numero)) || Number(numero) <= 0) {
-    document.getElementById('erro-numero').textContent =
-      'Informe um número de atendimento válido.';
+    document.getElementById('erro-numero').textContent = 'Informe um número de atendimento válido.';
     campoNumero.setAttribute('aria-invalid', 'true');
     valido = false;
   }
@@ -65,7 +64,9 @@ function mostrarAtendimento(atendimento) {
   adicionarDefinicao('Situação', atendimento.situacao);
   adicionarDefinicao(
     'Aberto em',
-    atendimento.aberto_em ? new Date(atendimento.aberto_em).toLocaleString('pt-BR') : 'Não informado',
+    atendimento.aberto_em
+      ? new Date(atendimento.aberto_em).toLocaleString('pt-BR')
+      : 'Não informado',
   );
   const podeExcluir = atendimento.situacao === 'aguardando_triagem';
   document.getElementById('aviso-exclusao').hidden = !podeExcluir;

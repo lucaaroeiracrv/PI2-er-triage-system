@@ -51,7 +51,11 @@ test('busca composta e exclusão exigem recepção e funcionam pela API', async 
           if (sql.includes('FROM atendimentos') && sql.includes('FOR UPDATE')) {
             return { rows: [{ id: 44, situacao: 'aguardando_triagem' }] };
           }
-          if (sql.includes('FROM triagens') || sql.includes('FROM consultas') || sql.includes('FROM medicacoes')) {
+          if (
+            sql.includes('FROM triagens') ||
+            sql.includes('FROM consultas') ||
+            sql.includes('FROM medicacoes')
+          ) {
             return { rows: [] };
           }
           if (sql.includes('DELETE FROM')) removidos.push(sql);
@@ -109,10 +113,9 @@ test('busca composta e exclusão exigem recepção e funcionam pela API', async 
     });
     assert.equal(incompleta.status, 400);
 
-    const buscaNaoAutorizada = await fetch(
-      `${origem}/api/atendimentos/busca?${parametros}`,
-      { headers: { Cookie: medico.cookie } },
-    );
+    const buscaNaoAutorizada = await fetch(`${origem}/api/atendimentos/busca?${parametros}`, {
+      headers: { Cookie: medico.cookie },
+    });
     assert.equal(buscaNaoAutorizada.status, 403);
 
     const exclusaoNaoAutorizada = await fetch(`${origem}/api/atendimentos/excluir`, {

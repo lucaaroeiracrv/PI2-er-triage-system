@@ -65,10 +65,9 @@ export async function excluirAtendimento(banco, usuario, dados) {
         )`,
       { atendimento_id: dados.atendimento_id },
     );
-    await conexao.execute(
-      'DELETE FROM prioridades_legais WHERE atendimento_id = :atendimento_id',
-      { atendimento_id: dados.atendimento_id },
-    );
+    await conexao.execute('DELETE FROM prioridades_legais WHERE atendimento_id = :atendimento_id', {
+      atendimento_id: dados.atendimento_id,
+    });
     await conexao.execute(
       `DELETE FROM atendimentos
         WHERE id = :atendimento_id
