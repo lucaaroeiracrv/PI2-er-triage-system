@@ -1,4 +1,4 @@
-// Buscar no Oracle pelo nome ou documento.
+// src\pacientes\busca.js
 import { ErroHttp } from '../http/respostas.js';
 import { consultar } from '../config/banco.js';
 // Busca nome ou documento como texto literal e limita o retorno para a tela.
