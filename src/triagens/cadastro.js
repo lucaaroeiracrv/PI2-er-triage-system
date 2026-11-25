@@ -102,8 +102,8 @@ function temPrecedencia(a, b) {
   if (a80Mais && b60a79) return true;
   if (b80Mais && a60a79) return false;
 
-  const aBeneficiario = valorAtivo(a._prioridade_grupo_a) || a80Mais;
-  const bBeneficiario = valorAtivo(b._prioridade_grupo_a) || b80Mais;
+  const aBeneficiario = valorAtivo(a._prioridade_grupo_a) || a80Mais || a60a79;
+  const bBeneficiario = valorAtivo(b._prioridade_grupo_a) || b80Mais || b60a79;
   const aDoador = valorAtivo(a._prioridade_doador) && !aBeneficiario;
   const bDoador = valorAtivo(b._prioridade_doador) && !bBeneficiario;
   const aSemPrioridade = !aBeneficiario && !aDoador;

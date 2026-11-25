@@ -278,7 +278,6 @@ test('ordena prioridade legal sem ultrapassar a classificação clínica', async
       atendimento_id: 6,
       classificacao: 'Amarelo',
       data_hora: new Date('2026-11-12T09:00:00.000Z'),
-      _prioridade_grupo_a: 1,
       _prioridade_60_79: 1,
     },
     {
