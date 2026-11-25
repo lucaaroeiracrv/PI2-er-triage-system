@@ -213,7 +213,25 @@ test('as filas consultam os dados de vínculo exigidos para enfermagem e médico
   assert.match(consultas[1], /JOIN triagens/);
   assert.match(consultas[1], /JOIN usuarios/);
   assert.match(consultas[1], /a\.situacao = 'aguardando_medico'/);
-  assert.match(consultas[1], /ORDER BY t\.criado_em, a\.id/);
+  assert.match(consultas[1], /ORDER BY CASE t\.classificacao/);
+  assert.match(consultas[1], /FROM prioridades_legais pl/);
+  assert.match(consultas[1], /c\.categoria = 'idoso_80_mais'/);
+  for (const consulta of [consultas[1], consultas[2]]) {
+    const prioridades = [
+      "WHEN 'Vermelho' THEN 1",
+      "WHEN 'Laranja' THEN 2",
+      "WHEN 'Amarelo' THEN 3",
+      "WHEN 'Verde' THEN 4",
+      "WHEN 'Azul' THEN 5",
+    ];
+    let indiceAnterior = -1;
+    for (const prioridade of prioridades) {
+      const indiceAtual = consulta.indexOf(prioridade);
+      assert.ok(indiceAtual > indiceAnterior, `${prioridade} deve manter a ordem clínica`);
+      indiceAnterior = indiceAtual;
+    }
+    assert.match(consulta, /END, t\.criado_em, a\.id/);
+  }
   assert.match(consultas[2], /a\.situacao = 'em_atendimento'/);
   assert.match(consultas[2], /EXISTS/);
   assert.match(consultas[2], /FROM consultas c/);
@@ -246,6 +264,108 @@ test('a fila médica vazia retorna uma lista vazia e libera a conexão', async (
 
   assert.deepEqual(await listarAtendimentosAguardandoMedico(banco), []);
   assert.equal(fechamentos, 1);
+});
+
+test('ordena prioridade legal sem ultrapassar a classificação clínica', async () => {
+  const atendimentos = [
+    {
+      atendimento_id: 7,
+      classificacao: 'Amarelo',
+      data_hora: new Date('2026-11-12T10:00:00.000Z'),
+      _prioridade_grupo_a: 1,
+    },
+    {
+      atendimento_id: 6,
+      classificacao: 'Amarelo',
+      data_hora: new Date('2026-11-12T09:00:00.000Z'),
+      _prioridade_60_79: 1,
+    },
+    {
+      atendimento_id: 8,
+      classificacao: 'Amarelo',
+      data_hora: new Date('2026-11-12T11:00:00.000Z'),
+      _prioridade_80_mais: 1,
+    },
+    {
+      atendimento_id: 11,
+      classificacao: 'Amarelo',
+      data_hora: new Date('2026-11-12T10:30:00.000Z'),
+      _prioridade_grupo_a: 1,
+    },
+    {
+      atendimento_id: 9,
+      classificacao: 'Amarelo',
+      data_hora: new Date('2026-11-12T12:00:00.000Z'),
+      _prioridade_doador: 1,
+    },
+    {
+      atendimento_id: 10,
+      classificacao: 'Amarelo',
+      data_hora: new Date('2026-11-12T13:00:00.000Z'),
+    },
+    {
+      atendimento_id: 2,
+      classificacao: 'Laranja',
+      data_hora: new Date('2026-11-12T14:00:00.000Z'),
+    },
+    {
+      atendimento_id: 1,
+      classificacao: 'Vermelho',
+      data_hora: new Date('2026-11-12T15:00:00.000Z'),
+    },
+    {
+      atendimento_id: 3,
+      classificacao: 'Vermelho',
+      data_hora: new Date('2026-11-12T16:00:00.000Z'),
+      _prioridade_grupo_a: 1,
+    },
+    {
+      atendimento_id: 4,
+      classificacao: 'Laranja',
+      data_hora: new Date('2026-11-12T17:00:00.000Z'),
+      _prioridade_grupo_a: 1,
+    },
+    {
+      atendimento_id: 12,
+      classificacao: 'Verde',
+      data_hora: new Date('2026-11-12T18:00:00.000Z'),
+      _prioridade_grupo_a: 1,
+    },
+    {
+      atendimento_id: 13,
+      classificacao: 'Verde',
+      data_hora: new Date('2026-11-12T19:00:00.000Z'),
+    },
+    {
+      atendimento_id: 14,
+      classificacao: 'Azul',
+      data_hora: new Date('2026-11-12T20:00:00.000Z'),
+      _prioridade_doador: 1,
+    },
+    {
+      atendimento_id: 15,
+      classificacao: 'Azul',
+      data_hora: new Date('2026-11-12T21:00:00.000Z'),
+    },
+  ];
+  const banco = {
+    async getConnection() {
+      return {
+        async execute() {
+          return { rows: atendimentos };
+        },
+        async close() {},
+      };
+    },
+  };
+
+  const fila = await listarAtendimentosAguardandoMedico(banco);
+
+  assert.deepEqual(
+    fila.map(({ atendimento_id }) => atendimento_id),
+    [1, 3, 2, 4, 7, 11, 8, 6, 9, 10, 12, 13, 14, 15],
+  );
+  assert.ok(fila.every((atendimento) => !('_prioridade_grupo_a' in atendimento)));
 });
 
 test('a falha ao consultar a fila médica é propagada e libera a conexão', async () => {

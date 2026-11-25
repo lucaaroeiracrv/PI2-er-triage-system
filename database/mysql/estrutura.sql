@@ -49,6 +49,55 @@ CREATE TABLE IF NOT EXISTS atendimentos (
 
 CREATE INDEX idx_atendimento_situacao ON atendimentos (situacao);
 
+CREATE TABLE IF NOT EXISTS prioridades_legais (
+  id INT NOT NULL AUTO_INCREMENT,
+  atendimento_id INT NOT NULL,
+  declaracao VARCHAR(20) NOT NULL,
+  data_doacao_sangue DATE DEFAULT NULL,
+  registrado_por INT NOT NULL,
+  registrado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_prioridade_atendimento (atendimento_id),
+  CONSTRAINT fk_prioridade_atendimento FOREIGN KEY (atendimento_id) REFERENCES atendimentos (id),
+  CONSTRAINT fk_prioridade_usuario FOREIGN KEY (registrado_por) REFERENCES usuarios (id),
+  CHECK (declaracao IN ('sim', 'nao', 'nao_informado'))
+);
+
+CREATE TABLE IF NOT EXISTS categorias_prioridade_legal (
+  prioridade_id INT NOT NULL,
+  categoria VARCHAR(40) NOT NULL,
+  PRIMARY KEY (prioridade_id, categoria),
+  CONSTRAINT fk_categoria_prioridade FOREIGN KEY (prioridade_id) REFERENCES prioridades_legais (id),
+  CHECK (
+    categoria IN (
+      'pessoa_com_deficiencia',
+      'pessoa_com_tea',
+      'idoso_60_79',
+      'gestante',
+      'lactante',
+      'pessoa_com_crianca_de_colo',
+      'pessoa_obesa',
+      'pessoa_com_mobilidade_reduzida',
+      'idoso_80_mais',
+      'doador_sangue'
+    )
+  )
+);
+
+CREATE TABLE IF NOT EXISTS historico_prioridades_legais (
+  id INT NOT NULL AUTO_INCREMENT,
+  prioridade_id INT NOT NULL,
+  declaracao VARCHAR(20) NOT NULL,
+  categorias_json VARCHAR(500) NOT NULL,
+  data_doacao_sangue DATE DEFAULT NULL,
+  registrado_por INT NOT NULL,
+  registrado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_historico_prioridade FOREIGN KEY (prioridade_id) REFERENCES prioridades_legais (id),
+  CONSTRAINT fk_historico_prioridade_usuario FOREIGN KEY (registrado_por) REFERENCES usuarios (id),
+  CHECK (declaracao IN ('sim', 'nao', 'nao_informado'))
+);
+
 CREATE TABLE IF NOT EXISTS triagens (
   id INT NOT NULL AUTO_INCREMENT,
   atendimento_id INT NOT NULL,

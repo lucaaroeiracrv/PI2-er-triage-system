@@ -6,6 +6,7 @@ let intervaloFilaMedica = null;
 let atendimentoTriagemSelecionado = null;
 let atendimentoConsultaSelecionado = null;
 let carregandoFilaMedica = false;
+let pacienteAberturaSelecionado = null;
 // Chave mantida durante a mesma tentativa de envio; uma edição inicia outra tentativa.
 let chaveCadastro = crypto.randomUUID();
 $('[name="data_nascimento"]').max = new Date().toISOString().slice(0, 10);
@@ -311,6 +312,79 @@ function renderizarFilaMedica(atendimentos, corpo, estado, mensagemVazia, textoA
     corpo.append(linha);
   }
 }
+function obterFaixaEtaria(dataNascimento) {
+  const [ano, mes, dia] = dataNascimento.split('-').map(Number);
+  const nascimento = new Date(ano, mes - 1, dia);
+  const hoje = new Date();
+  let idade = hoje.getFullYear() - nascimento.getFullYear();
+  const aindaNaoFezAniversario =
+    hoje.getMonth() < nascimento.getMonth() ||
+    (hoje.getMonth() === nascimento.getMonth() && hoje.getDate() < nascimento.getDate());
+
+  if (aindaNaoFezAniversario) idade -= 1;
+  if (idade >= 80) return { valor: 'idoso_80_mais', rotulo: 'Pessoa idosa com 80 anos ou mais' };
+  if (idade >= 60) return { valor: 'idoso_60_79', rotulo: 'Pessoa idosa de 60 a 79 anos' };
+  return null;
+}
+function formatarDataLocal(data) {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, '0');
+  const dia = String(data.getDate()).padStart(2, '0');
+  return `${ano}-${mes}-${dia}`;
+}
+function atualizarLimiteDataDoacao() {
+  const hoje = new Date();
+  const dataMaxima = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  const dataMinima = new Date(dataMaxima);
+  dataMinima.setDate(dataMinima.getDate() - 120);
+  const campoDataDoacao = $('#form-abertura-atendimento [name="data_doacao_sangue"]');
+
+  campoDataDoacao.max = formatarDataLocal(dataMaxima);
+  campoDataDoacao.min = formatarDataLocal(dataMinima);
+}
+function atualizarFormularioPrioridade() {
+  const declaracao = $('#form-abertura-atendimento [name="declaracao_prioridade"]:checked')?.value;
+  const detalhes = $('#detalhes-prioridade');
+  const campoDataDoacao = $('#campo-data-doacao');
+  const dataDoacao = $('#form-abertura-atendimento [name="data_doacao_sangue"]');
+  const doador = $('#doador-sangue');
+
+  detalhes.hidden = declaracao !== 'sim';
+  if (declaracao !== 'sim') {
+    $('#form-abertura-atendimento')
+      .querySelectorAll('[name="categorias_prioridade"]')
+      .forEach((categoria) => {
+        categoria.checked = false;
+      });
+    doador.checked = false;
+    dataDoacao.value = '';
+  }
+
+  const faixaEtaria = pacienteAberturaSelecionado
+    ? obterFaixaEtaria(pacienteAberturaSelecionado.data_nascimento)
+    : null;
+  $('#prioridade-por-idade').textContent = faixaEtaria
+    ? `${faixaEtaria.rotulo} — identificado automaticamente pela data de nascimento.`
+    : 'Nenhuma faixa etária de prioridade identificada pela data de nascimento.';
+
+  campoDataDoacao.hidden = declaracao !== 'sim' || !doador.checked;
+  dataDoacao.required = declaracao === 'sim' && doador.checked;
+  if (declaracao === 'sim' && doador.checked) {
+    atualizarLimiteDataDoacao();
+  } else {
+    dataDoacao.value = '';
+  }
+}
+function selecionarPacienteParaAbertura(paciente) {
+  pacienteAberturaSelecionado = paciente;
+  $('#form-abertura-atendimento').reset();
+  $('#paciente-para-abertura').textContent =
+    `Paciente: ${paciente.nome} • Nascimento: ${paciente.data_nascimento.split('-').reverse().join('/')}`;
+  $('#abrir-atendimento-card').hidden = false;
+  atualizarFormularioPrioridade();
+  $('#abrir-atendimento-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('#form-abertura-atendimento [name="declaracao_prioridade"]').focus();
+}
 // Constrói a lista com elementos DOM e textContent; nomes digitados não são interpretados como HTML.
 function listar(pacientes) {
   // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
@@ -344,39 +418,9 @@ function listar(pacientes) {
     const botao = document.createElement('button');
     botao.type = 'button';
     // Exibe o conteúdo como texto para que dados digitados não se tornem marcação HTML executável.
-    botao.textContent = 'Abrir atendimento';
+    botao.textContent = 'Selecionar para abertura';
     // Liga a ação do usuário a este controle; o restante da regra só roda quando o evento acontece.
-    botao.addEventListener('click', async () => {
-      // Bloqueia outro envio enquanto a operação atual aguarda o backend.
-      botao.disabled = true;
-      // Uma repetição do clique reaproveita a mesma chave em vez de solicitar outro atendimento.
-      if (!chavesAbertura.has(paciente.id)) {
-        // Guarda a associação desta tentativa no estado atual para reconhecer uma repetição posterior.
-        chavesAbertura.set(paciente.id, crypto.randomUUID());
-      }
-      try {
-        // Resultado da operação ou da conferência; o chamador decide a resposta a partir dele.
-        const resultado = await pedir('/api/atendimentos', {
-          // Método HTTP que separa leitura e envio de dados.
-          method: 'POST',
-          dados: {
-            // Referência ao paciente existente que foi escolhido na recepção.
-            paciente_id: paciente.id,
-            chave_abertura: chavesAbertura.get(paciente.id),
-          },
-        });
-        // Apresenta o resultado da ação sem exigir que o usuário consulte o terminal.
-        mensagem(
-          `Atendimento ${resultado.atendimento.id} aberto para ${paciente.nome}. Situação: aguardando triagem.`,
-        );
-      } catch (erro) {
-        // Apresenta o resultado da ação sem exigir que o usuário consulte o terminal.
-        mensagem(erro.message, true);
-      } finally {
-        // Libera o controle novamente, inclusive quando o pedido terminou com erro.
-        botao.disabled = false;
-      }
-    });
+    botao.addEventListener('click', () => selecionarPacienteParaAbertura(paciente));
     // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
     celula.append(botao);
     // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
@@ -467,6 +511,71 @@ aoEnviar('#form-busca', async (dados) => {
   listar(resultado.pacientes);
   // Apresenta o resultado da ação sem exigir que o usuário consulte o terminal.
   mensagem(resultado.mensagem);
+});
+$('#form-abertura-atendimento')
+  .querySelectorAll('[name="declaracao_prioridade"]')
+  .forEach((opcao) => {
+    opcao.addEventListener('change', atualizarFormularioPrioridade);
+  });
+$('#doador-sangue').addEventListener('change', atualizarFormularioPrioridade);
+$('#cancelar-abertura-atendimento').addEventListener('click', () => {
+  pacienteAberturaSelecionado = null;
+  $('#form-abertura-atendimento').reset();
+  $('#abrir-atendimento-card').hidden = true;
+});
+$('#form-abertura-atendimento').addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  const form = evento.currentTarget;
+  const botao = form.querySelector('button[type="submit"]');
+
+  if (!pacienteAberturaSelecionado) {
+    mensagem('Selecione um paciente antes de abrir o atendimento.', true);
+    return;
+  }
+
+  const formulario = new FormData(form);
+  const declaracao = formulario.get('declaracao_prioridade');
+  const categorias = formulario.getAll('categorias_prioridade');
+  const faixaEtaria = obterFaixaEtaria(pacienteAberturaSelecionado.data_nascimento);
+
+  if (declaracao === 'sim' && categorias.length === 0 && !faixaEtaria) {
+    mensagem('Selecione ao menos uma categoria de prioridade declarada.', true);
+    return;
+  }
+  if (!chavesAbertura.has(pacienteAberturaSelecionado.id)) {
+    chavesAbertura.set(pacienteAberturaSelecionado.id, crypto.randomUUID());
+  }
+
+  botao.disabled = true;
+  try {
+    const prioridadeLegal = {
+      declaracao,
+      categorias:
+        declaracao === 'sim' ? [...categorias, ...(faixaEtaria ? [faixaEtaria.valor] : [])] : [],
+      data_doacao_sangue:
+        declaracao === 'sim' && $('#doador-sangue').checked
+          ? formulario.get('data_doacao_sangue')
+          : null,
+    };
+    const resultado = await pedir('/api/atendimentos', {
+      method: 'POST',
+      dados: {
+        paciente_id: pacienteAberturaSelecionado.id,
+        chave_abertura: chavesAbertura.get(pacienteAberturaSelecionado.id),
+        prioridade_legal: prioridadeLegal,
+      },
+    });
+    mensagem(
+      `Atendimento ${resultado.atendimento.id} aberto para ${pacienteAberturaSelecionado.nome}. Situação: aguardando triagem. Prioridade legal registrada.`,
+    );
+    pacienteAberturaSelecionado = null;
+    form.reset();
+    $('#abrir-atendimento-card').hidden = true;
+  } catch (erro) {
+    mensagem(erro.message, true);
+  } finally {
+    botao.disabled = false;
+  }
 });
 aoEnviar('#form-triagem', async (dados, form) => {
   if (!atendimentoTriagemSelecionado) {

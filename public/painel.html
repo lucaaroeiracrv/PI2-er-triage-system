@@ -180,6 +180,98 @@
             </table>
           </div>
         </section>
+        <section class="card" id="abrir-atendimento-card" hidden>
+          <p class="etapa">Abertura do atendimento</p>
+          <h2>Prioridade legal declarada</h2>
+          <p id="paciente-para-abertura"></p>
+          <form id="form-abertura-atendimento">
+            <fieldset>
+              <legend>A pessoa declara possuir prioridade legal?*</legend>
+              <div class="opcoes-prioridade">
+                <label>
+                  <input type="radio" name="declaracao_prioridade" value="sim" required />
+                  Sim
+                </label>
+                <label>
+                  <input type="radio" name="declaracao_prioridade" value="nao" required />
+                  Não
+                </label>
+                <label>
+                  <input type="radio" name="declaracao_prioridade" value="nao_informado" required />
+                  Não sabe/não informou
+                </label>
+              </div>
+            </fieldset>
+            <div id="detalhes-prioridade" hidden>
+              <fieldset>
+                <legend>Selecione as categorias declaradas</legend>
+                <p id="prioridade-por-idade" class="ajuda"></p>
+                <div class="opcoes-prioridade categorias-prioridade">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="categorias_prioridade"
+                      value="pessoa_com_deficiencia"
+                    />
+                    Pessoa com deficiência
+                  </label>
+                  <label>
+                    <input type="checkbox" name="categorias_prioridade" value="pessoa_com_tea" />
+                    Pessoa com TEA
+                  </label>
+                  <label>
+                    <input type="checkbox" name="categorias_prioridade" value="gestante" />
+                    Gestante
+                  </label>
+                  <label>
+                    <input type="checkbox" name="categorias_prioridade" value="lactante" />
+                    Lactante
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="categorias_prioridade"
+                      value="pessoa_com_crianca_de_colo"
+                    />
+                    Pessoa com criança de colo
+                  </label>
+                  <label>
+                    <input type="checkbox" name="categorias_prioridade" value="pessoa_obesa" />
+                    Pessoa obesa
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="categorias_prioridade"
+                      value="pessoa_com_mobilidade_reduzida"
+                    />
+                    Pessoa com mobilidade reduzida
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="categorias_prioridade"
+                      value="doador_sangue"
+                      id="doador-sangue"
+                    />
+                    Doador de sangue (doação nos últimos 120 dias)
+                  </label>
+                </div>
+              </fieldset>
+              <label id="campo-data-doacao" hidden>
+                Data da doação de sangue*
+                <span>Informe a data para verificar o prazo de 120 dias.</span>
+                <input name="data_doacao_sangue" type="date" />
+              </label>
+            </div>
+            <div class="linha">
+              <button type="submit">Abrir atendimento</button>
+              <button type="button" class="secundario" id="cancelar-abertura-atendimento">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </section>
       </div>
       <div id="enfermagem" hidden>
         <section class="card">

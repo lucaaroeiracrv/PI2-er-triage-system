@@ -205,6 +205,36 @@ button:disabled {
 .linha input {
   margin-bottom: 0;
 }
+.opcoes-prioridade {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 12px 0 20px;
+}
+.opcoes-prioridade label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+}
+.opcoes-prioridade input {
+  display: inline-block;
+  width: auto;
+  margin: 0;
+}
+.categorias-prioridade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+fieldset {
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  margin: 16px 0;
+  padding: 12px 16px;
+}
+legend {
+  font-weight: bold;
+}
 .ajuda {
   /* Mantém o texto legível dentro da paleta compartilhada. */
   color: #59697d;
