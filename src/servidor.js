@@ -20,6 +20,8 @@ import { cadastrarPaciente } from './pacientes/cadastro.js';
 import { buscarPacientes } from './pacientes/busca.js';
 // Encaminha a abertura ao módulo que mantém as verificações na mesma transação.
 import { abrirAtendimento } from './atendimentos/abertura.js';
+import { buscarAtendimento } from './atendimentos/busca.js';
+import { excluirAtendimento } from './atendimentos/exclusao.js';
 import { registrarConsulta } from './consultas/registro.js';
 import { listarMedicacoes, registrarMedicacao } from './medicacoes/registro.js';
 import { finalizarAtendimento } from './atendimentos/finalizacao.js';
@@ -140,6 +142,18 @@ export async function criarServidor(banco) {
           atendimentos: await listarAtendimentosEmAndamento(banco),
         });
       }
+      if (req.method === 'GET' && rota === '/api/atendimentos/busca') {
+        exigirPerfil(sessao, ['recepcao']);
+        return responder(
+          res,
+          200,
+          await buscarAtendimento(
+            banco,
+            url.searchParams.get('numero'),
+            url.searchParams.get('cpf'),
+          ),
+        );
+      }
       // Separa esta operação pelas regras de rota e método; somente esse ramo pode produzir sua resposta.
       if (rota === '/api/pacientes' && req.method === 'POST') {
         exigirPerfil(sessao, ['recepcao']);
@@ -161,6 +175,14 @@ export async function criarServidor(banco) {
         const resultado = await abrirAtendimento(banco, sessao.usuario, await lerJson(req));
         // Envia a resposta deste ramo e encerra o pedido, sem executar as rotas que aparecem depois.
         return responder(res, resultado.criado ? 201 : 200, resultado);
+      }
+      if (req.method === 'POST' && rota === '/api/atendimentos/excluir') {
+        exigirPerfil(sessao, ['recepcao']);
+        return responder(
+          res,
+          200,
+          await excluirAtendimento(banco, sessao.usuario, await lerJson(req)),
+        );
       }
       // Separa esta operação pelas regras de rota e método; somente esse ramo pode produzir sua resposta.
       if (req.method === 'POST' && rota === '/api/triagens') {

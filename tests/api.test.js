@@ -6,7 +6,7 @@ import { runInNewContext } from 'node:vm';
 const codigoApi = await readFile(new URL('../public/assets/js/api.js', import.meta.url), 'utf8');
 
 function carregarApi(fetch) {
-  const contexto = { window: {}, fetch };
+  const contexto = { window: {}, fetch, URLSearchParams };
   runInNewContext(codigoApi, contexto);
   return contexto.window.pi2Api;
 }
@@ -79,4 +79,90 @@ test('requisição POST não continua sem uma sessão autenticada', async () => 
     /Entre no sistema para continuar/,
   );
   assert.equal(quantidadeChamadas, 1);
+});
+
+test('coluna "Atendimento ativo" descreve número e situação, ou a ausência de atendimento', () => {
+  const api = carregarApi(async () => {});
+
+  assert.equal(
+    api.descreverAtendimentoAtivo({ id: 1025, situacao: 'aguardando_triagem' }),
+    '#1025 — Aguardando triagem',
+  );
+  assert.equal(
+    api.descreverAtendimentoAtivo({ id: 1026, situacao: 'em_atendimento' }),
+    '#1026 — Em atendimento',
+  );
+  assert.equal(
+    api.descreverAtendimentoAtivo({ id: 1027, situacao: 'aguardando_medico' }),
+    '#1027 — Aguardando médico',
+  );
+  assert.equal(api.descreverAtendimentoAtivo(null), 'Nenhum atendimento ativo');
+  assert.equal(api.descreverAtendimentoAtivo(undefined), 'Nenhum atendimento ativo');
+});
+
+test('atendimento finalizado nunca é apresentado como ativo', () => {
+  const api = carregarApi(async () => {});
+  const finalizado = { id: 1020, situacao: 'finalizado' };
+
+  assert.equal(api.atendimentoEstaAtivo(finalizado), false);
+  assert.equal(api.descreverAtendimentoAtivo(finalizado), 'Nenhum atendimento ativo');
+  assert.equal(api.podeAbrirAtendimento({ id: 31, atendimento_ativo: finalizado }), true);
+});
+
+test('só paciente sem atendimento ativo pode receber uma nova abertura', () => {
+  const api = carregarApi(async () => {});
+
+  assert.equal(api.podeAbrirAtendimento({ id: 31, atendimento_ativo: null }), true);
+  assert.equal(api.podeAbrirAtendimento({ id: 31 }), true);
+  for (const situacao of ['aguardando_triagem', 'aguardando_medico', 'em_atendimento']) {
+    assert.equal(
+      api.podeAbrirAtendimento({ id: 31, atendimento_ativo: { id: 1025, situacao } }),
+      false,
+    );
+  }
+});
+
+test('situação desconhecida é mostrada como veio, sem quebrar a tabela', () => {
+  const api = carregarApi(async () => {});
+
+  assert.equal(api.rotuloSituacaoAtendimento('constructor'), 'constructor');
+  assert.equal(api.rotuloSituacaoAtendimento(undefined), 'Situação desconhecida');
+});
+
+test('link de localizar leva número e CPF, e o preenchimento os lê de volta', () => {
+  const api = carregarApi(async () => {});
+  const paciente = {
+    id: 31,
+    documento: '52998224725',
+    atendimento_ativo: { id: 1025, situacao: 'aguardando_triagem' },
+  };
+
+  const link = api.montarLinkLocalizarAtendimento(paciente);
+  assert.equal(link, 'screens/busca-atendimento.html?numero=1025&cpf=52998224725');
+
+  const preenchimento = api.lerPreenchimentoBusca(`?${link.split('?')[1]}`);
+  assert.equal(preenchimento.numero, '1025');
+  assert.equal(preenchimento.cpf, '529.982.247-25');
+});
+
+test('documento fora do formato de CPF não vai no link, e o preenchimento ignora valores inválidos', () => {
+  const api = carregarApi(async () => {});
+  const link = api.montarLinkLocalizarAtendimento({
+    documento: 'DEMO-002',
+    atendimento_ativo: { id: 1025, situacao: 'em_atendimento' },
+  });
+  assert.equal(link, 'screens/busca-atendimento.html?numero=1025');
+
+  for (const busca of [
+    '',
+    '?numero=abc&cpf=123',
+    '?numero=0&cpf=',
+    '?numero=1e3&cpf=529.982',
+    '?numero=-5',
+  ]) {
+    const preenchimento = api.lerPreenchimentoBusca(busca);
+    assert.equal(preenchimento.numero, '');
+    assert.equal(preenchimento.cpf, '');
+  }
+  assert.equal(api.lerPreenchimentoBusca('?numero=44').numero, '44');
 });

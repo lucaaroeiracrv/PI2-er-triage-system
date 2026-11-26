@@ -1,239 +1,143 @@
-// Tela da recepção: busca um paciente, permite escolher o resultado correto
-// e abrir um atendimento. Integra com as rotas atuais do backend.
-
-const URL_BUSCA = '/api/pacientes';
-const URL_ATENDIMENTO = '/api/atendimentos';
-const BACKEND_PRONTO = true;
-
-const PACIENTES_EXEMPLO = [
-  { id: 1, nome: 'Maria Souza Lima', data_nascimento: '1985-03-12', documento: '11122233344' },
-  { id: 2, nome: 'Maria Souza Andrade', data_nascimento: '1990-07-25', documento: '55566677788' },
-  { id: 3, nome: 'João Pereira', data_nascimento: '1972-11-02', documento: '99900011122' },
-];
-
-const formularioBusca = document.getElementById('form-busca');
-const campoTermo = document.getElementById('termo');
-const erroTermo = document.getElementById('erro-termo');
+const formulario = document.getElementById('form-busca');
+const campoNumero = document.getElementById('numero');
+const campoCpf = document.getElementById('cpf');
 const botaoBuscar = document.getElementById('botao-buscar');
+const botaoExcluir = document.getElementById('botao-excluir');
 const mensagem = document.getElementById('mensagem');
-const areaResultados = document.getElementById('resultados');
-const listaPacientes = document.getElementById('lista-pacientes');
-const textoEscolhido = document.getElementById('paciente-escolhido');
-const botaoAbrir = document.getElementById('botao-abrir');
-const linkTriagem = document.getElementById('link-triagem');
-const avisoTeste = document.getElementById('aviso-teste');
+const resultadoAtendimento = document.getElementById('resultado-atendimento');
 
-let pacienteSelecionado = null;
+let atendimentoEncontrado = null;
 
-avisoTeste.hidden = BACKEND_PRONTO && window.location.protocol !== 'file:';
+window.pi2Api.maskCpfInput(campoCpf);
 
-function mostrarMensagem(texto, ehErro) {
+// A lista de pacientes da recepção envia número e CPF no endereço para evitar digitar de novo.
+function preencherPelaLista() {
+  const preenchimento = window.pi2Api.lerPreenchimentoBusca(window.location.search);
+  if (preenchimento.numero) campoNumero.value = preenchimento.numero;
+  if (preenchimento.cpf) campoCpf.value = preenchimento.cpf;
+  if (window.location.search) {
+    // Remove os dados do endereço para que o CPF não permaneça no histórico do navegador.
+    window.history.replaceState(null, '', window.location.pathname);
+  }
+  if (preenchimento.numero && preenchimento.cpf) {
+    botaoBuscar.focus();
+  } else if (preenchimento.numero) {
+    campoCpf.focus();
+  }
+}
+preencherPelaLista();
+
+function mostrarMensagem(texto, ehErro = false) {
   mensagem.textContent = texto;
   mensagem.classList.toggle('erro', ehErro);
 }
 
-function semAcento(texto) {
-  return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+function limparResultado() {
+  atendimentoEncontrado = null;
+  resultadoAtendimento.hidden = true;
+  document.getElementById('dados-atendimento').replaceChildren();
+  document.getElementById('aviso-exclusao').hidden = true;
+  botaoExcluir.hidden = true;
 }
 
-function formatarCpf(cpf) {
-  if (!cpf) return 'Não informado';
-  const numero = cpf.replace(/\D/g, '');
-  if (numero.length !== 11) return cpf;
-  return numero.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+function adicionarDefinicao(rotulo, valor) {
+  const titulo = document.createElement('dt');
+  titulo.textContent = rotulo;
+  const detalhe = document.createElement('dd');
+  detalhe.textContent = valor ?? 'Não informado';
+  document.getElementById('dados-atendimento').append(titulo, detalhe);
 }
 
-function formatarData(data) {
-  const partes = data.split('-');
-  return partes[2] + '/' + partes[1] + '/' + partes[0];
-}
+function validarCampos() {
+  document.getElementById('erro-numero').textContent = '';
+  document.getElementById('erro-cpf').textContent = '';
+  campoNumero.removeAttribute('aria-invalid');
+  campoCpf.removeAttribute('aria-invalid');
 
-function limparResultados() {
-  pacienteSelecionado = null;
-  listaPacientes.textContent = '';
-  areaResultados.hidden = true;
-  textoEscolhido.textContent = 'Nenhum paciente selecionado.';
-  botaoAbrir.disabled = true;
-  linkTriagem.hidden = true;
-}
+  const numero = campoNumero.value.trim();
+  const cpf = campoCpf.value.trim();
+  let valido = true;
 
-function validarTermo(termo) {
-  const apenasNumeros = termo.replace(/\D/g, '');
-  const pareceCpf = apenasNumeros.length > 0 && /^[\d.\-\s]+$/.test(termo);
-
-  if (termo === '') {
-    return 'Digite o nome ou o CPF do paciente.';
+  if (!/^\d+$/.test(numero) || !Number.isSafeInteger(Number(numero)) || Number(numero) <= 0) {
+    document.getElementById('erro-numero').textContent = 'Informe um número de atendimento válido.';
+    campoNumero.setAttribute('aria-invalid', 'true');
+    valido = false;
   }
-  if (pareceCpf && apenasNumeros.length !== 11) {
-    return 'O CPF deve ter 11 números.';
-  }
-  if (!pareceCpf && termo.length < 3) {
-    return 'Digite pelo menos 3 letras do nome.';
-  }
-  return '';
-}
-
-function buscarNosExemplos(termo) {
-  const textoBusca = semAcento(termo.toLowerCase());
-  const numerosBusca = termo.replace(/\D/g, '');
-
-  return PACIENTES_EXEMPLO.filter(function (paciente) {
-    const nome = semAcento(paciente.nome.toLowerCase());
-    const achouPeloNome = nome.includes(textoBusca);
-    const achouPeloCpf = numerosBusca !== '' && paciente.documento.includes(numerosBusca);
-    return achouPeloNome || achouPeloCpf;
-  });
-}
-
-async function buscarNoBackend(termo) {
-  exigirServidor();
-  const resposta = await fetch(URL_BUSCA + '?busca=' + encodeURIComponent(termo), {
-    credentials: 'same-origin',
-  });
-
-  if (!resposta.ok) {
-    throw new Error('Falha na busca: ' + resposta.status);
+  if (!window.pi2Api.validarCpf(cpf)) {
+    document.getElementById('erro-cpf').textContent = 'Informe um CPF válido com 11 números.';
+    campoCpf.setAttribute('aria-invalid', 'true');
+    valido = false;
   }
 
-  const conteudo = await resposta.json();
-  return conteudo.pacientes || [];
+  return valido;
 }
 
-async function abrirNoBackend(idPaciente) {
-  exigirServidor();
-  return window.pi2Api.postJson(URL_ATENDIMENTO, {
-    paciente_id: idPaciente,
-    chave_abertura: crypto.randomUUID(),
-  });
+function mostrarAtendimento(atendimento) {
+  atendimentoEncontrado = atendimento;
+  const dados = document.getElementById('dados-atendimento');
+  dados.replaceChildren();
+  adicionarDefinicao('Número', `#${atendimento.atendimento_id}`);
+  adicionarDefinicao('Paciente', atendimento.paciente_nome);
+  adicionarDefinicao('Situação', window.pi2Api.rotuloSituacaoAtendimento(atendimento.situacao));
+  adicionarDefinicao(
+    'Aberto em',
+    atendimento.aberto_em
+      ? new Date(atendimento.aberto_em).toLocaleString('pt-BR')
+      : 'Não informado',
+  );
+  const podeExcluir = atendimento.situacao === 'aguardando_triagem';
+  document.getElementById('aviso-exclusao').hidden = !podeExcluir;
+  botaoExcluir.hidden = !podeExcluir;
+  resultadoAtendimento.hidden = false;
 }
 
-function exigirServidor() {
-  if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') {
-    throw new Error(
-      'Esta tela foi aberta como arquivo. Execute npm start e acesse http://127.0.0.1:3000/screens/busca-atendimento.html.',
-    );
-  }
-}
-
-function criarCelula(texto) {
-  const celula = document.createElement('td');
-  celula.textContent = texto;
-  return celula;
-}
-
-function selecionarPaciente(paciente, botaoClicado) {
-  pacienteSelecionado = paciente;
-  linkTriagem.hidden = true;
-
-  const botoes = listaPacientes.querySelectorAll('button');
-  for (const botao of botoes) {
-    botao.textContent = 'Selecionar';
-    botao.setAttribute('aria-pressed', 'false');
-  }
-  botaoClicado.textContent = 'Selecionado';
-  botaoClicado.setAttribute('aria-pressed', 'true');
-
-  textoEscolhido.textContent =
-    'Paciente selecionado: ' + paciente.nome + ' (CPF ' + formatarCpf(paciente.documento) + ')';
-  botaoAbrir.disabled = false;
-}
-
-function mostrarLista(pacientes) {
-  listaPacientes.textContent = '';
-
-  for (const paciente of pacientes) {
-    const linha = document.createElement('tr');
-    linha.appendChild(criarCelula(paciente.nome));
-    linha.appendChild(criarCelula(formatarData(paciente.data_nascimento)));
-    linha.appendChild(criarCelula(formatarCpf(paciente.documento)));
-
-    const celulaAcao = document.createElement('td');
-    const botao = document.createElement('button');
-    botao.type = 'button';
-    botao.className = 'secundario';
-    botao.textContent = 'Selecionar';
-    botao.setAttribute('aria-pressed', 'false');
-    botao.addEventListener('click', function () {
-      selecionarPaciente(paciente, botao);
-    });
-    celulaAcao.appendChild(botao);
-    linha.appendChild(celulaAcao);
-
-    listaPacientes.appendChild(linha);
-  }
-
-  areaResultados.hidden = false;
-}
-
-formularioBusca.addEventListener('submit', async function (evento) {
+formulario.addEventListener('submit', async (evento) => {
   evento.preventDefault();
-  limparResultados();
-  mostrarMensagem('', false);
-  erroTermo.textContent = '';
-  campoTermo.removeAttribute('aria-invalid');
-
-  const termo = campoTermo.value.trim();
-  const erro = validarTermo(termo);
-  if (erro !== '') {
-    erroTermo.textContent = erro;
-    campoTermo.setAttribute('aria-invalid', 'true');
-    campoTermo.focus();
-    return;
-  }
+  limparResultado();
+  mostrarMensagem('');
+  if (!validarCampos()) return;
 
   botaoBuscar.disabled = true;
-  mostrarMensagem('Buscando...', false);
-
+  mostrarMensagem('Buscando atendimento...');
   try {
-    let pacientes;
-    if (BACKEND_PRONTO) {
-      pacientes = await buscarNoBackend(termo);
-    } else {
-      pacientes = buscarNosExemplos(termo);
+    const parametros = new URLSearchParams({
+      numero: campoNumero.value.trim(),
+      cpf: campoCpf.value.replace(/[.-]/g, ''),
+    });
+    const resposta = await fetch(`/api/atendimentos/busca?${parametros}`, {
+      credentials: 'same-origin',
+    });
+    const dados = await resposta.json();
+    if (!resposta.ok) {
+      throw new Error(dados.erro || 'Não foi possível localizar o atendimento.');
     }
-
-    if (pacientes.length === 0) {
-      mostrarMensagem(
-        'Nenhum paciente encontrado. Confira o nome ou o CPF, ou cadastre um novo paciente.',
-        true,
-      );
-    } else {
-      mostrarLista(pacientes);
-      mostrarMensagem(pacientes.length + ' paciente(s) encontrado(s). Escolha o correto.', false);
-    }
-  } catch (erroDaBusca) {
-    console.error(erroDaBusca);
-    mostrarMensagem(
-      erroDaBusca.message || 'Não foi possível buscar os pacientes. Tente novamente.',
-      true,
-    );
+    mostrarAtendimento(dados);
+    mostrarMensagem('Atendimento localizado.');
+  } catch (erro) {
+    mostrarMensagem(erro.message || 'Não foi possível localizar o atendimento.', true);
   } finally {
     botaoBuscar.disabled = false;
   }
 });
 
-botaoAbrir.addEventListener('click', async function () {
-  if (pacienteSelecionado === null) {
-    mostrarMensagem('Selecione um paciente antes de abrir o atendimento.', true);
-    return;
-  }
+botaoExcluir.addEventListener('click', async () => {
+  if (!atendimentoEncontrado || atendimentoEncontrado.situacao !== 'aguardando_triagem') return;
+  const confirmacao = window.confirm(
+    `Excluir o atendimento #${atendimentoEncontrado.atendimento_id} de ${atendimentoEncontrado.paciente_nome}? O cadastro do paciente será mantido.`,
+  );
+  if (!confirmacao) return;
 
-  botaoAbrir.disabled = true;
-  mostrarMensagem('Abrindo atendimento...', false);
-
+  botaoExcluir.disabled = true;
+  mostrarMensagem('Excluindo atendimento...');
   try {
-    const resultado = await abrirNoBackend(pacienteSelecionado.id);
-    mostrarMensagem(
-      resultado.criado
-        ? 'Atendimento aberto com sucesso. Situação: aguardando triagem.'
-        : 'Este atendimento já foi registrado para este paciente.',
-      false,
-    );
-    linkTriagem.hidden = false;
+    const resultado = await window.pi2Api.postJson('/api/atendimentos/excluir', {
+      atendimento_id: atendimentoEncontrado.atendimento_id,
+    });
+    limparResultado();
+    mostrarMensagem(resultado.mensagem);
   } catch (erro) {
-    console.error(erro);
-    mostrarMensagem(erro.message || 'Não foi possível abrir o atendimento.', true);
+    mostrarMensagem(erro.message || 'Não foi possível excluir o atendimento.', true);
   } finally {
-    botaoAbrir.disabled = false;
+    botaoExcluir.disabled = false;
   }
 });

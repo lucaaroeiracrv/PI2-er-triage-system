@@ -2,99 +2,15 @@
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0; url=../painel.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Atendimento médico • PI2</title>
-    <link rel="stylesheet" href="../assets/css/tema.css" />
-    <script src="../assets/js/api.js" defer></script>
-    <script src="../assets/js/medico.js" defer></script>
+    <title>Painel médico unificado • PI2</title>
   </head>
   <body>
-    <header>
-      <div class="marca">
-        PI2
-        <small>Sistema de atendimento</small>
-      </div>
-      <a href="../painel.html">Voltar ao painel</a>
-    </header>
-    <main>
-      <span class="etiqueta">Área médica</span>
-      <h1>Atendimento médico</h1>
-      <p class="subtitulo">
-        Selecione um atendimento para conferir a triagem e registrar a consulta.
-      </p>
-
-      <section class="cartao">
-        <div class="linha">
-          <h2>Aguardando atendimento médico</h2>
-          <button type="button" class="secundario" id="atualizar-fila">Atualizar filas</button>
-        </div>
-        <p id="estado-aguardando" role="status" aria-live="polite">Carregando atendimentos...</p>
-        <div class="tabela">
-          <table>
-            <caption>Atendimentos com triagem concluída, aguardando consulta</caption>
-            <thead>
-              <tr>
-                <th>Atendimento</th>
-                <th>Paciente</th>
-                <th>Classificação</th>
-                <th>Queixa</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody id="fila-aguardando"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="cartao">
-        <h2>Atendimentos em andamento</h2>
-        <p id="estado-andamento">Carregando atendimentos...</p>
-        <div class="tabela">
-          <table>
-            <caption>Atendimentos que permitem novos registros de consulta</caption>
-            <thead>
-              <tr>
-                <th>Atendimento</th>
-                <th>Paciente</th>
-                <th>Classificação</th>
-                <th>Queixa</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody id="fila-andamento"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="cartao" id="consulta-card" hidden>
-        <div class="linha">
-          <h2>Registro da consulta</h2>
-          <span class="etiqueta">Registro médico</span>
-        </div>
-        <div id="dados-atendimento" aria-live="polite"></div>
-        <p class="aviso">
-          A classificação e os dados de triagem foram informados pela enfermagem e não substituem a
-          avaliação clínica do médico.
-        </p>
-        <form id="form-consulta">
-          <label class="campo">
-            Registro da consulta
-            <textarea
-              name="registro_consulta"
-              required
-              rows="7"
-              placeholder="Registre a avaliação e a conduta da consulta."
-            ></textarea>
-          </label>
-          <div class="acoes">
-            <button type="submit" id="salvar-consulta">Salvar consulta</button>
-            <button type="button" class="secundario" id="cancelar-consulta">Cancelar</button>
-          </div>
-        </form>
-      </section>
-
-      <p class="mensagem" id="mensagem" role="status" aria-live="polite"></p>
-    </main>
-    <footer>Projeto acadêmico • Use apenas dados fictícios</footer>
+    <p>
+      O painel médico foi unificado.
+      <a href="../painel.html">Acessar o painel principal</a>
+      .
+    </p>
   </body>
 </html>

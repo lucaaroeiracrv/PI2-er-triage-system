@@ -2,95 +2,15 @@
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0; url=../painel.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Medicações do atendimento • PI2</title>
-    <link rel="stylesheet" href="../assets/css/tema.css" />
-    <script src="../assets/js/api.js" defer></script>
-    <script src="../assets/js/medicacoes.js" defer></script>
+    <title>Medicações • PI2</title>
   </head>
   <body>
-    <header>
-      <div class="marca">
-        PI2
-        <small>Sistema de atendimento</small>
-      </div>
-      <nav class="linha" aria-label="Navegação do atendimento">
-        <a href="medico.html">Voltar à fila médica</a>
-        <a id="link-resumo" href="resumo-encerramento.html">Ver resumo e encerramento</a>
-        <a href="../index.html">Índice do projeto</a>
-      </nav>
-    </header>
-    <main>
-      <span class="etiqueta">Tarefa 37 • Medicações</span>
-      <h1>Medicações do atendimento</h1>
-      <p class="subtitulo">
-        Consulte os registros persistidos e preencha o formulário de medicação.
-      </p>
-
-      <section class="cartao">
-        <h2>Atendimento selecionado</h2>
-        <p id="contexto-atendimento" aria-live="polite"></p>
-        <p class="aviso">Os registros são associados ao atendimento e ao médico autenticado.</p>
-      </section>
-
-      <section class="cartao">
-        <h2>Registrar medicação</h2>
-        <form id="form-medicacao">
-          <label class="campo">
-            Medicação
-            <input
-              name="medicacao"
-              required
-              maxlength="120"
-              placeholder="Ex.: Medicação demonstrativa"
-            />
-          </label>
-          <label class="campo">
-            Dose
-            <input
-              name="dose"
-              required
-              maxlength="80"
-              placeholder="Dose fictícia para demonstração"
-            />
-          </label>
-          <label class="campo">
-            Via de administração
-            <input name="via" required maxlength="40" placeholder="Ex.: via demonstrativa" />
-          </label>
-          <label class="campo">
-            Observações
-            <textarea name="observacoes" maxlength="500" rows="4"></textarea>
-          </label>
-          <div class="acoes">
-            <button type="submit">Adicionar ao exemplo</button>
-            <button type="reset" class="secundario">Limpar campos</button>
-          </div>
-        </form>
-        <p id="mensagem-medicacao" class="mensagem" role="status" aria-live="polite"></p>
-      </section>
-
-      <section class="cartao">
-        <div class="linha">
-          <h2>Registros de medicação</h2>
-          <span class="etiqueta">Exemplos fictícios</span>
-        </div>
-        <div class="tabela">
-          <table>
-            <caption>Registros persistidos deste atendimento</caption>
-            <thead>
-              <tr>
-                <th>Medicação</th>
-                <th>Dose</th>
-                <th>Via</th>
-                <th>Observações</th>
-              </tr>
-            </thead>
-            <tbody id="lista-medicacoes"></tbody>
-          </table>
-        </div>
-      </section>
-    </main>
-    <footer>Projeto acadêmico • Use apenas dados fictícios</footer>
+    <p>
+      As medicações agora são gerenciadas no painel médico.
+      <a href="../painel.html">Acessar o painel principal</a>
+      .
+    </p>
   </body>
 </html>

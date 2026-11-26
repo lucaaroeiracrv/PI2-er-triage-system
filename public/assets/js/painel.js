@@ -7,6 +7,8 @@ let atendimentoTriagemSelecionado = null;
 let atendimentoConsultaSelecionado = null;
 let carregandoFilaMedica = false;
 let pacienteAberturaSelecionado = null;
+// Pacientes exibidos na tabela; permite atualizar a coluna "Atendimento ativo" sem nova busca.
+let pacientesListados = [];
 // Chave mantida durante a mesma tentativa de envio; uma edição inicia outra tentativa.
 let chaveCadastro = crypto.randomUUID();
 $('[name="data_nascimento"]').max = new Date().toISOString().slice(0, 10);
@@ -120,6 +122,7 @@ function mostrarSaida() {
   }
   // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
   $('#pacientes').replaceChildren();
+  pacientesListados = [];
   // Uma tentativa editada ou concluída recebe outra chave; uma repetição sem edição mantém a anterior.
   chaveCadastro = crypto.randomUUID();
   // Exibe o conteúdo como texto para que dados digitados não se tornem marcação HTML executável.
@@ -194,15 +197,127 @@ function limparConsulta() {
   $('#consulta-contexto').textContent = '';
   $('#resultado-consulta').textContent = '';
   $('#form-consulta').reset();
+  $('#form-medicacao-medico').reset();
+  $('#resultado-medicacao-medico').textContent = '';
+  $('#resumo-identificacao-medico').replaceChildren();
+  $('#resumo-triagem-medico').replaceChildren();
+  $('#resumo-consultas-medico').replaceChildren();
+  $('#lista-medicacoes-medico').replaceChildren();
+  $('#encerrar-atendimento').disabled = true;
+  $('#form-consulta').querySelector('button[type="submit"]').disabled = false;
+  $('#form-medicacao-medico').querySelector('button[type="submit"]').disabled = true;
 }
 function selecionarAtendimentoConsulta(atendimento) {
   atendimentoConsultaSelecionado = atendimento;
   $('#form-consulta').reset();
   $('#resultado-consulta').textContent = '';
+  $('#resultado-medicacao-medico').textContent = '';
   $('#consulta-contexto').textContent =
     `Atendimento #${atendimento.atendimento_id} • ${atendimento.paciente_nome} (paciente #${atendimento.paciente_id}) • ${atendimento.classificacao}`;
+  $('#resumo-identificacao-medico').replaceChildren();
+  $('#resumo-triagem-medico').replaceChildren();
+  $('#resumo-consultas-medico').replaceChildren();
+  $('#lista-medicacoes-medico').replaceChildren();
+  $('#form-consulta').querySelector('button[type="submit"]').disabled = false;
+  $('#form-medicacao-medico').querySelector('button[type="submit"]').disabled = true;
+  $('#encerrar-atendimento').disabled = true;
   $('#consulta-card').hidden = false;
   $('#consulta-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  carregarResumoMedico(atendimento.atendimento_id).catch((erro) => {
+    mensagem(
+      `Atendimento selecionado, mas não foi possível carregar o resumo: ${erro.message}`,
+      true,
+    );
+  });
+}
+function adicionarDefinicao(container, rotulo, valor) {
+  const titulo = document.createElement('dt');
+  titulo.textContent = rotulo;
+  const detalhe = document.createElement('dd');
+  detalhe.textContent = valor ?? 'Não informado';
+  container.append(titulo, detalhe);
+}
+function renderizarResumoMedico(resumo) {
+  const identificacao = $('#resumo-identificacao-medico');
+  identificacao.replaceChildren();
+  adicionarDefinicao(identificacao, 'Paciente', resumo.paciente_nome);
+  adicionarDefinicao(identificacao, 'Atendimento', `#${resumo.atendimento_id}`);
+  adicionarDefinicao(identificacao, 'Situação', resumo.situacao);
+
+  const triagem = $('#resumo-triagem-medico');
+  triagem.replaceChildren();
+  if (resumo.triagem) {
+    adicionarDefinicao(triagem, 'Queixa principal', resumo.triagem.queixa);
+    adicionarDefinicao(triagem, 'Classificação', resumo.triagem.classificacao);
+    adicionarDefinicao(
+      triagem,
+      'Sinais vitais',
+      `Pressão: ${resumo.triagem.pressao} • Temperatura: ${resumo.triagem.temperatura} °C • Frequência: ${resumo.triagem.frequencia} bpm • Saturação: ${resumo.triagem.saturacao}%`,
+    );
+    adicionarDefinicao(triagem, 'Profissional da triagem', resumo.triagem.profissional_responsavel);
+  } else {
+    adicionarDefinicao(triagem, 'Situação', 'Nenhuma triagem registrada.');
+  }
+
+  const consultas = $('#resumo-consultas-medico');
+  consultas.replaceChildren();
+  if (resumo.consultas.length) {
+    for (const consulta of resumo.consultas) {
+      const artigo = document.createElement('article');
+      const titulo = document.createElement('h4');
+      titulo.textContent = `Consulta #${consulta.consulta_id}`;
+      const registro = document.createElement('p');
+      registro.textContent = consulta.registro_consulta;
+      const autoria = document.createElement('p');
+      autoria.textContent = `Responsável: ${consulta.medico_nome || 'Não informado'}`;
+      artigo.append(titulo, registro, autoria);
+      consultas.append(artigo);
+    }
+  } else {
+    const vazio = document.createElement('p');
+    vazio.textContent = 'Nenhuma consulta registrada.';
+    consultas.append(vazio);
+  }
+
+  const medicacoes = $('#lista-medicacoes-medico');
+  medicacoes.replaceChildren();
+  if (resumo.medicacoes.length) {
+    for (const item of resumo.medicacoes) {
+      const linha = document.createElement('tr');
+      linha.append(
+        criarCelula(item.medicacao),
+        criarCelula(item.dose),
+        criarCelula(item.via),
+        criarCelula(item.observacoes),
+      );
+      medicacoes.append(linha);
+    }
+  } else {
+    const linha = document.createElement('tr');
+    const celula = criarCelula('Nenhuma medicação registrada.');
+    celula.colSpan = 4;
+    linha.append(celula);
+    medicacoes.append(linha);
+  }
+
+  const emAtendimento = resumo.situacao === 'em_atendimento';
+  const finalizado = resumo.situacao === 'finalizado';
+  $('#form-medicacao-medico').querySelector('button[type="submit"]').disabled = !emAtendimento;
+  $('#encerrar-atendimento').disabled = !emAtendimento;
+  $('#form-consulta').querySelector('button[type="submit"]').disabled = finalizado;
+  $('#resultado-medicacao-medico').textContent =
+    resumo.situacao === 'aguardando_medico'
+      ? 'Registre uma consulta antes de adicionar medicações.'
+      : finalizado
+        ? 'Este atendimento está finalizado; os registros são somente para consulta.'
+        : '';
+}
+async function carregarResumoMedico(atendimentoId) {
+  const resumo = await pedir(
+    `/api/atendimentos/resumo?atendimento_id=${encodeURIComponent(atendimentoId)}`,
+  );
+  if (atendimentoConsultaSelecionado?.atendimento_id !== atendimentoId) return;
+  renderizarResumoMedico(resumo);
 }
 function mostrarResultadoTriagem(triagem) {
   $('#resultado-triagem-vinculo').textContent =
@@ -376,6 +491,14 @@ function atualizarFormularioPrioridade() {
   }
 }
 function selecionarPacienteParaAbertura(paciente) {
+  // Um paciente só tem um atendimento ativo por vez; a abertura de outro fica bloqueada.
+  if (!window.pi2Api.podeAbrirAtendimento(paciente)) {
+    mensagem(
+      `${paciente.nome} já tem o atendimento ${window.pi2Api.descreverAtendimentoAtivo(paciente.atendimento_ativo)}. Localize esse atendimento em vez de abrir outro.`,
+      true,
+    );
+    return;
+  }
   pacienteAberturaSelecionado = paciente;
   $('#form-abertura-atendimento').reset();
   $('#paciente-para-abertura').textContent =
@@ -387,6 +510,7 @@ function selecionarPacienteParaAbertura(paciente) {
 }
 // Constrói a lista com elementos DOM e textContent; nomes digitados não são interpretados como HTML.
 function listar(pacientes) {
+  pacientesListados = pacientes;
   // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
   $('#pacientes').replaceChildren();
   // Exibe o conteúdo como texto para que dados digitados não se tornem marcação HTML executável.
@@ -404,6 +528,7 @@ function listar(pacientes) {
       paciente.nome,
       paciente.data_nascimento.split('-').reverse().join('/'),
       paciente.documento || 'Não informado',
+      window.pi2Api.descreverAtendimentoAtivo(paciente.atendimento_ativo),
     ]) {
       // Célula DOM que mantém o conteúdo do paciente separado da marcação da página.
       const celula = document.createElement('td');
@@ -414,15 +539,28 @@ function listar(pacientes) {
     }
     // Célula DOM que mantém o conteúdo do paciente separado da marcação da página.
     const celula = document.createElement('td');
-    // Controle da ação atual; fica temporariamente desativado para não reenviar durante a espera.
-    const botao = document.createElement('button');
-    botao.type = 'button';
-    // Exibe o conteúdo como texto para que dados digitados não se tornem marcação HTML executável.
-    botao.textContent = 'Selecionar para abertura';
-    // Liga a ação do usuário a este controle; o restante da regra só roda quando o evento acontece.
-    botao.addEventListener('click', () => selecionarPacienteParaAbertura(paciente));
-    // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
-    celula.append(botao);
+    if (window.pi2Api.podeAbrirAtendimento(paciente)) {
+      // Controle da ação atual; fica temporariamente desativado para não reenviar durante a espera.
+      const botao = document.createElement('button');
+      botao.type = 'button';
+      // Exibe o conteúdo como texto para que dados digitados não se tornem marcação HTML executável.
+      botao.textContent = 'Selecionar para abertura';
+      // Liga a ação do usuário a este controle; o restante da regra só roda quando o evento acontece.
+      botao.addEventListener('click', () => selecionarPacienteParaAbertura(paciente));
+      // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
+      celula.append(botao);
+    } else {
+      // Com atendimento ativo não há nova abertura: a ação leva à tela de localização/exclusão.
+      const link = document.createElement('a');
+      link.className = 'botao-link';
+      link.href = window.pi2Api.montarLinkLocalizarAtendimento(paciente);
+      link.textContent = 'Localizar atendimento';
+      link.setAttribute(
+        'aria-label',
+        `Localizar o atendimento #${paciente.atendimento_ativo.id} de ${paciente.nome}`,
+      );
+      celula.append(link);
+    }
     // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
     linha.append(celula);
     // Atualiza a árvore DOM usando elementos próprios, mantendo dados separados da marcação.
@@ -565,9 +703,16 @@ $('#form-abertura-atendimento').addEventListener('submit', async (evento) => {
         prioridade_legal: prioridadeLegal,
       },
     });
+    chavesAbertura.delete(pacienteAberturaSelecionado.id);
     mensagem(
       `Atendimento ${resultado.atendimento.id} aberto para ${pacienteAberturaSelecionado.nome}. Situação: aguardando triagem. Prioridade legal registrada.`,
     );
+    // A linha do paciente passa a mostrar o novo atendimento ativo e a ação de localizá-lo.
+    pacienteAberturaSelecionado.atendimento_ativo = {
+      id: resultado.atendimento.id,
+      situacao: resultado.atendimento.situacao,
+    };
+    listar(pacientesListados);
     pacienteAberturaSelecionado = null;
     form.reset();
     $('#abrir-atendimento-card').hidden = true;
@@ -624,9 +769,56 @@ aoEnviar('#form-consulta', async (dados, form) => {
     `${confirmacao} Você pode registrar outra consulta para este atendimento.`;
   mensagem(resultado.mensagem);
   try {
+    await carregarResumoMedico(atendimentoConsultaSelecionado.atendimento_id);
     await carregarFilaMedica();
   } catch (erro) {
     mensagem(`${confirmacao} Não foi possível atualizar as filas: ${erro.message}`, true);
+  }
+});
+aoEnviar('#form-medicacao-medico', async (dados, form) => {
+  if (!atendimentoConsultaSelecionado) {
+    throw new Error('Selecione um atendimento em andamento antes de registrar medicação.');
+  }
+  const resultado = await pedir('/api/medicacoes', {
+    method: 'POST',
+    dados: {
+      atendimento_id: atendimentoConsultaSelecionado.atendimento_id,
+      medicacao: dados.medicacao,
+      dose: dados.dose,
+      via: dados.via,
+      observacoes: dados.observacoes,
+    },
+  });
+  form.reset();
+  $('#resultado-medicacao-medico').textContent = resultado.mensagem;
+  await carregarResumoMedico(atendimentoConsultaSelecionado.atendimento_id);
+});
+$('#encerrar-atendimento').addEventListener('click', () => {
+  $('#dialogo-encerrar-atendimento').showModal();
+});
+$('#cancelar-encerrar-atendimento').addEventListener('click', () => {
+  $('#dialogo-encerrar-atendimento').close();
+});
+$('#confirmar-encerrar-atendimento').addEventListener('click', async (evento) => {
+  if (!atendimentoConsultaSelecionado) {
+    mensagem('Selecione um atendimento antes de encerrar.', true);
+    return;
+  }
+  const botao = evento.currentTarget;
+  botao.disabled = true;
+  $('#dialogo-encerrar-atendimento').close();
+  try {
+    const resultado = await pedir('/api/atendimentos/finalizar', {
+      method: 'POST',
+      dados: { atendimento_id: atendimentoConsultaSelecionado.atendimento_id },
+    });
+    $('#resultado-consulta').textContent = resultado.mensagem;
+    await carregarResumoMedico(atendimentoConsultaSelecionado.atendimento_id);
+    await carregarFilaMedica();
+  } catch (erro) {
+    mensagem(erro.message, true);
+  } finally {
+    botao.disabled = false;
   }
 });
 $('#atualizar-triagens').addEventListener('click', () => {

@@ -202,3 +202,239 @@ test('desfaz a abertura se a gravação do histórico falhar', async () => {
     }
   }
 });
+
+test('abre novo atendimento com novo número e chave após finalizar o anterior', async () => {
+  const engineAnterior = process.env.DB_ENGINE;
+  process.env.DB_ENGINE = 'oracle';
+  const atendimentos = [];
+  let proximoAtendimento = 40;
+  let proximaPrioridade = 50;
+  const conexao = {
+    async execute(sql, binds = {}) {
+      if (sql.includes('FROM pacientes')) return { rows: [{ id: 8 }] };
+      if (sql.includes('FROM atendimentos WHERE chave_abertura')) {
+        return {
+          rows: atendimentos
+            .filter((atendimento) => atendimento.chave_abertura === binds.chave)
+            .map(({ id, paciente_id, recepcionista_id, situacao }) => ({
+              id,
+              paciente_id,
+              recepcionista_id,
+              situacao,
+            })),
+        };
+      }
+      if (sql.includes("situacao <> 'finalizado'")) {
+        return {
+          rows: atendimentos.filter((atendimento) => atendimento.situacao !== 'finalizado'),
+        };
+      }
+      if (sql.includes('INSERT INTO atendimentos')) {
+        const id = ++proximoAtendimento;
+        atendimentos.push({
+          id,
+          paciente_id: binds.paciente_id,
+          recepcionista_id: binds.recepcionista_id,
+          situacao: 'aguardando_triagem',
+          chave_abertura: binds.chave,
+        });
+        return { outBinds: { id: [id] } };
+      }
+      if (sql.includes('INSERT INTO prioridades_legais')) {
+        return { outBinds: { id: [++proximaPrioridade] } };
+      }
+      return { rows: [] };
+    },
+    async commit() {},
+    async rollback() {},
+    async close() {},
+  };
+  const banco = { getConnection: async () => conexao };
+  const usuario = { id: 12 };
+  const dados = (chave_abertura) => ({
+    paciente_id: 8,
+    chave_abertura,
+    prioridade_legal: {
+      declaracao: 'nao',
+      categorias: [],
+      data_doacao_sangue: null,
+    },
+  });
+
+  try {
+    const anterior = await abrirAtendimento(
+      banco,
+      usuario,
+      dados('00000000-0000-4000-8000-000000000003'),
+    );
+    atendimentos[0].situacao = 'finalizado';
+
+    const novo = await abrirAtendimento(
+      banco,
+      usuario,
+      dados('00000000-0000-4000-8000-000000000004'),
+    );
+
+    assert.equal(novo.criado, true);
+    assert.notEqual(novo.atendimento.id, anterior.atendimento.id);
+    assert.equal(novo.atendimento.situacao, 'aguardando_triagem');
+    assert.equal(atendimentos[0].situacao, 'finalizado');
+    assert.notEqual(atendimentos[0].chave_abertura, atendimentos[1].chave_abertura);
+    await assert.rejects(
+      abrirAtendimento(banco, usuario, dados('00000000-0000-4000-8000-000000000005')),
+      (erro) => erro.status === 409,
+    );
+  } finally {
+    if (engineAnterior === undefined) {
+      delete process.env.DB_ENGINE;
+    } else {
+      process.env.DB_ENGINE = engineAnterior;
+    }
+  }
+});
+
+const dadosDeAbertura = (chave_abertura) => ({
+  paciente_id: 8,
+  chave_abertura,
+  prioridade_legal: { declaracao: 'nao', categorias: [], data_doacao_sangue: null },
+});
+
+// Banco em memória com o histórico do paciente 8; a conferência de ativos ignora os finalizados.
+function criarBancoComHistorico(historico) {
+  const atendimentos = historico.map((atendimento) => ({
+    paciente_id: 8,
+    recepcionista_id: 12,
+    chave_abertura: null,
+    ...atendimento,
+  }));
+  let proximoAtendimento = 100;
+  let inseridos = 0;
+  let commits = 0;
+  let rollbacks = 0;
+  const conexao = {
+    async execute(sql, binds = {}) {
+      if (sql.includes('FROM pacientes'))
+        return { rows: [{ id: 8, data_nascimento: '2000-01-01' }] };
+      if (sql.includes('FROM atendimentos WHERE chave_abertura')) return { rows: [] };
+      if (sql.includes("situacao <> 'finalizado'")) {
+        return {
+          rows: atendimentos.filter(
+            (atendimento) =>
+              atendimento.paciente_id === binds.paciente_id &&
+              atendimento.situacao !== 'finalizado',
+          ),
+        };
+      }
+      if (sql.includes('INSERT INTO atendimentos')) {
+        const id = ++proximoAtendimento;
+        inseridos += 1;
+        atendimentos.push({
+          id,
+          paciente_id: binds.paciente_id,
+          recepcionista_id: binds.recepcionista_id,
+          situacao: 'aguardando_triagem',
+          chave_abertura: binds.chave,
+        });
+        return { outBinds: { id: [id] } };
+      }
+      if (sql.includes('INSERT INTO prioridades_legais')) return { outBinds: { id: [900] } };
+      return { rows: [] };
+    },
+    async beginTransaction() {},
+    async commit() {
+      commits += 1;
+    },
+    async rollback() {
+      rollbacks += 1;
+    },
+    async close() {},
+  };
+  return {
+    banco: { getConnection: async () => conexao },
+    atendimentos,
+    contadores: () => ({ inseridos, commits, rollbacks }),
+  };
+}
+
+test('não abre segundo atendimento enquanto houver um ativo, em qualquer situação ativa', async () => {
+  const engineAnterior = process.env.DB_ENGINE;
+  try {
+    for (const engine of ['oracle', 'mysql']) {
+      process.env.DB_ENGINE = engine;
+      for (const situacao of ['aguardando_triagem', 'aguardando_medico', 'em_atendimento']) {
+        const mock = criarBancoComHistorico([
+          { id: 20, situacao: 'finalizado' },
+          { id: 30, situacao },
+        ]);
+
+        await assert.rejects(
+          abrirAtendimento(
+            mock.banco,
+            { id: 12 },
+            dadosDeAbertura('00000000-0000-4000-8000-000000000020'),
+          ),
+          (erro) => erro.status === 409 && /já tem um atendimento em aberto/.test(erro.message),
+        );
+        assert.deepEqual(mock.contadores(), { inseridos: 0, commits: 0, rollbacks: 1 });
+        assert.equal(mock.atendimentos.length, 2);
+      }
+    }
+  } finally {
+    if (engineAnterior === undefined) {
+      delete process.env.DB_ENGINE;
+    } else {
+      process.env.DB_ENGINE = engineAnterior;
+    }
+  }
+});
+
+test('paciente com vários atendimentos finalizados abre um novo sem perder o histórico', async () => {
+  const engineAnterior = process.env.DB_ENGINE;
+  try {
+    for (const engine of ['oracle', 'mysql']) {
+      process.env.DB_ENGINE = engine;
+      const mock = criarBancoComHistorico([
+        { id: 10, situacao: 'finalizado' },
+        { id: 11, situacao: 'finalizado' },
+        { id: 12, situacao: 'finalizado' },
+      ]);
+
+      const resultado = await abrirAtendimento(
+        mock.banco,
+        { id: 12 },
+        dadosDeAbertura('00000000-0000-4000-8000-000000000021'),
+      );
+
+      assert.equal(resultado.criado, true);
+      assert.equal(resultado.atendimento.id, 101);
+      assert.equal(resultado.atendimento.situacao, 'aguardando_triagem');
+      assert.deepEqual(
+        mock.atendimentos.map(({ id, situacao }) => [id, situacao]),
+        [
+          [10, 'finalizado'],
+          [11, 'finalizado'],
+          [12, 'finalizado'],
+          [101, 'aguardando_triagem'],
+        ],
+      );
+      assert.deepEqual(mock.contadores(), { inseridos: 1, commits: 1, rollbacks: 0 });
+
+      // Com o novo atendimento ativo, uma segunda abertura volta a ser recusada.
+      await assert.rejects(
+        abrirAtendimento(
+          mock.banco,
+          { id: 12 },
+          dadosDeAbertura('00000000-0000-4000-8000-000000000022'),
+        ),
+        (erro) => erro.status === 409,
+      );
+      assert.equal(mock.atendimentos.length, 4);
+    }
+  } finally {
+    if (engineAnterior === undefined) {
+      delete process.env.DB_ENGINE;
+    } else {
+      process.env.DB_ENGINE = engineAnterior;
+    }
+  }
+});

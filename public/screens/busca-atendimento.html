@@ -24,9 +24,10 @@
       <a href="../index.html">Índice do projeto</a>
     </header>
     <main>
-      <h1>Recepção: buscar paciente</h1>
+      <h1>Recepção: localizar atendimento</h1>
       <p class="subtitulo">
-        Procure o paciente pelo nome ou pelo CPF, escolha o resultado correto e abra o atendimento.
+        Informe o número do atendimento e o CPF vinculado para consultar ou excluir um atendimento
+        que ainda aguarda triagem.
       </p>
 
       <p class="aviso" id="aviso-teste" hidden>
@@ -38,52 +39,57 @@
       </p>
 
       <section class="cartao">
-        <h2>1. Buscar</h2>
+        <h2>Buscar atendimento</h2>
         <form id="form-busca" novalidate>
           <label class="campo">
-            Nome ou CPF
-            <small>Digite pelo menos 3 letras do nome ou os 11 números do CPF</small>
+            Número do atendimento
             <input
-              type="search"
-              id="termo"
-              name="termo"
+              type="text"
+              id="numero"
+              name="numero"
+              inputmode="numeric"
               autocomplete="off"
-              aria-describedby="erro-termo"
+              required
+              aria-describedby="erro-numero"
             />
-            <span class="erro" id="erro-termo"></span>
+            <span class="erro" id="erro-numero"></span>
+          </label>
+          <label class="campo">
+            CPF do paciente
+            <small>Informe os 11 números; pontos e traço são opcionais</small>
+            <input
+              type="text"
+              id="cpf"
+              name="cpf"
+              inputmode="numeric"
+              autocomplete="off"
+              required
+              maxlength="14"
+              placeholder="000.000.000-00"
+              aria-describedby="erro-cpf"
+            />
+            <span class="erro" id="erro-cpf"></span>
           </label>
           <div class="acoes">
             <button type="submit" id="botao-buscar">Buscar</button>
-            <a class="botao secundario" href="cadastro.html">Cadastrar novo paciente</a>
+            <a class="botao secundario" href="../painel.html">Voltar ao painel</a>
           </div>
         </form>
 
         <p class="mensagem" id="mensagem" role="status" aria-live="polite"></p>
       </section>
 
-      <section class="cartao" id="resultados" hidden>
-        <h2>2. Escolher e abrir atendimento</h2>
-        <div class="tabela">
-          <table>
-            <caption>Pacientes encontrados</caption>
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Nascimento</th>
-                <th>CPF</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody id="lista-pacientes"></tbody>
-          </table>
-        </div>
-
-        <p class="meta" id="paciente-escolhido">Nenhum paciente selecionado.</p>
+      <section class="cartao" id="resultado-atendimento" hidden>
+        <h2>Atendimento localizado</h2>
+        <dl id="dados-atendimento"></dl>
+        <p class="aviso" id="aviso-exclusao" hidden>
+          A exclusão é permitida somente enquanto o atendimento aguarda triagem e não possui
+          registros clínicos.
+        </p>
         <div class="acoes">
-          <button type="button" id="botao-abrir" disabled>Abrir atendimento</button>
-          <a class="botao secundario" id="link-triagem" href="triagem.html" hidden>
-            Ir para a triagem
-          </a>
+          <button type="button" id="botao-excluir" class="secundario" hidden>
+            Excluir atendimento
+          </button>
         </div>
       </section>
     </main>
